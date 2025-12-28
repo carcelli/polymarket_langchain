@@ -1,0 +1,1114 @@
+
+🔁 Starting continuous refresh (every 300s)
+   Auto-cleanup: ON (grace: 24h)
+   Press Ctrl+C to stop
+
+
+[Refresh #1]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:11:59
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,455 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 64 markets  ✓ Offset 50: 50 events, 122 markets  ✓ Offset 100: 50 events, 180 markets  ✓ Offset 150: 50 events, 310 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 310
+  Total markets:   20,455
+  Net change:      +0
+  Total volume:    $3,657,521,436
+
+  By Category:
+    crypto: 267
+    sports: 43
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #2]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:16:45
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,455 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 64 markets  ✓ Offset 50: 50 events, 122 markets  ✓ Offset 100: 50 events, 180 markets  ✓ Offset 150: 50 events, 310 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 310
+  Total markets:   20,459
+  Net change:      +4
+  Total volume:    $3,657,521,436
+
+  By Category:
+    crypto: 267
+    sports: 43
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #3]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:21:32
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,459 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 64 markets  ✓ Offset 50: 50 events, 122 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 310 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 310
+  Total markets:   20,467
+  Net change:      +8
+  Total volume:    $3,657,521,696
+
+  By Category:
+    crypto: 267
+    sports: 43
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #4]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:26:20
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,467 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 56 markets  ✓ Offset 50: 50 events, 117 markets   ⚠️  Error fetching events: [Errno 104] Connection reset by peer
+
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  100
+  Markets updated: 117
+  Total markets:   20,471
+  Net change:      +4
+  Total volume:    $3,657,521,696
+
+  By Category:
+    crypto: 93
+    sports: 24
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #5]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:31:05
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,471 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 56 markets  ✓ Offset 50: 50 events, 117 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 310 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 310
+  Total markets:   20,475
+  Net change:      +4
+  Total volume:    $3,657,521,736
+
+  By Category:
+    crypto: 267
+    sports: 43
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #6]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:35:52
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,475 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 56 markets  ✓ Offset 50: 50 events, 117 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 270 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 270
+  Total markets:   20,483
+  Net change:      +8
+  Total volume:    $3,657,521,741
+
+  By Category:
+    crypto: 228
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #7]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:40:37
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,483 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 56 markets  ✓ Offset 50: 50 events, 117 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 270 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 270
+  Total markets:   20,487
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 228
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #8]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:45:24
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,487 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 53 markets  ✓ Offset 50: 50 events, 117 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 230 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 230
+  Total markets:   20,491
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 188
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #9]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:50:11
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,491 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 117 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 230 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 230
+  Total markets:   20,499
+  Net change:      +8
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 188
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #10]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:54:56
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,499 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 114 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 230 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 230
+  Total markets:   20,503
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 188
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #11]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 13:59:43
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,503 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 114 markets  ✓ Offset 100: 50 events, 172 markets  ✓ Offset 150: 50 events, 230 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 230
+  Total markets:   20,507
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 188
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #12]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:04:28
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,507 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 110 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,518
+  Net change:      +11
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #13]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:09:15
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,518 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 106 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,523
+  Net change:      +5
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #14]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:14:02
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,523 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 106 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,527
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #15]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:18:46
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,527 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 106 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,531
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #16]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:23:33
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,531 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 106 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,539
+  Net change:      +8
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #17]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:28:18
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,539 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 100 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,543
+  Net change:      +4
+  Total volume:    $3,657,521,851
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #18]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:33:05
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     Deleted: 3 markets ($9,654 volume)
+       - sports: 3
+
+  📊 Current: 20,540 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 100 markets  ✓ Offset 100: 50 events, 167 markets  ✓ Offset 150: 50 events, 222 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 3
+  Events fetched:  200
+  Markets updated: 222
+  Total markets:   20,544
+  Net change:      +4
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 192
+    sports: 30
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #19]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:37:52
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,544 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 176 markets  ✓ Offset 150: 50 events, 234 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 234
+  Total markets:   20,570
+  Net change:      +26
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 186
+    sports: 48
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #20]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:42:38
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,570 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 176 markets  ✓ Offset 150: 50 events, 234 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 234
+  Total markets:   20,570
+  Net change:      +0
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 186
+    sports: 48
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #21]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:47:24
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,570 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 168 markets  ✓ Offset 150: 50 events, 229 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 229
+  Total markets:   20,581
+  Net change:      +11
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 187
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #22]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:52:09
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,581 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 168 markets  ✓ Offset 150: 50 events, 229 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 229
+  Total markets:   20,582
+  Net change:      +1
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 187
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #23]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 14:56:55
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,582 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 168 markets  ✓ Offset 150: 50 events, 229 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 229
+  Total markets:   20,586
+  Net change:      +4
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 187
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #24]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:01:42
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,586 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 62 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 168 markets  ✓ Offset 150: 50 events, 229 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 229
+  Total markets:   20,594
+  Net change:      +8
+  Total volume:    $3,657,512,197
+
+  By Category:
+    crypto: 187
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #25]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:06:26
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,594 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 54 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 229 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 229
+  Total markets:   20,606
+  Net change:      +12
+  Total volume:    $3,657,512,207
+
+  By Category:
+    crypto: 187
+    sports: 42
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #26]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:11:12
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,606 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 226 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 226
+  Total markets:   20,610
+  Net change:      +4
+  Total volume:    $3,657,512,207
+
+  By Category:
+    crypto: 188
+    sports: 38
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #27]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:15:59
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,610 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 226 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 226
+  Total markets:   20,614
+  Net change:      +4
+  Total volume:    $3,657,512,207
+
+  By Category:
+    crypto: 188
+    sports: 38
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #28]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:20:43
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,614 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 226 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 226
+  Total markets:   20,622
+  Net change:      +8
+  Total volume:    $3,657,512,207
+
+  By Category:
+    crypto: 188
+    sports: 38
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #29]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:25:29
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,622 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 226 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 226
+  Total markets:   20,626
+  Net change:      +4
+  Total volume:    $3,657,512,207
+
+  By Category:
+    crypto: 188
+    sports: 38
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #30]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:30:13
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,626 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 50 markets  ✓ Offset 50: 50 events, 112 markets  ✓ Offset 100: 50 events, 162 markets  ✓ Offset 150: 50 events, 218 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 218
+  Total markets:   20,630
+  Net change:      +4
+  Total volume:    $3,657,512,317
+
+  By Category:
+    crypto: 192
+    sports: 26
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #31]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:34:59
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,630 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 52 markets  ✓ Offset 50: 50 events, 114 markets  ✓ Offset 100: 50 events, 164 markets  ✓ Offset 150: 50 events, 220 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 220
+  Total markets:   20,641
+  Net change:      +11
+  Total volume:    $3,657,512,338
+
+  By Category:
+    crypto: 191
+    sports: 29
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #32]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:39:45
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,641 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 52 markets  ✓ Offset 50: 50 events, 114 markets  ✓ Offset 100: 50 events, 164 markets  ✓ Offset 150: 50 events, 220 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 220
+  Total markets:   20,645
+  Net change:      +4
+  Total volume:    $3,657,512,338
+
+  By Category:
+    crypto: 191
+    sports: 29
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #33]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:44:29
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,645 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 52 markets  ✓ Offset 50: 50 events, 114 markets  ✓ Offset 100: 50 events, 164 markets  ✓ Offset 150: 50 events, 220 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 220
+  Total markets:   20,649
+  Net change:      +4
+  Total volume:    $3,657,512,338
+
+  By Category:
+    crypto: 191
+    sports: 29
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #34]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:49:15
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,649 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 52 markets  ✓ Offset 50: 50 events, 108 markets  ✓ Offset 100: 50 events, 164 markets  ✓ Offset 150: 50 events, 214 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
+  Expired deleted: 0
+  Events fetched:  200
+  Markets updated: 214
+  Total markets:   20,657
+  Net change:      +8
+  Total volume:    $3,657,512,338
+
+  By Category:
+    crypto: 193
+    sports: 21
+============================================================
+
+   💤 Next refresh in 300s...
+
+[Refresh #35]
+
+============================================================
+  🔄 MARKET DATABASE REFRESH
+  2025-12-28 15:53:59
+============================================================
+
+  🧹 Cleaning up expired markets (>24h past end_date)...
+     No expired markets to clean up
+
+  📊 Current: 20,657 active markets
+  📥 Fetching up to 200 events...
+
+  ✓ Offset 0: 50 events, 52 markets  ✓ Offset 50: 50 events, 102 markets  ✓ Offset 100: 50 events, 164 markets  ✓ Offset 150: 50 events, 214 markets
+
+  ────────────────────────────────────────────────────────
+  ✅ REFRESH COMPLETE
+  ────────────────────────────────────────────────────────
