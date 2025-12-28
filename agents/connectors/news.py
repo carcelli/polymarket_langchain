@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from newsapi import NewsApiClient
 
 from agents.utils.objects import Article
 
