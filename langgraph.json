@@ -2,16 +2,10 @@
   "$schema": "https://langchain-ai.github.io/langgraph/schemas/langgraph.json",
   "graphs": {
     "memory_agent": "./agents/graph/memory_agent.py:create_memory_agent",
-    "planning_agent": "./agents/graph/planning_agent.py:create_planning_agent",
-    "deep_research_agent": "./agents/deep_research_agent.py:create_polymarket_research_agent",
-    "memory_enabled_agent": "./agents/deep_research_agent.py:create_memory_enabled_agent",
-    "trading_agent": "./agents/deep_research_agent.py:create_trading_agent_with_approval",
-    "conservative_agent": "./agents/deep_research_agent.py:create_conservative_trading_agent",
-    "autonomous_agent": "./agents/deep_research_agent.py:create_autonomous_research_agent"
+    "planning_agent": "./agents/graph/planning_agent.py:create_planning_agent"
   },
   "env": ".env",
   "dependencies": [
-    "deepagents",
     "langchain-openai",
     "langchain-anthropic",
     "tavily-python",
@@ -23,4 +17,3 @@
     "."
   ]
 }
-

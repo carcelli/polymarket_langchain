@@ -145,7 +145,6 @@ SQLAlchemy==2.0.31
 starlette==0.37.2
 sympy==1.13.1
 tavily-python==0.3.5
-deepagents
 tenacity==8.5.0
 tiktoken==0.7.0
 tokenizers==0.19.1
