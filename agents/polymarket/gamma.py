@@ -180,6 +180,11 @@ class GammaMarketClient:
         response = httpx.get(url)
         return response.json()
 
+    def get_event(self, event_id: int) -> dict:
+        url = self.gamma_events_endpoint + "/" + str(event_id)
+        response = httpx.get(url)
+        return response.json()
+
 
 if __name__ == "__main__":
     gamma = GammaMarketClient()

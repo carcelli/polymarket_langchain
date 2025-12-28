@@ -1,0 +1,57 @@
+[
+  {
+    "market": {
+      "id": 12,
+      "question": "Will Joe Biden get Coronavirus before the election?",
+      "outcomes": "[\"Yes\", \"No\"]",
+      "outcome_prices": "[\"0\", \"0\"]",
+      "spread": 1.0
+    },
+    "news": [],
+    "ingested_at": "2025-12-28T11:36:45.028314"
+  },
+  {
+    "market": {
+      "id": 17,
+      "question": "Will Airbnb begin publicly trading before Jan 1, 2021?",
+      "outcomes": "[\"Yes\", \"No\"]",
+      "outcome_prices": "[\"0\", \"0\"]",
+      "spread": 1.0
+    },
+    "news": [],
+    "ingested_at": "2025-12-28T11:36:45.543797"
+  },
+  {
+    "market": {
+      "id": 18,
+      "question": "Will a new Supreme Court Justice be confirmed before Nov 3rd, 2020?",
+      "outcomes": "[\"Yes\", \"No\"]",
+      "outcome_prices": "[\"0\", \"0\"]",
+      "spread": 1.0
+    },
+    "news": [],
+    "ingested_at": "2025-12-28T11:36:46.072302"
+  },
+  {
+    "market": {
+      "id": 19,
+      "question": "Will Kim Kardashian and Kanye West divorce before Jan 1, 2021?",
+      "outcomes": "[\"Yes\", \"No\"]",
+      "outcome_prices": "[\"0.000001011082052522541417308141468657552\", \"0.9999989889179474774585826918585313\"]",
+      "spread": 1.0
+    },
+    "news": [],
+    "ingested_at": "2025-12-28T11:36:46.574188"
+  },
+  {
+    "market": {
+      "id": 20,
+      "question": "Will Coinbase begin publicly trading before Jan 1, 2021?",
+      "outcomes": "[\"Yes\", \"No\"]",
+      "outcome_prices": "[\"0.000001024519509568169644816863666886675\", \"0.9999989754804904318303551831363331\"]",
+      "spread": 1.0
+    },
+    "news": [],
+    "ingested_at": "2025-12-28T11:36:47.080741"
+  }
+]
