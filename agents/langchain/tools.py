@@ -51,6 +51,16 @@ _gamma = None
 _news = None
 _chroma = None
 _executor = None
+_memory = None
+
+
+def _get_memory():
+    """Get the MemoryManager instance for database access."""
+    global _memory
+    if _memory is None:
+        from agents.memory.manager import MemoryManager
+        _memory = MemoryManager("data/markets.db")
+    return _memory
 
 
 def _get_polymarket():
@@ -386,6 +396,55 @@ def _get_current_events_gamma_impl(limit: int = 10) -> str:
 
 
 # =============================================================================
+# TAG TOOLS
+# =============================================================================
+
+def _fetch_all_tags_impl(limit: int = 20) -> str:
+    """Fetch Polymarket tags.
+    
+    Tags are used to categorize events and markets (e.g., "Politics", "Sports").
+    
+    Args:
+        limit: Maximum number of tags to return (default: 20)
+    
+    Returns:
+        JSON string containing list of tags
+    """
+    try:
+        gamma = _get_gamma()
+        tags = gamma.get_tags(querystring_params={"limit": limit}, parse_pydantic=True)
+        return json.dumps([
+            {
+                "id": t.id,
+                "label": t.label,
+                "slug": t.slug,
+            }
+            for t in tags
+        ], indent=2)
+    except Exception as e:
+        return f"Error fetching tags: {str(e)}"
+
+
+def _get_tag_by_id_impl(tag_id: int) -> str:
+    """Get detailed information about a tag by its ID.
+    
+    Args:
+        tag_id: The tag ID (integer)
+    
+    Returns:
+        JSON string with tag details
+    """
+    try:
+        gamma = _get_gamma()
+        tag = gamma.get_tag(tag_id)
+        if tag:
+            return json.dumps(tag, indent=2)
+        return f"No tag found for tag_id: {tag_id}"
+    except Exception as e:
+        return f"Error fetching tag by id: {str(e)}"
+
+
+# =============================================================================
 # ORDER BOOK TOOLS
 # =============================================================================
 
@@ -631,6 +690,195 @@ def _create_markets_rag_database_impl(directory: str = "./local_db_markets") -> 
 
 
 # =============================================================================
+# DATABASE / MEMORY TOOLS
+# =============================================================================
+
+def _get_database_stats_impl() -> str:
+    """Get statistics about the markets database.
+    
+    Returns the total number of active markets, total volume, and category counts.
+    Use this to understand what data is available before querying.
+    
+    Returns:
+        Database statistics including market counts and volume by category
+    """
+    try:
+        memory = _get_memory()
+        stats = memory.get_stats()
+        categories = memory.get_categories()
+        
+        result = {
+            "total_active_markets": stats["total_markets"],
+            "total_volume_usd": stats["total_volume"],
+            "categories": [
+                {
+                    "name": cat["category"],
+                    "market_count": cat["count"],
+                    "volume_usd": cat["total_volume"]
+                }
+                for cat in categories
+            ]
+        }
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error getting database stats: {str(e)}"
+
+
+def _get_markets_by_category_impl(category: str, limit: int = 10) -> str:
+    """Get markets from the database filtered by category.
+    
+    Categories include: politics, sports, crypto, tech, geopolitics, 
+    culture, finance, economy, science
+    
+    Args:
+        category: Category name to filter by (e.g., 'sports', 'politics')
+        limit: Maximum number of markets to return (default: 10)
+    
+    Returns:
+        List of markets in the specified category, sorted by volume
+    """
+    try:
+        memory = _get_memory()
+        markets = memory.list_markets_by_category(category, limit=limit)
+        
+        result = []
+        for m in markets:
+            result.append({
+                "id": m["id"],
+                "question": m["question"],
+                "category": m["category"],
+                "volume": m["volume"],
+                "liquidity": m["liquidity"],
+                "outcomes": m["outcomes"],
+                "outcome_prices": m["outcome_prices"],
+                "end_date": m["end_date"],
+                "slug": m.get("slug"),
+                "clob_token_ids": m.get("clob_token_ids")
+            })
+        
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error getting markets by category: {str(e)}"
+
+
+def _get_top_volume_markets_impl(limit: int = 10, category: str = None) -> str:
+    """Get the highest volume markets from the database.
+    
+    Args:
+        limit: Maximum number of markets to return (default: 10)
+        category: Optional category filter (e.g., 'sports', 'politics')
+    
+    Returns:
+        List of top markets by volume
+    """
+    try:
+        memory = _get_memory()
+        markets = memory.list_top_volume_markets(limit=limit, category=category)
+        
+        result = []
+        for m in markets:
+            result.append({
+                "id": m["id"],
+                "question": m["question"],
+                "category": m["category"],
+                "volume": m["volume"],
+                "liquidity": m["liquidity"],
+                "outcomes": m["outcomes"],
+                "outcome_prices": m["outcome_prices"],
+                "end_date": m["end_date"],
+                "slug": m.get("slug")
+            })
+        
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error getting top volume markets: {str(e)}"
+
+
+def _search_markets_db_impl(query: str, limit: int = 10) -> str:
+    """Search markets in the database by question text.
+    
+    Performs a text search on market questions. For semantic search,
+    use query_markets_rag instead.
+    
+    Args:
+        query: Text to search for in market questions
+        limit: Maximum number of results (default: 10)
+    
+    Returns:
+        List of matching markets sorted by volume
+    """
+    try:
+        memory = _get_memory()
+        markets = memory.search_markets(query, limit=limit)
+        
+        result = []
+        for m in markets:
+            result.append({
+                "id": m["id"],
+                "question": m["question"],
+                "category": m["category"],
+                "volume": m["volume"],
+                "outcomes": m["outcomes"],
+                "outcome_prices": m["outcome_prices"],
+                "end_date": m["end_date"]
+            })
+        
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error searching markets: {str(e)}"
+
+
+def _get_market_from_db_impl(market_id: str) -> str:
+    """Get a specific market from the database by ID.
+    
+    Args:
+        market_id: The market ID to look up
+    
+    Returns:
+        Full market data including outcomes, prices, and metadata
+    """
+    try:
+        memory = _get_memory()
+        market = memory.get_market(market_id)
+        
+        if market:
+            return json.dumps(market, indent=2)
+        return f"Market {market_id} not found in database"
+    except Exception as e:
+        return f"Error getting market: {str(e)}"
+
+
+def _list_recent_markets_impl(limit: int = 10) -> str:
+    """List the most recently updated markets in the database.
+    
+    Args:
+        limit: Maximum number of markets to return (default: 10)
+    
+    Returns:
+        List of recently updated markets
+    """
+    try:
+        memory = _get_memory()
+        markets = memory.list_recent_markets(limit=limit)
+        
+        result = []
+        for m in markets:
+            result.append({
+                "id": m["id"],
+                "question": m["question"],
+                "category": m["category"],
+                "volume": m["volume"],
+                "last_updated": m["last_updated"],
+                "outcomes": m["outcomes"],
+                "outcome_prices": m["outcome_prices"]
+            })
+        
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        return f"Error listing recent markets: {str(e)}"
+
+
+# =============================================================================
 # TRADING TOOLS (USE WITH CAUTION)
 # =============================================================================
 
@@ -724,6 +972,9 @@ get_current_events_gamma = wrap_tool(
     name="get_current_events_gamma",
 )
 
+fetch_all_tags = wrap_tool(_fetch_all_tags_impl, name="fetch_all_tags")
+get_tag_by_id = wrap_tool(_get_tag_by_id_impl, name="get_tag_by_id")
+
 get_orderbook = wrap_tool(_get_orderbook_impl, name="get_orderbook")
 get_orderbook_price = wrap_tool(
     _get_orderbook_price_impl,
@@ -751,6 +1002,20 @@ create_markets_rag_database = wrap_tool(
     name="create_markets_rag_database",
 )
 
+# Database / Memory Tools
+get_database_stats = wrap_tool(_get_database_stats_impl, name="get_database_stats")
+get_markets_by_category = wrap_tool(
+    _get_markets_by_category_impl,
+    name="get_markets_by_category",
+)
+get_top_volume_markets = wrap_tool(
+    _get_top_volume_markets_impl,
+    name="get_top_volume_markets",
+)
+search_markets_db = wrap_tool(_search_markets_db_impl, name="search_markets_db")
+get_market_from_db = wrap_tool(_get_market_from_db_impl, name="get_market_from_db")
+list_recent_markets = wrap_tool(_list_recent_markets_impl, name="list_recent_markets")
+
 preview_order = wrap_tool(_preview_order_impl, name="preview_order")
 
 _TOOL_FUNCTIONS: Dict[str, Callable] = {
@@ -764,6 +1029,8 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
     "fetch_tradeable_events": _fetch_tradeable_events_impl,
     "get_event_by_id": _get_event_by_id_impl,
     "get_current_events_gamma": _get_current_events_gamma_impl,
+    "fetch_all_tags": _fetch_all_tags_impl,
+    "get_tag_by_id": _get_tag_by_id_impl,
     "get_orderbook": _get_orderbook_impl,
     "get_orderbook_price": _get_orderbook_price_impl,
     "get_usdc_balance": _get_usdc_balance_impl,
@@ -774,6 +1041,12 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
     "get_market_analyst_response": _get_market_analyst_response_impl,
     "query_markets_rag": _query_markets_rag_impl,
     "create_markets_rag_database": _create_markets_rag_database_impl,
+    "get_database_stats": _get_database_stats_impl,
+    "get_markets_by_category": _get_markets_by_category_impl,
+    "get_top_volume_markets": _get_top_volume_markets_impl,
+    "search_markets_db": _search_markets_db_impl,
+    "get_market_from_db": _get_market_from_db_impl,
+    "list_recent_markets": _list_recent_markets_impl,
     "preview_order": _preview_order_impl,
 }
 
@@ -809,9 +1082,17 @@ def get_event_tools() -> List:
     ]
 
 
+def get_tag_tools() -> List:
+    """Get all tag-related tools."""
+    return [
+        fetch_all_tags,
+        get_tag_by_id,
+    ]
+
+
 def get_read_only_tools() -> List:
     """Get read-only market and event tools (no trading or wallet access)."""
-    return get_market_tools() + get_event_tools()
+    return get_market_tools() + get_event_tools() + get_tag_tools()
 
 
 def get_trading_tools() -> List:
@@ -837,13 +1118,27 @@ def get_analysis_tools() -> List:
     ]
 
 
+def get_database_tools() -> List:
+    """Get database/memory tools for accessing stored market data."""
+    return [
+        get_database_stats,
+        get_markets_by_category,
+        get_top_volume_markets,
+        search_markets_db,
+        get_market_from_db,
+        list_recent_markets,
+    ]
+
+
 def get_all_tools() -> List:
     """Get all available Polymarket tools for LangChain agents."""
     return (
         get_market_tools() +
         get_event_tools() +
+        get_tag_tools() +
         get_trading_tools() +
-        get_analysis_tools()
+        get_analysis_tools() +
+        get_database_tools()
     )
 
 
@@ -894,7 +1189,17 @@ get_current_events_gamma(limit: int = 10)
     limit: Max events. Type: int. Default: 10
 
 
-3. ORDERBOOK TOOLS
+3. TAG TOOLS
+------------
+
+fetch_all_tags(limit: int = 20)
+    limit: Max tags. Type: int. Default: 20
+
+get_tag_by_id(tag_id: int)
+    tag_id: Gamma tag ID. Type: int. Required.
+
+
+4. ORDERBOOK TOOLS
 ------------------
 
 get_orderbook(token_id: str)

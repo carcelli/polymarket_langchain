@@ -8,16 +8,18 @@ from py_clob_client.order_builder.constants import BUY, SELL
 
 # Singleton instance to reuse connection
 _poly_client: Optional[Polymarket] = None
+_poly_client_factory: Optional[object] = None
 
 def get_poly_client() -> Polymarket:
-    global _poly_client
-    if _poly_client is None:
+    global _poly_client, _poly_client_factory
+    if _poly_client is None or _poly_client_factory is not Polymarket:
         try:
             _poly_client = Polymarket()
+            _poly_client_factory = Polymarket
         except Exception as e:
             # We fail gracefully if creds aren't set, tools will report error on use
             print(f"Warning: Failed to initialize Polymarket client: {e}")
-            pass
+            _poly_client = None
     return _poly_client
 
 def _execute_market_order_impl(token_id: str, amount: float, side: str) -> str:

@@ -58,9 +58,14 @@ class Tag(BaseModel):
     id: str
     label: Optional[str] = None
     slug: Optional[str] = None
-    forceShow: Optional[bool] = None  # missing from current events data
-    createdAt: Optional[str] = None  # missing from events data
-    updatedAt: Optional[str] = None  # missing from current events data
+    forceShow: Optional[bool] = None
+    publishedAt: Optional[str] = None
+    createdBy: Optional[int] = None
+    updatedBy: Optional[int] = None
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+    forceHide: Optional[bool] = None
+    isCarousel: Optional[bool] = None
     _sync: Optional[bool] = None
 
 

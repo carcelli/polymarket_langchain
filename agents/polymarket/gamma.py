@@ -10,6 +10,7 @@ class GammaMarketClient:
         self.gamma_url = "https://gamma-api.polymarket.com"
         self.gamma_markets_endpoint = self.gamma_url + "/markets"
         self.gamma_events_endpoint = self.gamma_url + "/events"
+        self.gamma_tags_endpoint = self.gamma_url + "/tags"
 
     def parse_pydantic_market(self, market_object: dict) -> Market:
         try:
@@ -112,10 +113,40 @@ class GammaMarketClient:
             else:
                 events: list[PolymarketEvent] = []
                 for market_event_obj in data:
-                    events.append(self.parse_event(market_event_obj))
+                    events.append(self.parse_pydantic_event(market_event_obj))
                 return events
         else:
             raise Exception()
+
+    def get_tags(
+        self, querystring_params={}, parse_pydantic=False, local_file_path=None
+    ) -> "list[Tag]":
+        if parse_pydantic and local_file_path is not None:
+            raise Exception(
+                'Cannot use "parse_pydantic" and "local_file" params simultaneously.'
+            )
+
+        response = httpx.get(self.gamma_tags_endpoint, params=querystring_params)
+        if response.status_code == 200:
+            data = response.json()
+            if local_file_path is not None:
+                with open(local_file_path, "w+") as out_file:
+                    json.dump(data, out_file)
+            elif not parse_pydantic:
+                return data
+            else:
+                tags: list[Tag] = []
+                for tag_object in data:
+                    tags.append(Tag(**tag_object))
+                return tags
+        else:
+            print(f"Error response returned from api: HTTP {response.status_code}")
+            raise Exception()
+
+    def get_tag(self, tag_id: int) -> dict:
+        url = self.gamma_tags_endpoint + "/" + str(tag_id)
+        response = httpx.get(url)
+        return response.json()
 
     def get_all_markets(self, limit=2) -> "list[Market]":
         return self.get_markets(querystring_params={"limit": limit})
@@ -173,6 +204,23 @@ class GammaMarketClient:
                 "enableOrderBook": True,
             }
         )
+
+    def get_all_tags(self, limit=100) -> "list[Tag]":
+        offset = 0
+        all_tags = []
+        while True:
+            params = {
+                "limit": limit,
+                "offset": offset,
+            }
+            tag_batch = self.get_tags(querystring_params=params)
+            all_tags.extend(tag_batch)
+
+            if len(tag_batch) < limit:
+                break
+            offset += limit
+
+        return all_tags
 
     def get_market(self, market_id: int) -> dict():
         url = self.gamma_markets_endpoint + "/" + str(market_id)

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://langchain-ai.github.io/langgraph/schemas/langgraph.json",
+  "graphs": {
+    "memory_agent": "./agents/graph/memory_agent.py:create_memory_agent",
+    "planning_agent": "./agents/graph/planning_agent.py:create_planning_agent"
+  },
+  "env": ".env",
+  "dependencies": ["."]
+}
+
