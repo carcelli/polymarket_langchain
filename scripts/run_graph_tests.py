@@ -17,6 +17,7 @@ import argparse
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
 def run_unit_tests():
     """Run unit tests for individual nodes."""
     print("🧪 Running Unit Tests...")
@@ -25,7 +26,12 @@ def run_unit_tests():
     print("  📦 Testing imports...")
     try:
         from agents.graph.state import AgentState
-        from agents.graph.memory_agent import MemoryAgentState, memory_node, create_memory_agent
+        from agents.graph.memory_agent import (
+            MemoryAgentState,
+            memory_node,
+            create_memory_agent,
+        )
+
         print("    ✅ Core imports successful")
     except ImportError as e:
         print(f"    ❌ Import failed: {e}")
@@ -41,9 +47,16 @@ def run_unit_tests():
             live_data={},
             analysis={},
             decision={},
-            error=None
+            error=None,
         )
-        required_keys = ["messages", "query", "memory_context", "live_data", "analysis", "decision"]
+        required_keys = [
+            "messages",
+            "query",
+            "memory_context",
+            "live_data",
+            "analysis",
+            "decision",
+        ]
         for key in required_keys:
             assert key in state, f"Missing key: {key}"
         print("    ✅ State structures valid")
@@ -56,7 +69,7 @@ def run_unit_tests():
     try:
         from unittest.mock import patch, MagicMock
 
-        with patch('agents.graph.memory_agent.MemoryManager') as mock_mm_class:
+        with patch("agents.graph.memory_agent.MemoryManager") as mock_mm_class:
             mock_mm = MagicMock()
             mock_mm.get_stats.return_value = {"total_markets": 1000}
             mock_mm.get_categories.return_value = ["politics", "sports"]
@@ -70,7 +83,7 @@ def run_unit_tests():
                 live_data={},
                 analysis={},
                 decision={},
-                error=None
+                error=None,
             )
 
             result = memory_node(state)
@@ -97,15 +110,17 @@ def run_unit_tests():
     print("  ▶️ Testing basic graph execution...")
     try:
         graph = create_memory_agent()
-        result = graph.invoke({
-            "messages": [],
-            "query": "test execution",
-            "memory_context": {},
-            "live_data": {},
-            "analysis": {},
-            "decision": {},
-            "error": None
-        })
+        result = graph.invoke(
+            {
+                "messages": [],
+                "query": "test execution",
+                "memory_context": {},
+                "live_data": {},
+                "analysis": {},
+                "decision": {},
+                "error": None,
+            }
+        )
         assert isinstance(result, dict)
         print("    ✅ Basic graph execution successful")
     except Exception as e:
@@ -113,6 +128,7 @@ def run_unit_tests():
         return False
 
     return True
+
 
 def run_integration_tests():
     """Run graph integration tests."""
@@ -126,11 +142,13 @@ def run_integration_tests():
         graph = create_memory_agent()
 
         # Mock the memory manager to avoid database dependencies
-        with patch('agents.graph.memory_agent.MemoryManager') as mock_mm_class:
+        with patch("agents.graph.memory_agent.MemoryManager") as mock_mm_class:
             mock_mm = MagicMock()
             mock_mm.get_stats.return_value = {"total_markets": 500}
             mock_mm.get_categories.return_value = ["politics"]
-            mock_mm.list_top_volume_markets.return_value = [{"question": "Test Market?"}]
+            mock_mm.list_top_volume_markets.return_value = [
+                {"question": "Test Market?"}
+            ]
             mock_mm_class.return_value = mock_mm
 
             result = run_memory_agent(graph, "test politics", verbose=False)
@@ -144,6 +162,7 @@ def run_integration_tests():
         print(f"❌ Integration test failed: {e}")
         return False
 
+
 def run_validation_tests():
     """Run graph structure validation tests."""
     print("✅ Running Validation Tests...")
@@ -156,15 +175,17 @@ def run_validation_tests():
         print("    ✅ Memory agent graph valid")
 
         # Basic execution test
-        result = memory_graph.invoke({
-            "messages": [],
-            "query": "validation",
-            "memory_context": {},
-            "live_data": {},
-            "analysis": {},
-            "decision": {},
-            "error": None
-        })
+        result = memory_graph.invoke(
+            {
+                "messages": [],
+                "query": "validation",
+                "memory_context": {},
+                "live_data": {},
+                "analysis": {},
+                "decision": {},
+                "error": None,
+            }
+        )
 
         # Check that state flows correctly
         assert "memory_context" in result
@@ -175,6 +196,7 @@ def run_validation_tests():
     except Exception as e:
         print(f"❌ Validation test failed: {e}")
         return False
+
 
 def run_performance_tests():
     """Run performance tests."""
@@ -190,22 +212,24 @@ def run_performance_tests():
         # Test execution time
         start_time = time.time()
 
-        with patch('agents.graph.memory_agent.MemoryManager') as mock_mm_class:
+        with patch("agents.graph.memory_agent.MemoryManager") as mock_mm_class:
             mock_mm = MagicMock()
             mock_mm.get_stats.return_value = {"total_markets": 100}
             mock_mm.get_categories.return_value = ["test"]
             mock_mm.list_top_volume_markets.return_value = []
             mock_mm_class.return_value = mock_mm
 
-            result = graph.invoke({
-                "messages": [],
-                "query": "performance test",
-                "memory_context": {},
-                "live_data": {},
-                "analysis": {},
-                "decision": {},
-                "error": None
-            })
+            result = graph.invoke(
+                {
+                    "messages": [],
+                    "query": "performance test",
+                    "memory_context": {},
+                    "live_data": {},
+                    "analysis": {},
+                    "decision": {},
+                    "error": None,
+                }
+            )
 
         execution_time = time.time() - start_time
 
@@ -220,6 +244,7 @@ def run_performance_tests():
         print(f"❌ Performance test failed: {e}")
         return False
 
+
 def run_e2e_tests():
     """Run end-to-end tests."""
     print("🌐 Running End-to-End Tests...")
@@ -231,8 +256,9 @@ def run_e2e_tests():
         # Full end-to-end test with minimal mocking
         graph = create_memory_agent()
 
-        with patch('agents.graph.memory_agent.MemoryManager') as mock_mm_class, \
-             patch('agents.polymarket.gamma.GammaMarketClient') as mock_gamma_class:
+        with patch("agents.graph.memory_agent.MemoryManager") as mock_mm_class, patch(
+            "agents.polymarket.gamma.GammaMarketClient"
+        ) as mock_gamma_class:
 
             # Setup mocks
             mock_mm = MagicMock()
@@ -245,15 +271,17 @@ def run_e2e_tests():
             mock_gamma.get_current_events.return_value = [{"title": "Test Event"}]
             mock_gamma_class.return_value = mock_gamma
 
-            result = graph.invoke({
-                "messages": [],
-                "query": "Find interesting political markets",
-                "memory_context": {},
-                "live_data": {},
-                "analysis": {},
-                "decision": {},
-                "error": None
-            })
+            result = graph.invoke(
+                {
+                    "messages": [],
+                    "query": "Find interesting political markets",
+                    "memory_context": {},
+                    "live_data": {},
+                    "analysis": {},
+                    "decision": {},
+                    "error": None,
+                }
+            )
 
             # Verify end-to-end flow
             assert "analysis" in result
@@ -266,16 +294,23 @@ def run_e2e_tests():
         print(f"❌ E2E test failed: {e}")
         return False
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Run LangGraph tests')
-    parser.add_argument('--unit', action='store_true', help='Run unit tests only')
-    parser.add_argument('--integration', action='store_true', help='Run integration tests only')
-    parser.add_argument('--validation', action='store_true', help='Run validation tests only')
-    parser.add_argument('--perf', action='store_true', help='Run performance tests only')
-    parser.add_argument('--e2e', action='store_true', help='Run end-to-end tests only')
-    
+    parser = argparse.ArgumentParser(description="Run LangGraph tests")
+    parser.add_argument("--unit", action="store_true", help="Run unit tests only")
+    parser.add_argument(
+        "--integration", action="store_true", help="Run integration tests only"
+    )
+    parser.add_argument(
+        "--validation", action="store_true", help="Run validation tests only"
+    )
+    parser.add_argument(
+        "--perf", action="store_true", help="Run performance tests only"
+    )
+    parser.add_argument("--e2e", action="store_true", help="Run end-to-end tests only")
+
     args = parser.parse_args()
-    
+
     # Run specific test suites or all tests
     if args.unit:
         success = run_unit_tests()
@@ -291,7 +326,7 @@ def main():
         # Run all tests
         print("🧪 Running Complete LangGraph Test Suite")
         print("=" * 50)
-        
+
         all_passed = True
         test_suites = [
             ("Unit Tests", run_unit_tests),
@@ -300,7 +335,7 @@ def main():
             ("Performance Tests", run_performance_tests),
             ("E2E Tests", run_e2e_tests),
         ]
-        
+
         for suite_name, test_func in test_suites:
             print(f"\n▶️  Running {suite_name}...")
             try:
@@ -313,10 +348,11 @@ def main():
             except Exception as e:
                 print(f"💥 {suite_name}: ERROR - {e}")
                 all_passed = False
-        
+
         success = all_passed
-    
+
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

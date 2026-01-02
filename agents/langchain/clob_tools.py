@@ -21,10 +21,10 @@ ENVIRONMENT VARIABLES:
 
 Usage:
     from agents.langchain.clob_tools import get_clob_market_tools, get_clob_trading_tools
-    
+
     # Read-only tools (no auth required)
     tools = get_clob_market_tools()
-    
+
     # Trading tools (requires full auth)
     tools = get_clob_trading_tools()
 """
@@ -51,6 +51,7 @@ def _get_clob_client_readonly():
     if _clob_client_readonly is None:
         try:
             from py_clob_client.client import ClobClient
+
             host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
             _clob_client_readonly = ClobClient(host)
         except ImportError:
@@ -68,21 +69,21 @@ def _get_clob_client():
             from py_clob_client.client import ClobClient
             from py_clob_client.clob_types import ApiCreds
             from py_clob_client.constants import POLYGON
-            
+
             host = os.getenv("CLOB_API_URL", "https://clob.polymarket.com")
             key = os.getenv("PK") or os.getenv("POLYGON_WALLET_PRIVATE_KEY")
             chain_id = int(os.getenv("CHAIN_ID", POLYGON))
-            
+
             if not key:
                 raise ValueError(
                     "Private key required. Set PK or POLYGON_WALLET_PRIVATE_KEY env var."
                 )
-            
+
             # Check for existing API creds or derive them
             api_key = os.getenv("CLOB_API_KEY")
             api_secret = os.getenv("CLOB_SECRET")
             api_passphrase = os.getenv("CLOB_PASS_PHRASE")
-            
+
             if api_key and api_secret and api_passphrase:
                 creds = ApiCreds(
                     api_key=api_key,
@@ -95,7 +96,7 @@ def _get_clob_client():
                 _clob_client = ClobClient(host, key=key, chain_id=chain_id)
                 creds = _clob_client.create_or_derive_api_creds()
                 _clob_client.set_api_creds(creds)
-                
+
         except ImportError:
             raise ImportError(
                 "py_clob_client not installed. Install with: pip install py-clob-client"
@@ -107,8 +108,10 @@ def _get_clob_client():
 # PYDANTIC SCHEMAS
 # =============================================================================
 
+
 class CLOBOrderArgs(BaseModel):
     """Schema for CLOB limit order arguments."""
+
     token_id: str = Field(description="Token ID of the conditional token")
     price: float = Field(ge=0.01, le=0.99, description="Price per share (0.01 to 0.99)")
     size: float = Field(gt=0, description="Number of shares to trade")
@@ -117,6 +120,7 @@ class CLOBOrderArgs(BaseModel):
 
 class CLOBMarketOrderArgs(BaseModel):
     """Schema for CLOB market order arguments."""
+
     token_id: str = Field(description="Token ID of the conditional token")
     amount: float = Field(gt=0, description="USDC amount (BUY) or shares (SELL)")
     side: str = Field(pattern="^(BUY|SELL)$", description="BUY or SELL")
@@ -126,11 +130,12 @@ class CLOBMarketOrderArgs(BaseModel):
 # CLOB MARKET DATA TOOLS (READ-ONLY, NO AUTH)
 # =============================================================================
 
+
 def _clob_health_check_impl() -> str:
     """Check if the Polymarket CLOB API is healthy and responding.
-    
+
     Use this to verify connectivity before making other API calls.
-    
+
     Returns:
         "OK" if the API is healthy, error message otherwise
     """
@@ -144,9 +149,9 @@ def _clob_health_check_impl() -> str:
 
 def _clob_get_server_time_impl() -> str:
     """Get the current server time from the CLOB API.
-    
+
     Useful for debugging timing issues or verifying API connectivity.
-    
+
     Returns:
         Server timestamp
     """
@@ -160,13 +165,13 @@ def _clob_get_server_time_impl() -> str:
 
 def _clob_get_midpoint_impl(token_id: str) -> str:
     """Get the mid-market price for a token.
-    
+
     The midpoint is the average of best bid and best ask prices.
     Use this for a quick price check without full orderbook data.
-    
+
     Args:
         token_id: The conditional token ID (long numeric string)
-    
+
     Returns:
         Mid-market price as a decimal (e.g., "0.55" = 55% probability)
     """
@@ -180,14 +185,14 @@ def _clob_get_midpoint_impl(token_id: str) -> str:
 
 def _clob_get_price_impl(token_id: str, side: str) -> str:
     """Get the current price for buying or selling a token.
-    
+
     Returns the best available price for the specified side.
     BUY price is the lowest ask, SELL price is the highest bid.
-    
+
     Args:
         token_id: The conditional token ID
         side: "BUY" or "SELL"
-    
+
     Returns:
         Current price for the specified side
     """
@@ -204,39 +209,46 @@ def _clob_get_price_impl(token_id: str, side: str) -> str:
 
 def _clob_get_orderbook_impl(token_id: str) -> str:
     """Get the full order book for a token.
-    
+
     Shows all open bids (buy orders) and asks (sell orders) with
     their prices and sizes. Essential for understanding market depth.
-    
+
     Args:
         token_id: The conditional token ID
-    
+
     Returns:
         JSON with bids and asks arrays, each containing price/size
     """
     try:
         client = _get_clob_client_readonly()
         orderbook = client.get_order_book(token_id)
-        return json.dumps({
-            "market": orderbook.market,
-            "asset_id": orderbook.asset_id,
-            "bids": [{"price": b.price, "size": b.size} for b in orderbook.bids[:15]],
-            "asks": [{"price": a.price, "size": a.size} for a in orderbook.asks[:15]],
-            "hash": orderbook.hash,
-        }, indent=2)
+        return json.dumps(
+            {
+                "market": orderbook.market,
+                "asset_id": orderbook.asset_id,
+                "bids": [
+                    {"price": b.price, "size": b.size} for b in orderbook.bids[:15]
+                ],
+                "asks": [
+                    {"price": a.price, "size": a.size} for a in orderbook.asks[:15]
+                ],
+                "hash": orderbook.hash,
+            },
+            indent=2,
+        )
     except Exception as e:
         return f"Error: {str(e)}"
 
 
 def _clob_get_spread_impl(token_id: str) -> str:
     """Get the bid-ask spread for a token.
-    
+
     The spread is the difference between the best ask and best bid.
     Tighter spreads indicate more liquid markets.
-    
+
     Args:
         token_id: The conditional token ID
-    
+
     Returns:
         Spread information with best bid, best ask, and spread size
     """
@@ -250,12 +262,12 @@ def _clob_get_spread_impl(token_id: str) -> str:
 
 def _clob_get_last_trade_price_impl(token_id: str) -> str:
     """Get the last trade price for a token.
-    
+
     Shows the price at which the most recent trade occurred.
-    
+
     Args:
         token_id: The conditional token ID
-    
+
     Returns:
         Last trade price
     """
@@ -269,13 +281,13 @@ def _clob_get_last_trade_price_impl(token_id: str) -> str:
 
 def _clob_get_markets_impl(next_cursor: str = "") -> str:
     """Get all markets from the CLOB API.
-    
+
     Returns a paginated list of all available markets.
     Use the next_cursor for pagination through results.
-    
+
     Args:
         next_cursor: Pagination cursor (empty for first page)
-    
+
     Returns:
         JSON with markets data and pagination cursor
     """
@@ -289,19 +301,21 @@ def _clob_get_markets_impl(next_cursor: str = "") -> str:
 
 def _clob_get_simplified_markets_impl(next_cursor: str = "") -> str:
     """Get simplified market data from the CLOB API.
-    
+
     Returns a lighter-weight response with essential market info.
     Better for quick lookups when you don't need full details.
-    
+
     Args:
         next_cursor: Pagination cursor (empty for first page)
-    
+
     Returns:
         JSON with simplified markets data
     """
     try:
         client = _get_clob_client_readonly()
-        result = client.get_simplified_markets(next_cursor=next_cursor if next_cursor else None)
+        result = client.get_simplified_markets(
+            next_cursor=next_cursor if next_cursor else None
+        )
         return json.dumps(result, indent=2)
     except Exception as e:
         return f"Error: {str(e)}"
@@ -309,10 +323,10 @@ def _clob_get_simplified_markets_impl(next_cursor: str = "") -> str:
 
 def _clob_get_market_impl(condition_id: str) -> str:
     """Get detailed information about a specific market.
-    
+
     Args:
         condition_id: The market condition ID
-    
+
     Returns:
         Full market details including tokens, outcomes, etc.
     """
@@ -328,183 +342,189 @@ def _clob_get_market_impl(condition_id: str) -> str:
 # CLOB TRADING TOOLS (REQUIRE AUTHENTICATION)
 # =============================================================================
 
+
 def _clob_create_limit_order_impl(
-    token_id: str,
-    price: float,
-    size: float,
-    side: str
+    token_id: str, price: float, size: float, side: str
 ) -> str:
     """Create and submit a limit order on Polymarket CLOB.
-    
+
     WARNING: This executes a REAL trade with REAL money!
-    
+
     A limit order specifies the exact price you want to trade at.
     The order will only execute if the market reaches your price.
-    
+
     Args:
         token_id: The conditional token ID to trade
         price: Price per share (0.01 to 0.99)
         size: Number of shares to trade
         side: "BUY" or "SELL"
-    
+
     Returns:
         Order confirmation with order ID, or error message
     """
     try:
         from py_clob_client.clob_types import OrderArgs, OrderType
-        
+
         client = _get_clob_client()
         side = side.upper()
-        
+
         if side not in ["BUY", "SELL"]:
             return "Error: side must be 'BUY' or 'SELL'"
         if not 0.01 <= price <= 0.99:
             return "Error: price must be between 0.01 and 0.99"
         if size <= 0:
             return "Error: size must be positive"
-        
+
         order_args = OrderArgs(
             token_id=token_id,
             price=price,
             size=size,
             side=side,
         )
-        
+
         signed_order = client.create_order(order_args)
         result = client.post_order(signed_order, OrderType.GTC)
-        
-        return json.dumps({
-            "success": True,
-            "order_type": "LIMIT",
-            "side": side,
-            "price": price,
-            "size": size,
-            "token_id": token_id,
-            "response": result,
-        }, indent=2)
-        
+
+        return json.dumps(
+            {
+                "success": True,
+                "order_type": "LIMIT",
+                "side": side,
+                "price": price,
+                "size": size,
+                "token_id": token_id,
+                "response": result,
+            },
+            indent=2,
+        )
+
     except Exception as e:
         return f"Error creating limit order: {str(e)}"
 
 
-def _clob_create_market_order_impl(
-    token_id: str,
-    amount: float,
-    side: str
-) -> str:
+def _clob_create_market_order_impl(token_id: str, amount: float, side: str) -> str:
     """Create and submit a market order on Polymarket CLOB.
-    
+
     WARNING: This executes a REAL trade with REAL money!
-    
+
     A market order executes immediately at the best available price.
     - BUY: amount is in USDC (how much $ to spend)
     - SELL: amount is in shares (how many shares to sell)
-    
+
     Args:
         token_id: The conditional token ID to trade
         amount: USDC amount (BUY) or number of shares (SELL)
         side: "BUY" or "SELL"
-    
+
     Returns:
         Order confirmation or error message
     """
     try:
         from py_clob_client.clob_types import MarketOrderArgs, OrderType
-        
+
         client = _get_clob_client()
         side = side.upper()
-        
+
         if side not in ["BUY", "SELL"]:
             return "Error: side must be 'BUY' or 'SELL'"
         if amount <= 0:
             return "Error: amount must be positive"
-        
+
         order_args = MarketOrderArgs(
             token_id=token_id,
             amount=amount,
             side=side,
         )
-        
+
         signed_order = client.create_market_order(order_args)
         result = client.post_order(signed_order, OrderType.FOK)
-        
-        return json.dumps({
-            "success": True,
-            "order_type": "MARKET",
-            "side": side,
-            "amount": amount,
-            "token_id": token_id,
-            "response": result,
-        }, indent=2)
-        
+
+        return json.dumps(
+            {
+                "success": True,
+                "order_type": "MARKET",
+                "side": side,
+                "amount": amount,
+                "token_id": token_id,
+                "response": result,
+            },
+            indent=2,
+        )
+
     except Exception as e:
         return f"Error creating market order: {str(e)}"
 
 
 def _clob_cancel_order_impl(order_id: str) -> str:
     """Cancel a specific open order.
-    
+
     Args:
         order_id: The order ID to cancel (0x... hash)
-    
+
     Returns:
         Cancellation confirmation or error message
     """
     try:
         client = _get_clob_client()
         result = client.cancel(order_id=order_id)
-        return json.dumps({
-            "success": True,
-            "cancelled_order": order_id,
-            "response": result,
-        }, indent=2)
+        return json.dumps(
+            {
+                "success": True,
+                "cancelled_order": order_id,
+                "response": result,
+            },
+            indent=2,
+        )
     except Exception as e:
         return f"Error cancelling order: {str(e)}"
 
 
 def _clob_cancel_all_orders_impl() -> str:
     """Cancel all open orders for the authenticated user.
-    
+
     Use with caution - this cancels ALL your open orders across all markets.
-    
+
     Returns:
         Cancellation confirmation or error message
     """
     try:
         client = _get_clob_client()
         result = client.cancel_all()
-        return json.dumps({
-            "success": True,
-            "message": "All orders cancelled",
-            "response": result,
-        }, indent=2)
+        return json.dumps(
+            {
+                "success": True,
+                "message": "All orders cancelled",
+                "response": result,
+            },
+            indent=2,
+        )
     except Exception as e:
         return f"Error cancelling all orders: {str(e)}"
 
 
 def _clob_get_open_orders_impl(market: str = "", asset_id: str = "") -> str:
     """Get all open orders for the authenticated user.
-    
+
     Can optionally filter by market or asset.
-    
+
     Args:
         market: Optional market condition ID to filter
         asset_id: Optional asset/token ID to filter
-    
+
     Returns:
         JSON array of open orders with details
     """
     try:
         from py_clob_client.clob_types import OpenOrderParams
-        
+
         client = _get_clob_client()
-        
+
         params = OpenOrderParams()
         if market:
             params.market = market
         if asset_id:
             params.asset_id = asset_id
-            
+
         result = client.get_orders(params)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -513,10 +533,10 @@ def _clob_get_open_orders_impl(market: str = "", asset_id: str = "") -> str:
 
 def _clob_get_order_impl(order_id: str) -> str:
     """Get details of a specific order.
-    
+
     Args:
         order_id: The order ID (0x... hash)
-    
+
     Returns:
         Order details including status, fill amount, etc.
     """
@@ -530,21 +550,21 @@ def _clob_get_order_impl(order_id: str) -> str:
 
 def _clob_get_trades_impl(market: str = "", maker_address: str = "") -> str:
     """Get trade history for the authenticated user.
-    
+
     Shows completed trades with execution details.
-    
+
     Args:
         market: Optional market condition ID to filter
         maker_address: Optional maker address to filter
-    
+
     Returns:
         JSON array of trades
     """
     try:
         from py_clob_client.clob_types import TradeParams
-        
+
         client = _get_clob_client()
-        
+
         params = TradeParams()
         if market:
             params.market = market
@@ -553,7 +573,7 @@ def _clob_get_trades_impl(market: str = "", maker_address: str = "") -> str:
         else:
             # Default to current user's address
             params.maker_address = client.get_address()
-            
+
         result = client.get_trades(params)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -564,39 +584,39 @@ def _clob_get_trades_impl(market: str = "", maker_address: str = "") -> str:
 # CLOB ACCOUNT TOOLS
 # =============================================================================
 
+
 def _clob_get_balance_allowance_impl(
     asset_type: str = "COLLATERAL",
     token_id: str = "",
 ) -> str:
     """Get balance and allowance for an asset.
-    
+
     Checks how much of an asset you have and how much the exchange
     is allowed to spend on your behalf.
-    
+
     Args:
         asset_type: "COLLATERAL" (USDC) or "CONDITIONAL" (outcome tokens)
         token_id: Required if asset_type is "CONDITIONAL"
-    
+
     Returns:
         Balance and allowance information
     """
     try:
         from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
-        
+
         client = _get_clob_client()
-        
+
         if asset_type.upper() == "COLLATERAL":
             params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
         elif asset_type.upper() == "CONDITIONAL":
             if not token_id:
                 return "Error: token_id required for CONDITIONAL asset type"
             params = BalanceAllowanceParams(
-                asset_type=AssetType.CONDITIONAL,
-                token_id=token_id
+                asset_type=AssetType.CONDITIONAL, token_id=token_id
             )
         else:
             return "Error: asset_type must be 'COLLATERAL' or 'CONDITIONAL'"
-            
+
         result = client.get_balance_allowance(params)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -605,7 +625,7 @@ def _clob_get_balance_allowance_impl(
 
 def _clob_get_api_keys_impl() -> str:
     """Get all API keys for the authenticated user.
-    
+
     Returns:
         List of API keys with their permissions
     """
@@ -621,42 +641,40 @@ def _clob_get_api_keys_impl() -> str:
 # CLOB RFQ (REQUEST FOR QUOTE) TOOLS
 # =============================================================================
 
+
 def _clob_create_rfq_request_impl(
-    token_id: str,
-    price: float,
-    size: float,
-    side: str
+    token_id: str, price: float, size: float, side: str
 ) -> str:
     """Create an RFQ (Request for Quote) request.
-    
+
     RFQ allows you to request quotes from market makers for large orders
     that might move the market if executed directly on the orderbook.
-    
+
     Args:
         token_id: The conditional token ID
         price: Desired price per share (0.01 to 0.99)
         size: Number of shares
         side: "BUY" or "SELL"
-    
+
     Returns:
         RFQ request ID and details
     """
     try:
         from py_clob_client.rfq import RfqUserRequest
-        
+
         client = _get_clob_client()
         side = side.upper()
-        
+
         if side not in ["BUY", "SELL"]:
             return "Error: side must be 'BUY' or 'SELL'"
-        
+
         user_request = RfqUserRequest(
             token_id=token_id,
             price=price,
             side=side,
             size=size,
         )
-        
+
         result = client.rfq.create_rfq_request(user_request)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -665,24 +683,24 @@ def _clob_create_rfq_request_impl(
 
 def _clob_get_rfq_requests_impl(state: str = "active", limit: int = 10) -> str:
     """Get RFQ requests.
-    
+
     Args:
         state: Filter by state ("active" or "inactive")
         limit: Maximum number of requests to return
-    
+
     Returns:
         JSON array of RFQ requests
     """
     try:
         from py_clob_client.rfq import GetRfqRequestsParams
-        
+
         client = _get_clob_client()
-        
+
         params = GetRfqRequestsParams(
             state=state,
             limit=limit,
         )
-        
+
         result = client.rfq.get_rfq_requests(params)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -690,35 +708,31 @@ def _clob_get_rfq_requests_impl(state: str = "active", limit: int = 10) -> str:
 
 
 def _clob_create_rfq_quote_impl(
-    request_id: str,
-    token_id: str,
-    price: float,
-    size: float,
-    side: str
+    request_id: str, token_id: str, price: float, size: float, side: str
 ) -> str:
     """Create a quote in response to an RFQ request.
-    
+
     Market makers use this to respond to RFQ requests with their prices.
-    
+
     Args:
         request_id: The RFQ request ID to quote
         token_id: The conditional token ID
         price: Quoted price per share
         size: Number of shares
         side: "BUY" or "SELL" (quoter's side)
-    
+
     Returns:
         Quote ID and details
     """
     try:
         from py_clob_client.rfq import RfqUserQuote
-        
+
         client = _get_clob_client()
         side = side.upper()
-        
+
         if side not in ["BUY", "SELL"]:
             return "Error: side must be 'BUY' or 'SELL'"
-        
+
         user_quote = RfqUserQuote(
             request_id=request_id,
             token_id=token_id,
@@ -726,7 +740,7 @@ def _clob_create_rfq_quote_impl(
             side=side,
             size=size,
         )
-        
+
         result = client.rfq.create_rfq_quote(user_quote)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -739,26 +753,26 @@ def _clob_get_rfq_quotes_impl(
     limit: int = 10,
 ) -> str:
     """Get RFQ quotes.
-    
+
     Args:
         request_id: Optional filter by request ID
         state: Optional filter by state
         limit: Maximum number of quotes to return
-    
+
     Returns:
         JSON array of RFQ quotes
     """
     try:
         from py_clob_client.rfq import GetRfqQuotesParams
-        
+
         client = _get_clob_client()
-        
+
         params = GetRfqQuotesParams(limit=limit)
         if request_id:
             params.request_ids = [request_id]
         if state:
             params.state = state
-        
+
         result = client.rfq.get_rfq_quotes(params)
         return json.dumps(result, indent=2)
     except Exception as e:
@@ -766,69 +780,73 @@ def _clob_get_rfq_quotes_impl(
 
 
 def _clob_accept_rfq_quote_impl(
-    request_id: str,
-    quote_id: str,
-    expiration_seconds: int = 3600
+    request_id: str, quote_id: str, expiration_seconds: int = 3600
 ) -> str:
     """Accept an RFQ quote (requester side).
-    
+
     When you receive quotes for your RFQ request, use this to accept one.
-    
+
     Args:
         request_id: The RFQ request ID
         quote_id: The quote ID to accept
         expiration_seconds: Order expiration in seconds (default: 1 hour)
-    
+
     Returns:
         Acceptance confirmation
     """
     try:
         from py_clob_client.rfq import AcceptQuoteParams
         import time
-        
+
         client = _get_clob_client()
-        
+
         expiration = int(time.time()) + expiration_seconds
-        
+
         params = AcceptQuoteParams(
             request_id=request_id,
             quote_id=quote_id,
             expiration=expiration,
         )
-        
+
         result = client.rfq.accept_rfq_quote(params)
-        return json.dumps({
-            "success": True,
-            "request_id": request_id,
-            "quote_id": quote_id,
-            "response": result,
-        }, indent=2)
+        return json.dumps(
+            {
+                "success": True,
+                "request_id": request_id,
+                "quote_id": quote_id,
+                "response": result,
+            },
+            indent=2,
+        )
     except Exception as e:
         return f"Error accepting RFQ quote: {str(e)}"
 
 
 def _clob_cancel_rfq_request_impl(request_id: str) -> str:
     """Cancel an RFQ request.
-    
+
     Args:
         request_id: The RFQ request ID to cancel
-    
+
     Returns:
         Cancellation confirmation
     """
     try:
         from py_clob_client.rfq import CancelRfqRequestParams
-        
+
         client = _get_clob_client()
-        
+
         params = CancelRfqRequestParams(request_id=request_id)
         result = client.rfq.cancel_rfq_request(params)
-        
-        return json.dumps({
-            "success": True,
-            "cancelled_request": request_id,
-            "response": result,
-        }, indent=2)
+
+        return json.dumps(
+            {
+                "success": True,
+                "cancelled_request": request_id,
+                "response": result,
+            },
+            indent=2,
+        )
     except Exception as e:
         return f"Error cancelling RFQ request: {str(e)}"
 
@@ -947,6 +965,7 @@ def get_clob_tool_functions() -> Dict[str, Callable]:
 # TOOL COLLECTION FUNCTIONS
 # =============================================================================
 
+
 def get_clob_market_tools() -> List:
     """Get CLOB market data tools (read-only, no auth required)."""
     return [
@@ -999,10 +1018,10 @@ def get_clob_rfq_tools() -> List:
 def get_all_clob_tools() -> List:
     """Get all CLOB tools."""
     return (
-        get_clob_market_tools() +
-        get_clob_trading_tools() +
-        get_clob_account_tools() +
-        get_clob_rfq_tools()
+        get_clob_market_tools()
+        + get_clob_trading_tools()
+        + get_clob_account_tools()
+        + get_clob_rfq_tools()
     )
 
 

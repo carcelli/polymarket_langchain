@@ -6,6 +6,7 @@ from agents.polymarket.gamma import GammaMarketClient
 # Initialize the client once (connection pooling)
 gamma_client = GammaMarketClient()
 
+
 def _fetch_active_markets_impl(limit: int = 5) -> List[Dict]:
     """
     Fetches a list of the most active markets on Polymarket.
@@ -20,22 +21,23 @@ def _fetch_active_markets_impl(limit: int = 5) -> List[Dict]:
                 "active": True,
                 "closed": False,
                 "archived": False,
-                "limit": limit
+                "limit": limit,
             },
-            parse_pydantic=True
+            parse_pydantic=True,
         )
-        
+
         # We serialize back to dict for the LLM tool output
         return [m.dict() for m in markets]
     except Exception as e:
         return [{"error": f"Failed to fetch markets: {str(e)}"}]
+
 
 def _get_market_details_impl(token_id: str) -> Dict:
     """
     Fetches deep details for a specific market using its Token ID.
     Use this when you need to know the specific Outcome Prices or Spread.
     """
-    # For now, we reuse get_active_markets logic, but in production 
+    # For now, we reuse get_active_markets logic, but in production
     # this would hit the specific /markets/{id} endpoint.
     # We mock this specifically for the bootstrapping phase.
     return {"id": token_id, "status": "active", "spread": 0.01}

@@ -11,17 +11,21 @@ tavily_api_key = os.getenv("TAVILY_API_KEY")
 TAVILY_AVAILABLE = False
 _tavily_client_class = None
 
+
 def _get_tavily_client():
     global _tavily_client_class, TAVILY_AVAILABLE
     if _tavily_client_class is None:
         try:
             from tavily import TavilyClient
+
             _tavily_client_class = TavilyClient
             TAVILY_AVAILABLE = True
         except ImportError:
             _tavily_client_class = None
             TAVILY_AVAILABLE = False
-            raise ImportError("tavily-python package is not installed. Install with: pip install tavily-python")
+            raise ImportError(
+                "tavily-python package is not installed. Install with: pip install tavily-python"
+            )
     return _tavily_client_class
 
 

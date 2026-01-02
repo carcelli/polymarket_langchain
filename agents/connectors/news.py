@@ -8,17 +8,21 @@ from agents.utils.objects import Article
 NEWSAPI_AVAILABLE = False
 _newsapi_client_class = None
 
+
 def _get_newsapi_client():
     global _newsapi_client_class, NEWSAPI_AVAILABLE
     if _newsapi_client_class is None:
         try:
             from newsapi import NewsApiClient
+
             _newsapi_client_class = NewsApiClient
             NEWSAPI_AVAILABLE = True
         except ImportError:
             _newsapi_client_class = None
             NEWSAPI_AVAILABLE = False
-            raise ImportError("newsapi-python package is not installed. Install with: pip install newsapi-python")
+            raise ImportError(
+                "newsapi-python package is not installed. Install with: pip install newsapi-python"
+            )
     return _newsapi_client_class
 
 

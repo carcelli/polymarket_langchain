@@ -5,7 +5,7 @@ This module provides ready-to-use agents for autonomous Polymarket analysis and 
 
 Example Usage:
     from agents.langchain.agent import create_polymarket_agent, run_agent
-    
+
     agent = create_polymarket_agent()
     result = run_agent(agent, "Find the best political market to trade")
     print(result)
@@ -22,6 +22,7 @@ load_dotenv()
 # AGENT CREATION FUNCTIONS
 # =============================================================================
 
+
 def create_polymarket_agent(
     model: str = "gpt-4o-mini",
     temperature: float = 0.1,
@@ -30,22 +31,22 @@ def create_polymarket_agent(
     verbose: bool = True,
 ):
     """Create a LangChain agent configured for Polymarket analysis.
-    
+
     Args:
         model: OpenAI model to use. Options:
             - "gpt-4o-mini" (fast, cheap, good for most tasks)
             - "gpt-4o" (more capable, higher cost)
             - "gpt-4-turbo" (best reasoning, highest cost)
-        temperature: 0.0 = deterministic, 1.0 = creative. 
+        temperature: 0.0 = deterministic, 1.0 = creative.
             Use low (0.1) for analysis, higher for brainstorming.
         max_iterations: Maximum tool calls before stopping.
             Prevents infinite loops. Increase for complex tasks.
         tools: List of tools to give the agent. If None, uses all available.
         verbose: If True, prints agent reasoning steps.
-    
+
     Returns:
         AgentExecutor ready to invoke with queries
-    
+
     Example:
         agent = create_polymarket_agent(
             model="gpt-4o",
@@ -57,24 +58,27 @@ def create_polymarket_agent(
     from langchain_openai import ChatOpenAI
     from langchain.agents import create_react_agent, AgentExecutor
     from langchain_core.prompts import ChatPromptTemplate
-    
+
     from agents.langchain.tools import get_all_tools
-    
+
     # Initialize LLM
     llm = ChatOpenAI(
         model=model,
         temperature=temperature,
         api_key=os.getenv("OPENAI_API_KEY"),
     )
-    
+
     # Get tools
     if tools is None:
         tools = get_all_tools()
-    
+
     # Create prompt template
     # The prompt is crucial - it defines agent behavior
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are an expert Polymarket trader and analyst.
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """You are an expert Polymarket trader and analyst.
 
 Your role is to:
 1. Analyze prediction markets using available tools
@@ -103,13 +107,15 @@ Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: the final answer to the original input question"""),
-        ("human", "{input}\n\n{agent_scratchpad}"),
-    ])
-    
+Final Answer: the final answer to the original input question""",
+            ),
+            ("human", "{input}\n\n{agent_scratchpad}"),
+        ]
+    )
+
     # Create agent
     agent = create_react_agent(llm, tools, prompt)
-    
+
     # Wrap in executor
     executor = AgentExecutor(
         agent=agent,
@@ -118,23 +124,27 @@ Final Answer: the final answer to the original input question"""),
         max_iterations=max_iterations,
         handle_parsing_errors=True,  # Gracefully handle LLM parsing errors
     )
-    
+
     return executor
 
 
 def create_simple_analyst(model: str = "gpt-4o-mini"):
     """Create a simpler agent focused on market analysis (no trading tools).
-    
+
     Good for research and recommendations without execution capability.
-    
+
     Args:
         model: OpenAI model to use
-    
+
     Returns:
         AgentExecutor for analysis tasks
     """
-    from agents.langchain.tools import get_market_tools, get_event_tools, get_analysis_tools
-    
+    from agents.langchain.tools import (
+        get_market_tools,
+        get_event_tools,
+        get_analysis_tools,
+    )
+
     analysis_tools = get_market_tools() + get_event_tools() + get_analysis_tools()
     return create_polymarket_agent(
         model=model,
@@ -145,10 +155,10 @@ def create_simple_analyst(model: str = "gpt-4o-mini"):
 
 def create_research_agent(model: str = "gpt-4o-mini"):
     """Create an agent specialized for market research with news integration.
-    
+
     Args:
         model: OpenAI model to use
-    
+
     Returns:
         AgentExecutor for research tasks
     """
@@ -159,7 +169,7 @@ def create_research_agent(model: str = "gpt-4o-mini"):
         get_superforecast,
         query_markets_rag,
     )
-    
+
     research_tools = [
         fetch_all_markets,
         fetch_all_events,
@@ -167,7 +177,7 @@ def create_research_agent(model: str = "gpt-4o-mini"):
         get_superforecast,
         query_markets_rag,
     ]
-    
+
     return create_polymarket_agent(
         model=model,
         tools=research_tools,
@@ -179,13 +189,14 @@ def create_research_agent(model: str = "gpt-4o-mini"):
 # AGENT EXECUTION HELPERS
 # =============================================================================
 
+
 def run_agent(agent, query: str) -> str:
     """Run an agent with a query and return the result.
-    
+
     Args:
         agent: AgentExecutor from create_polymarket_agent()
         query: Natural language query/instruction
-    
+
     Returns:
         Agent's final answer as string
     """
@@ -198,14 +209,14 @@ def run_agent(agent, query: str) -> str:
 
 def run_analysis_chain(query: str, model: str = "gpt-4o-mini") -> str:
     """Quick function to run a one-off analysis.
-    
+
     Creates a temporary agent, runs the query, returns result.
     For repeated use, create an agent once and reuse it.
-    
+
     Args:
         query: What to analyze
         model: OpenAI model to use
-    
+
     Returns:
         Analysis result as string
     """
@@ -217,23 +228,24 @@ def run_analysis_chain(query: str, model: str = "gpt-4o-mini") -> str:
 # SPECIALIZED WORKFLOWS
 # =============================================================================
 
+
 def find_best_trade(
     category: Optional[str] = None,
     risk_tolerance: str = "medium",
-    model: str = "gpt-4o-mini"
+    model: str = "gpt-4o-mini",
 ) -> Dict[str, Any]:
     """Automated workflow to find the best trade opportunity.
-    
+
     Args:
         category: Optional category filter (e.g., "politics", "sports")
         risk_tolerance: "low", "medium", or "high"
         model: OpenAI model to use
-    
+
     Returns:
         Dict with trade recommendation and reasoning
     """
     agent = create_polymarket_agent(model=model)
-    
+
     query = f"""
     Find the best trading opportunity on Polymarket right now.
     
@@ -259,9 +271,9 @@ def find_best_trade(
     - Expected value calculation
     - Key risks
     """
-    
+
     result = run_agent(agent, query)
-    
+
     return {
         "recommendation": result,
         "category": category,
@@ -272,16 +284,16 @@ def find_best_trade(
 
 def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") -> str:
     """Deep dive analysis on a specific market.
-    
+
     Args:
         market_question: The prediction question to analyze
         model: OpenAI model to use
-    
+
     Returns:
         Comprehensive analysis
     """
     agent = create_research_agent(model=model)
-    
+
     query = f"""
     Provide a comprehensive analysis of this prediction market:
     
@@ -295,7 +307,7 @@ def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") ->
     5. Probability estimate with confidence interval
     6. Trading recommendation (if any edge exists)
     """
-    
+
     return run_agent(agent, query)
 
 
@@ -303,16 +315,17 @@ def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") ->
 # LANGGRAPH MULTI-STEP AGENT (Advanced)
 # =============================================================================
 
+
 def create_langgraph_trader():
     """Create a LangGraph-based multi-step trading agent.
-    
+
     LangGraph provides more control over multi-step workflows
     compared to basic ReAct agents. Good for complex trading
     strategies with multiple stages.
-    
+
     Returns:
         LangGraph CompiledGraph
-    
+
     Note: Requires langgraph package: pip install langgraph
     """
     try:
@@ -322,46 +335,44 @@ def create_langgraph_trader():
         from typing import TypedDict, Annotated, Sequence
         from langchain_core.messages import BaseMessage
         import operator
-        
+
         from agents.langchain.tools import get_all_tools
-        
+
         # Define the state
         class AgentState(TypedDict):
             messages: Annotated[Sequence[BaseMessage], operator.add]
             next_action: str
-        
+
         # Initialize LLM with tools
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
         tools = get_all_tools()
         llm_with_tools = llm.bind_tools(tools)
-        
+
         # Define nodes
         def call_model(state: AgentState):
             messages = state["messages"]
             response = llm_with_tools.invoke(messages)
             return {"messages": [response]}
-        
+
         def should_continue(state: AgentState):
             last_message = state["messages"][-1]
             if hasattr(last_message, "tool_calls") and last_message.tool_calls:
                 return "tools"
             return END
-        
+
         # Build graph
         workflow = StateGraph(AgentState)
         workflow.add_node("agent", call_model)
         workflow.add_node("tools", ToolNode(tools))
-        
+
         workflow.set_entry_point("agent")
         workflow.add_conditional_edges(
-            "agent",
-            should_continue,
-            {"tools": "tools", END: END}
+            "agent", should_continue, {"tools": "tools", END: END}
         )
         workflow.add_edge("tools", "agent")
-        
+
         return workflow.compile()
-        
+
     except ImportError:
         raise ImportError(
             "LangGraph is required for this agent. "
@@ -377,18 +388,19 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Polymarket LangChain Agent Examples")
     print("=" * 60)
-    
+
     # Example 1: Simple analysis
     print("\n1. Creating simple analyst agent...")
     agent = create_simple_analyst()
-    
+
     # Example 2: Run a query
     print("\n2. Fetching current markets...")
-    result = run_agent(agent, "What are the top 3 most interesting markets to trade right now?")
+    result = run_agent(
+        agent, "What are the top 3 most interesting markets to trade right now?"
+    )
     print(result)
-    
+
     # Example 3: Find best trade (commented out - runs full workflow)
     # print("\n3. Finding best trade...")
     # trade = find_best_trade(category="politics", risk_tolerance="medium")
     # print(trade["recommendation"])
-

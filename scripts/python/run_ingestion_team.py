@@ -12,10 +12,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 
 from agents.team.ingestion import IngestionTeam
 
+
 def main():
     print("Initializing Polymarket Ingestion Team...")
     team = IngestionTeam()
-    
+
     try:
         # Default to 5 markets, can be adjusted
         team.run_cycle(limit=5)
@@ -24,6 +25,6 @@ def main():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 if __name__ == "__main__":
     main()
-

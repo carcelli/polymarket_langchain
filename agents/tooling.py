@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 try:
     from langchain_core.tools import StructuredTool
+
     _LANGCHAIN_AVAILABLE = True
 except Exception:
     StructuredTool = None

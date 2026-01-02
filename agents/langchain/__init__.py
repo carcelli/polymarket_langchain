@@ -11,10 +11,10 @@ Two sets of tools are available:
 Example Usage:
     # Agent tools (existing polymarket-agents functionality)
     from agents.langchain.tools import get_all_tools
-    
+
     # CLOB tools (official py_clob_client)
     from agents.langchain.clob_tools import get_all_clob_tools
-    
+
     # Combine both for full functionality
     from agents.langchain import get_combined_tools
 """

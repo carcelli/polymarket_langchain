@@ -101,7 +101,7 @@ def _market_news_search_impl(market_question: str, days_back: int = 7) -> List[D
                 query=f"{term} {days_back}d",
                 max_results=3,
                 topic="news",
-                include_raw_content=False
+                include_raw_content=False,
             )
 
             if "results" in results:
@@ -135,19 +135,20 @@ def _comprehensive_research_impl(market_id: str) -> Dict[str, Any]:
             "market_data": {},
             "web_research": [],
             "news_context": [],
-            "analysis_ready": False
+            "analysis_ready": False,
         }
 
         # Get market data
         try:
             markets = gamma_client.get_markets(
-                querystring_params={"id": market_id},
-                parse_pydantic=True
+                querystring_params={"id": market_id}, parse_pydantic=True
             )
             if markets:
                 research_package["market_data"] = markets[0].dict()
         except Exception as e:
-            research_package["market_data"] = {"error": f"Failed to fetch market: {str(e)}"}
+            research_package["market_data"] = {
+                "error": f"Failed to fetch market: {str(e)}"
+            }
 
         # Get market question for research
         market_question = research_package.get("market_data", {}).get("question", "")
@@ -155,9 +156,7 @@ def _comprehensive_research_impl(market_id: str) -> Dict[str, Any]:
         if market_question:
             # Web search for general context
             web_results = _web_search_impl(
-                query=f"{market_question} analysis",
-                max_results=3,
-                topic="general"
+                query=f"{market_question} analysis", max_results=3, topic="general"
             )
             research_package["web_research"] = web_results.get("results", [])
 
@@ -172,7 +171,7 @@ def _comprehensive_research_impl(market_id: str) -> Dict[str, Any]:
     except Exception as e:
         return {
             "error": f"Comprehensive research failed: {str(e)}",
-            "market_id": market_id
+            "market_id": market_id,
         }
 
 
@@ -180,18 +179,17 @@ def _comprehensive_research_impl(market_id: str) -> Dict[str, Any]:
 web_search = wrap_tool(
     _web_search_impl,
     name="web_search",
-    description="Search the web for information relevant to market analysis"
+    description="Search the web for information relevant to market analysis",
 )
 
 market_news_search = wrap_tool(
     _market_news_search_impl,
     name="market_news_search",
-    description="Search for recent news related to a market question"
+    description="Search for recent news related to a market question",
 )
 
 comprehensive_research = wrap_tool(
     _comprehensive_research_impl,
     name="comprehensive_research",
-    description="Perform comprehensive research on a market including data, web results, and news"
+    description="Perform comprehensive research on a market including data, web results, and news",
 )
-

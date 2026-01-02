@@ -259,8 +259,7 @@ class Polymarket:
                     event_data = self.map_api_to_event(event)
                     events.append(SimpleEvent(**event_data))
                 except Exception as e:
-                    print(
-                        f"Failed to parse event {event.get('id', 'unknown')}: {e}")
+                    print(f"Failed to parse event {event.get('id', 'unknown')}: {e}")
                     continue
         return events
 
@@ -353,8 +352,7 @@ class Polymarket:
         )
 
     def execute_market_order(self, market, amount) -> str:
-        token_id = ast.literal_eval(
-            market[0].dict()["metadata"]["clob_token_ids"])[1]
+        token_id = ast.literal_eval(market[0].dict()["metadata"]["clob_token_ids"])[1]
         order_args = MarketOrderArgs(
             token_id=token_id,
             amount=amount,
