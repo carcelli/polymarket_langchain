@@ -140,19 +140,31 @@ class Toolset:
         except Exception as e:
             return f"HTTP Request Error: {e}"
 
+from agents.utils.context import ContextManager, RuntimeContext
+
 class DeepAgentCLI:
     def __init__(self, agent_name: str = "default", auto_approve: bool = False, sandbox_type: str = None):
         self.agent_name = agent_name
         self.auto_approve = auto_approve
         self.sandbox_type = sandbox_type
-        self.memory = MemoryManager(agent_name)
+        
+        # Initialize Context Manager
+        runtime = RuntimeContext(
+            user_id=os.getenv("USER", "default_user"),
+            user_role="admin" if agent_name == "admin" else "trader",
+            deployment_env="production" if sandbox_type else "development"
+        )
+        self.context_manager = ContextManager(runtime=runtime)
+        self.memory = self.context_manager.store # Link to Store
+        
         self.todos = TodoManager()
         self.history = []
         self.console = console
         self.total_tokens = 0
         
-        # Tools configuration for the LLM
+        # Base tools
         self.tools = [
+            # ... (rest of the tools list stays same)
             {
                 "type": "function",
                 "function": {
@@ -257,6 +269,43 @@ class DeepAgentCLI:
                         "required": ["topic", "content"]
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_issues",
+                    "description": "Fetch issues from the repository.",
+                    "parameters": {"type": "object", "properties": {}}
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_issue",
+                    "description": "Fetch details about a specific issue.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "issue_number": {"type": "integer", "description": "The issue number"}
+                        },
+                        "required": ["issue_number"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "create_issue_comment",
+                    "description": "Comment on a specific issue.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "issue_number": {"type": "integer", "description": "The issue number"},
+                            "body": {"type": "string", "description": "The comment body"}
+                        },
+                        "required": ["issue_number", "body"]
+                    }
+                }
             }
         ]
 
@@ -303,6 +352,15 @@ class DeepAgentCLI:
         elif name == "save_memory":
             self.memory.save_memory(args["topic"], args["content"])
             return f"Memory saved: {args['topic']}"
+        elif name == "get_issues":
+            from agents.tools.github_tools import _get_issues_impl
+            return _get_issues_impl()
+        elif name == "get_issue":
+            from agents.tools.github_tools import _get_issue_impl
+            return _get_issue_impl(args["issue_number"])
+        elif name == "create_issue_comment":
+            from agents.tools.github_tools import _create_issue_comment_impl
+            return _create_issue_comment_impl(args["issue_number"], args["body"])
         return "Unknown tool"
 
     def chat_loop(self):
@@ -346,17 +404,18 @@ class DeepAgentCLI:
             self.console.print(f"[red]Unknown command: {cmd}[/red]")
 
     def _process_task(self, query):
-        context = self.memory.get_all_context()
+        self.context_manager.update_state({"messages_count": len(self.history) // 2})
+        context_block = self.context_manager.get_model_context()
         todos = self.todos.manage_todos("list")
         
         system_prompt = f"""You are a Deep Agent in an interactive CLI. 
-Current Project Context from Memory:
-{context}
+
+{context_block}
 
 Current Todo List:
 {todos}
 
-You have tools to read/write files, execute shell commands, make HTTP requests, and search the web.
+You have tools to read/write files, execute shell commands, make HTTP requests, search the web, and interact with GitHub.
 Use 'manage_todos' to break down complex tasks.
 Use 'save_memory' to remember important conventions or facts.
 Be concise and helpful."""

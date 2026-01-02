@@ -23,37 +23,28 @@ load_dotenv()
 # =============================================================================
 
 
+from agents.utils.context import ContextManager
+
 def create_polymarket_agent(
     model: str = "gpt-4o-mini",
     temperature: float = 0.1,
     max_iterations: int = 10,
     tools: Optional[List] = None,
     verbose: bool = True,
+    context_manager: Optional[ContextManager] = None,
 ):
     """Create a LangChain agent configured for Polymarket analysis.
 
     Args:
-        model: OpenAI model to use. Options:
-            - "gpt-4o-mini" (fast, cheap, good for most tasks)
-            - "gpt-4o" (more capable, higher cost)
-            - "gpt-4-turbo" (best reasoning, highest cost)
+        model: OpenAI model to use.
         temperature: 0.0 = deterministic, 1.0 = creative.
-            Use low (0.1) for analysis, higher for brainstorming.
         max_iterations: Maximum tool calls before stopping.
-            Prevents infinite loops. Increase for complex tasks.
         tools: List of tools to give the agent. If None, uses all available.
         verbose: If True, prints agent reasoning steps.
+        context_manager: Optional ContextManager for context engineering.
 
     Returns:
         AgentExecutor ready to invoke with queries
-
-    Example:
-        agent = create_polymarket_agent(
-            model="gpt-4o",
-            temperature=0.2,
-            max_iterations=15
-        )
-        result = agent.invoke({"input": "What are the best markets to trade?"})
     """
     from langchain_openai import ChatOpenAI
     from langchain.agents import create_react_agent, AgentExecutor
@@ -72,13 +63,15 @@ def create_polymarket_agent(
     if tools is None:
         tools = get_all_tools()
 
+    # Get context block if manager provided
+    context_block = ""
+    if context_manager:
+        context_block = context_manager.get_model_context()
+
     # Create prompt template
-    # The prompt is crucial - it defines agent behavior
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                """You are an expert Polymarket trader and analyst.
+    system_message = f"""You are an expert Polymarket trader and analyst.
+
+{context_block}
 
 Your role is to:
 1. Analyze prediction markets using available tools
@@ -93,22 +86,25 @@ IMPORTANT GUIDELINES:
 - Note any uncertainties or limitations in your analysis
 - For trades, consider risk/reward and position sizing
 
-Available tools: {tool_names}
+Available tools: {{tool_names}}
 
 Tool descriptions:
-{tools}
+{{tools}}
 
 Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
+Action: the action to take, should be one of [{{tool_names}}]
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: the final answer to the original input question""",
-            ),
+Final Answer: the final answer to the original input question"""
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_message),
             ("human", "{input}\n\n{agent_scratchpad}"),
         ]
     )
@@ -122,7 +118,7 @@ Final Answer: the final answer to the original input question""",
         tools=tools,
         verbose=verbose,
         max_iterations=max_iterations,
-        handle_parsing_errors=True,  # Gracefully handle LLM parsing errors
+        handle_parsing_errors=True,
     )
 
     return executor

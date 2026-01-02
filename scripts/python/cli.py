@@ -310,6 +310,34 @@ def run_deep_research_agent(
 
 
 @app.command()
+def run_ml_research_agent(
+    focus_area: str = typer.Option(
+        "general", help="Specific area to research (e.g., 'time series', 'nlp', 'ensemble')"
+    )
+) -> None:
+    """
+    Run the ML Research Agent to autonomously improve betting strategies.
+
+    Args:
+        focus_area: Specific area to research
+    """
+    print(f"🧪 ML Research Agent active. Focus: {focus_area}")
+    print("=" * 60)
+
+    try:
+        from agents.ml_strategies.research_agent import MLResearchAgent
+
+        agent = MLResearchAgent()
+        result = agent.run_research_cycle(focus_area=focus_area)
+        
+        print("\n📝 Research Report:")
+        print(result)
+
+    except Exception as e:
+        print(f"❌ Failed to run ML research agent: {e}")
+
+
+@app.command()
 def list_agents() -> None:
     """
     List all available agents and their capabilities.
@@ -346,6 +374,15 @@ def list_agents() -> None:
                 "Portfolio scanning",
             ],
         },
+        "ML Research Agent": {
+            "description": "Autonomous research and improvement of ML strategies",
+            "command": "run-ml-research-agent",
+            "capabilities": [
+                "Strategy generation",
+                "Code verification",
+                "Web research",
+            ],
+        },
     }
 
     for name, info in agents.items():
@@ -358,6 +395,7 @@ def list_agents() -> None:
     print(f"   python cli.py run-memory-agent 'Find political markets'")
     print(f"   python cli.py run-planning-agent 'Will BTC hit 100k?'")
     print(f"   python cli.py scan-opportunities --category politics")
+    print(f"   python cli.py run-ml-research-agent --focus-area 'time series'")
 
 
 if __name__ == "__main__":
