@@ -1,106 +1,120 @@
-# Polymarket LangChain Agent
+# 🧠 Polymarket LangChain Agent
 
-This project recreates the core components from the Polymarket Agents repository and integrates them with LangChain and LangGraph so you can build AI-powered research and trading workflows on Polymarket.
+Build research, forecasting, and trading workflows on Polymarket using LangChain + LangGraph. ⚡
 
-## Highlights
-- Polymarket API clients (Gamma + CLOB) with trading support
-- LangChain tools for markets, events, research, and orders
-- LangGraph agents for memory-first analysis and statistical planning
-- Local SQLite storage and categorized market databases
-- RAG via ChromaDB, plus news and web search connectors
-- CLI, workflow scripts, Docker helpers, and tests
+## ⚡ TL;DR
+```bash
+conda env create -f environment.yml
+conda activate polymarket-agent
+cp .env.example .env
+python scripts/python/refresh_markets.py --max-events 200
+python scripts/python/cli.py run-memory-agent "Find interesting markets"
+```
+> 💡 Add API keys in `.env` for live calls and trading.
 
-## Repository layout
-- `agents/` core library
-  - `agents/polymarket/` Polymarket API clients (`polymarket.py`, `gamma.py`)
-  - `agents/langchain/` LangChain tools and agent helpers (`tools.py`, `clob_tools.py`, `agent.py`)
-  - `agents/graph/` LangGraph agents and state (`memory_agent.py`, `planning_agent.py`, `state.py`)
-  - `agents/application/` app workflows (`trade.py`, `executor.py`, `creator.py`, `cron.py`, `prompts.py`)
-  - `agents/tools/` tool wrappers (`market_tools.py`, `trade_tools.py`, `research_tools.py`)
-  - `agents/connectors/` external data and RAG (`chroma.py`, `news.py`, `search.py`)
-  - `agents/memory/` SQLite memory manager (`manager.py`)
-  - `agents/team/` ingestion team orchestration (`ingestion.py`)
-  - `agents/utils/` Pydantic models and helpers (`objects.py`, `utils.py`)
-  - `agents/tooling.py` shared tool wrapper utilities
-- `scripts/` runnable entry points and utilities
-  - `scripts/python/` workflows and services (`cli.py`, `data_pipeline.py`, `refresh_markets.py`, `category_workflow.py`, `politics_workflow.py`, `sports_explorer.py`, `run_ingestion_team.py`, `server.py`, `setup.py`)
-  - `scripts/bash/` Docker helpers and cron setup
-  - `scripts/` root scripts (`bet_planner.sh`, `polymarket_agent.sh`, `run_graph_tests.py`, `validate_graphs.py`, `test_graph.py`, `test_trade_tools.py`)
-- `docs/` reference docs and examples
-- `tests/` pytest/unittest suites for tools, graphs, and integrations
-- `data/` SQLite databases and ingested market snapshots
-- `logs/` runtime logs
-- `langgraph.json` LangGraph project configuration
-- `fetch_active_bets.py` quick sample market fetch
-- `Dockerfile`, `environment.yml`, `requirements.txt`, `package-lock.json`
-- `.langgraph_api/` local LangGraph runtime artifacts
-- `CONTRIBUTING.md`, `LICENSE.md`
+## ✨ What You Can Do
+- 🔎 Discover markets and events via Gamma + local DB
+- 🧠 Analyze value with LangGraph (edge, EV, Kelly)
+- 📰 Enrich research with NewsAPI + Tavily search
+- 📚 Build local RAG indexes with ChromaDB
+- 💸 Place CLOB orders (limit/market) with py_clob_client
+- 🛠️ Automate ingestion, refresh, and monitoring pipelines
 
-## Quick start
+## 🧭 Architecture at a glance
+```
+Gamma API ──▶ Refresh/Category Workflows ──▶ SQLite (markets.db)
+                                            └──▶ LangGraph Agents (Memory + Planning)
+NewsAPI/Tavily ─────────────────────────────▶ Research Tools
+CLOB API ◀──────────────────────────────────▶ Trading Tools
+```
 
-1) Create and activate the conda environment:
+## 🗂️ Repository layout
+- 🧠 `agents/` core library
+  - 🔌 `agents/polymarket/` Polymarket API clients (`polymarket.py`, `gamma.py`)
+  - 🧰 `agents/langchain/` LangChain tools + helpers (`tools.py`, `clob_tools.py`, `agent.py`)
+  - 🧭 `agents/graph/` LangGraph agents + state (`memory_agent.py`, `planning_agent.py`, `state.py`)
+  - 🧪 `agents/application/` workflows (`trade.py`, `executor.py`, `creator.py`, `cron.py`, `prompts.py`)
+  - 🧩 `agents/tools/` tool wrappers (`market_tools.py`, `trade_tools.py`, `research_tools.py`)
+  - 🔗 `agents/connectors/` RAG + search (`chroma.py`, `news.py`, `search.py`)
+  - 🗃️ `agents/memory/` SQLite manager (`manager.py`)
+  - 🤝 `agents/team/` ingestion team (`ingestion.py`)
+  - 🧱 `agents/utils/` models + helpers (`objects.py`, `utils.py`)
+  - 🧼 `agents/tooling.py` shared tool wrapper utils
+- 🧰 `scripts/` runnable entry points (see scripts index below)
+- 🧪 `tests/` pytest/unittest coverage
+- 📚 `docs/` deep reference docs + examples
+- 🗃️ `data/` SQLite DBs + snapshots
+- 📝 `logs/` runtime logs
+- 🧬 `langgraph.json` LangGraph config
+- ⚡ `fetch_active_bets.py` quick Gamma API sample
+- 🐳 `Dockerfile`, `environment.yml`, `requirements.txt`
+- 🧹 `.langgraph_api/` local LangGraph runtime artifacts
+- 🙌 `CONTRIBUTING.md`, `LICENSE.md`
+
+## 🚀 Quick start
+1) Conda (recommended):
 ```bash
 conda env create -f environment.yml
 conda activate polymarket-agent
 ```
 
-2) Or install with pip:
+2) Or pip:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Optional helper script:
+Optional helper:
 ```bash
 ./scripts/bash/install.sh
 ```
 
-3) Configure environment variables:
+3) Configure env:
 ```bash
 cp .env.example .env
 ```
 
-## Environment variables
+4) Seed the local DB (recommended):
+```bash
+python scripts/python/refresh_markets.py --max-events 200
+```
 
-Required for LLM-powered agents:
+## ⚙️ Configuration (.env)
+Required for LLM + embeddings:
 - `OPENAI_API_KEY`
 
-Required for trading (CLOB):
+Required for trading:
 - `POLYGON_WALLET_PRIVATE_KEY` (or `PK`)
 
-Optional connectors and tooling:
+Optional connectors and tools:
 - `NEWSAPI_API_KEY` (NewsAPI)
-- `TAVILY_API_KEY` (Tavily web search)
-- `ANTHROPIC_API_KEY` (deep research agent, if available)
+- `TAVILY_API_KEY` (Tavily search)
+- `ANTHROPIC_API_KEY` (deep research agent, if present)
 - `CLOB_API_URL` (default: https://clob.polymarket.com)
 - `CHAIN_ID` (default: 137 / Polygon)
-- `CLOB_API_KEY`, `CLOB_SECRET`, `CLOB_PASS_PHRASE` (use if you do not want to derive creds)
+- `CLOB_API_KEY`, `CLOB_SECRET`, `CLOB_PASS_PHRASE` (skip derivation)
 
-## Usage
+> 🔐 Keep `.env` private. Never commit keys.
 
-### CLI
-The main CLI lives at `scripts/python/cli.py` (Typer). Run:
+## 🧰 Usage
+
+### 🧪 CLI (Typer)
+Run:
 ```bash
 python scripts/python/cli.py --help
 ```
 
-Common commands:
-- `get-all-markets` - list tradeable markets
-- `get-all-events` - list events
-- `get-relevant-news` - query NewsAPI
-- `create-local-markets-rag` - build a local Chroma RAG index
-- `query-local-markets-rag` - query the local RAG index
-- `ask-superforecaster` - forecast a specific market
-- `create-market` - draft a market description
-- `ask-llm` - ask the base LLM
-- `ask-polymarket-llm` - ask LLM with live markets/events context
-- `run-autonomous-trader` - run the trading workflow
-- `run-memory-agent` - LangGraph memory agent
-- `run-planning-agent` - LangGraph planning agent
-- `scan-opportunities` - find value opportunities
-- `list-agents` - list orchestrator agents
-- `run-deep-research-agent` - deep research agent (requires `agents/deep_research_agent.py` and ANTHROPIC/TAVILY keys)
+Popular commands:
+- `get-all-markets`, `get-all-events`
+- `get-relevant-news`
+- `create-local-markets-rag`, `query-local-markets-rag`
+- `ask-superforecaster`, `create-market`
+- `ask-llm`, `ask-polymarket-llm`
+- `run-autonomous-trader`
+- `run-memory-agent`, `run-planning-agent`
+- `scan-opportunities`, `list-agents`
+- `run-deep-research-agent` (requires `agents/deep_research_agent.py` + ANTHROPIC/TAVILY keys)
 
 Examples:
 ```bash
@@ -108,104 +122,169 @@ python scripts/python/cli.py get-all-markets --limit 5
 python scripts/python/cli.py get-relevant-news "market keywords"
 python scripts/python/cli.py run-memory-agent "Find interesting political markets"
 python scripts/python/cli.py run-planning-agent "Will BTC hit 100k?"
+python scripts/python/cli.py scan-opportunities --category politics
 ```
 
-### LangGraph config
-The LangGraph project configuration lives in `langgraph.json` and wires:
+### 🧠 LangGraph agents
+- 🧳 Memory Agent: local-first market analysis + API enrichment.
+- 📊 Planning Agent: implied probability, EV, and Kelly sizing.
+- 🔍 Opportunity Scanner: batch scan for positive edge.
+
+LangGraph config lives in `langgraph.json` and wires:
 - `memory_agent` to `agents/graph/memory_agent.py:create_memory_agent`
 - `planning_agent` to `agents/graph/planning_agent.py:create_planning_agent`
 
-### Agent entry points
-- `scripts/polymarket_agent.sh` - run the memory agent via CLI.
-- `scripts/bet_planner.sh` - run the planning agent, scan for opportunities, or show portfolio summary.
-
-Examples:
+Direct runs:
 ```bash
-./scripts/polymarket_agent.sh "Find crypto arbitrage opportunities"
-./scripts/bet_planner.sh "Bitcoin 100k"
-./scripts/bet_planner.sh --scan politics
-./scripts/bet_planner.sh --portfolio
+python agents/graph/memory_agent.py "What are the top crypto markets?"
+python agents/graph/planning_agent.py "Will the Fed cut rates in Q1 2025?"
+python agents/graph/planning_agent.py --scan politics
 ```
 
-### Workflows and data pipelines
-- `scripts/python/refresh_markets.py` - refresh the local markets database (one-shot or continuous).
-- `scripts/python/data_pipeline.py` - full data pipeline and information management.
-- `scripts/python/politics_workflow.py` - politics-only ingestion workflow.
-- `scripts/python/category_workflow.py` - multi-category ingestion and stats.
-- `scripts/python/run_ingestion_team.py` - orchestrated ingestion team.
-- `scripts/python/sports_explorer.py` - explore sports leagues, teams, and market types.
+### 🧑‍💻 Python usage
+```python
+from agents.langchain.agent import create_polymarket_agent, run_agent
+from agents.graph.planning_agent import analyze_bet
+
+agent = create_polymarket_agent(model="gpt-4o-mini", temperature=0.1)
+print(run_agent(agent, "Find the best political market to trade"))
+
+result = analyze_bet("Will ETH hit $5k by year end?")
+print(result.get("recommendation"))
+```
+
+### 🧵 Workflows & pipelines
+- `scripts/python/refresh_markets.py` refreshes `data/markets.db` (one-shot or continuous).
+- `scripts/python/category_workflow.py` categorizes markets across domains.
+- `scripts/python/politics_workflow.py` ingests politics-tagged markets into `data/memory.db`.
+- `scripts/python/data_pipeline.py` runs refresh + info management + monitoring.
+- `scripts/python/run_ingestion_team.py` runs a market/news ingestion team into `data/memory.db`.
+- `scripts/python/sports_explorer.py` explores leagues, teams, and market types.
 
 Examples:
 ```bash
 python scripts/python/refresh_markets.py --continuous --interval 300
-python scripts/python/data_pipeline.py --continuous --interval 600
-python scripts/python/politics_workflow.py --limit 50
 python scripts/python/category_workflow.py --category crypto
+python scripts/python/politics_workflow.py --limit 50 --view
+python scripts/python/data_pipeline.py --continuous --interval 600
 python scripts/python/sports_explorer.py --leagues
 ```
 
-### RAG and local memory
-- `agents/connectors/chroma.py` implements ChromaDB-based RAG.
-- Local SQLite data lives in `data/markets.db` and `data/memory.db`.
+### 📚 RAG (ChromaDB)
+Build and query a local vector index:
+```bash
+python scripts/python/cli.py create-local-markets-rag ./data
+python scripts/python/cli.py query-local-markets-rag ./data "Which markets mention rate cuts?"
+```
 
-### Server
+### 🛰️ CLOB trading tools
+- Read-only and trading tools live in `agents/langchain/clob_tools.py`.
+- Simple trade helpers live in `agents/tools/trade_tools.py`.
+- Trading requires a wallet private key and (optionally) CLOB API credentials.
+
+### 🖥️ Server
 A minimal FastAPI server lives at `scripts/python/server.py`.
-
 ```bash
 python scripts/python/server.py
 ```
 
-For local dev with the FastAPI CLI:
-```bash
-./scripts/bash/start-dev.sh
-```
-
-### Docker
+### 🐳 Docker
 ```bash
 ./scripts/bash/build-docker.sh
 ./scripts/bash/run-docker.sh
 ./scripts/bash/run-docker-dev.sh
 ```
 
-### Cron automation
-Set up scheduled pipelines and backups:
+### ⏱️ Cron automation
+Schedule pipelines and backups:
 ```bash
 ./scripts/bash/setup_cron_jobs.sh
 ```
 
-### Quick fetch example
+### ⚡ Quick fetch example
 ```bash
 python fetch_active_bets.py
 ```
 
-## Tests and validation
+## 🧰 Scripts index (all entry points)
 
-Pytest or unittest:
+### 🐍 Python
+- `scripts/python/cli.py` CLI for markets, agents, and tools
+- `scripts/python/refresh_markets.py` refresh local markets DB
+- `scripts/python/category_workflow.py` multi-category ingestion
+- `scripts/python/politics_workflow.py` politics-only workflow
+- `scripts/python/data_pipeline.py` full pipeline + monitoring
+- `scripts/python/run_ingestion_team.py` ingestion team runner
+- `scripts/python/sports_explorer.py` sports metadata explorer
+- `scripts/python/server.py` FastAPI server
+- `scripts/python/setup.py` loads `.env` for dev helpers
+
+### 🐚 Bash / Shell
+- `scripts/bet_planner.sh` planning agent + portfolio tools
+- `scripts/polymarket_agent.sh` memory agent shortcut
+- `scripts/bash/install.sh` pip install helper
+- `scripts/bash/build-docker.sh` build container
+- `scripts/bash/run-docker.sh` run container
+- `scripts/bash/run-docker-dev.sh` run container with bind mount
+- `scripts/bash/start-dev.sh` FastAPI dev helper
+- `scripts/bash/setup_cron_jobs.sh` cron + backup setup
+
+### 🧪 Test & validation scripts
+- `scripts/run_graph_tests.py` run graph unit/perf/e2e tests
+- `scripts/validate_graphs.py` validate graph compilation
+- `scripts/test_graph.py` small graph smoke test
+- `scripts/test_trade_tools.py` mock trade tool tests
+- `fetch_active_bets.py` lightweight Gamma API sample
+
+## 🧱 Data & storage
+- `data/markets.db` main SQLite store (markets, news, price_history, bets, research, analytics).
+- `data/memory.db` ingestion/politics workflows (same schema, different dataset).
+- `data/ingested_markets_*.json` raw ingestion snapshots.
+- `logs/refresh_daemon.log` + pipeline logs.
+- `.langgraph_api/` local LangGraph runtime artifacts.
+
+## 🔌 Integrations
+- Polymarket Gamma API (market discovery)
+- Polymarket CLOB API (orderbook + trading)
+- LangChain + LangGraph
+- OpenAI (LLM + embeddings)
+- NewsAPI + Tavily (research)
+- ChromaDB (RAG)
+- FastAPI (server)
+
+## 🧪 Tests & validation
+Run all tests:
 ```bash
 python -m pytest
 python -m unittest
 ```
 
-Graph-specific checks:
+Graph checks:
 ```bash
 python scripts/validate_graphs.py
 python scripts/run_graph_tests.py
-python scripts/test_graph.py
 ```
 
-Trade tool mocks:
-```bash
-python scripts/test_trade_tools.py
-```
+Tests include LangChain tools, LangGraph nodes, CLOB tools, E2E graph tests, and perf checks.
 
-## Docs
+## 🧯 Troubleshooting
+- `OPENAI_API_KEY` missing: set it for LLM + embeddings.
+- `POLYGON_WALLET_PRIVATE_KEY` missing: required for trading tools.
+- `TAVILY_API_KEY` or `NEWSAPI_API_KEY` missing: required only for those connectors.
+- Empty results or slow agents: seed `data/markets.db` via `refresh_markets.py`.
+- `py_clob_client` import errors: reinstall dependencies from `requirements.txt`.
 
-- `docs/LANGCHAIN_REFERENCE.md` - LangChain integration, tool reference, best practices
-- `docs/POLYMARKET_API_REFERENCE.md` - Gamma, CLOB, data APIs, and WebSocket reference
-- `docs/WORKFLOW_POLITICS.md` - politics workflow diagram and schema
-- `docs/EXAMPLE.md` - sample run output
+## 🛡️ Safety & risk
+- Trading is real money. Use small sizes and sanity-check recommendations.
+- Keep private keys local and never commit `.env`.
+- Consider running read-only workflows when prototyping.
 
-## Contributing and license
+## 📚 Docs
+- `docs/LANGCHAIN_REFERENCE.md` LangChain integration + tools
+- `docs/POLYMARKET_API_REFERENCE.md` Gamma/CLOB/Data/WebSocket reference
+- `docs/WORKFLOW_POLITICS.md` politics pipeline diagram + schema
+- `docs/EXAMPLE.md` sample run output
 
+## 🙌 Contributing & license
 - `CONTRIBUTING.md` covers contribution guidelines.
 - `LICENSE.md` contains the license.
