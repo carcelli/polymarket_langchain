@@ -49,10 +49,17 @@ class TestEndToEndGraphs(unittest.TestCase):
         # This would require more complex mocking
         # but demonstrates the pattern
 
+        from langchain_core.messages import AIMessage
+
         # Mock the necessary components
         with patch("agents.memory.manager.MemoryManager") as mock_mm, patch(
             "agents.polymarket.gamma.GammaMarketClient"
-        ) as mock_gamma, patch("langchain_openai.ChatOpenAI") as mock_llm:
+        ) as mock_gamma, patch("langchain_openai.ChatOpenAI") as mock_llm_class:
+            
+            # Configure LLM mock to return AIMessage
+            mock_llm_instance = MagicMock()
+            mock_llm_instance.invoke.return_value = AIMessage(content="Analysis complete")
+            mock_llm_class.return_value = mock_llm_instance
 
             # Setup mocks with realistic data
             mock_mm.return_value.list_markets_by_category.return_value = [
@@ -66,7 +73,8 @@ class TestEndToEndGraphs(unittest.TestCase):
             # We also need to mock analyze_bet implementation if it relies on external services
             # But here we are testing the function itself.
 
-            # Since analyze_bet might not be easily importable or runnable without real creds,
-            # we might need to patch it or its dependencies.
-            # For this fix, I am just cleaning the syntax.
-            pass
+            # Test the planning workflow
+            result = analyze_bet("Will Candidate A win the election?")
+            
+            # Verify planning analysis completed
+            self.assertIsInstance(result, dict)
