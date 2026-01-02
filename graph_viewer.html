@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Visualizations</title>
+    <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@1.23.0/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .graph-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        .code-block {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            background: #e9ecef;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background: white;
+            border-bottom: 2px solid #007bff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 LangGraph Visualizations</h1>
+    <p>Your Polymarket LangChain graphs visualized in multiple formats</p>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('memory')">Memory Agent</button>
+        <button class="tab-button" onclick="showTab('planning')">Planning Agent</button>
+    </div>
+
+    <div id="memory-tab" class="tab-content active">
+        <div class="container">
+            <h2>🧠 Memory Agent Graph</h2>
+            <p><strong>Flow:</strong> Query → Memory Search → Data Enrichment → LLM Reasoning → Decision</p>
+
+            <h3>📊 Graphviz Visualization</h3>
+            <div class="graph-container">
+                <div id="memory-graphviz"></div>
+            </div>
+
+            <h3>📝 Mermaid Diagram</h3>
+            <div class="code-block" id="memory-mermaid"></div>
+
+            <h3>🔗 Graph Structure</h3>
+            <div class="code-block">
+Nodes (6): __start__, memory, enrichment, reasoning, decide, __end__<br>
+Edges (5): __start__ → memory → enrichment → reasoning → decide → __end__
+            </div>
+        </div>
+    </div>
+
+    <div id="planning-tab" class="tab-content">
+        <div class="container">
+            <h2>📊 Planning Agent Graph</h2>
+            <p><strong>Flow:</strong> Query → Research → Statistics → Probability → Decision</p>
+
+            <h3>📊 Graphviz Visualization</h3>
+            <div class="graph-container">
+                <div id="planning-graphviz"></div>
+            </div>
+
+            <h3>📝 Mermaid Diagram</h3>
+            <div class="code-block" id="planning-mermaid"></div>
+
+            <h3>🔗 Graph Structure</h3>
+            <div class="code-block">
+Nodes (6): __start__, research, stats, probability, decision, __end__<br>
+Edges (5): __start__ → research → stats → probability → decision → __end__
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Graphviz DOT content for Memory Agent
+        const memoryDot = `digraph memory_agent {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  __start__ [shape=circle, label="__start__"];
+  memory [label="memory"];
+  enrichment [label="enrichment"];
+  reasoning [label="reasoning"];
+  decide [label="decide"];
+  __end__ [shape=circle, label="__end__"];
+
+  __start__ -> memory;
+  decide -> __end__;
+  enrichment -> reasoning;
+  memory -> enrichment;
+  reasoning -> decide;
+}`;
+
+        // Graphviz DOT content for Planning Agent
+        const planningDot = `digraph planning_agent {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  __start__ [shape=circle, label="__start__"];
+  research [label="research"];
+  stats [label="stats"];
+  probability [label="probability"];
+  decision [label="decision"];
+  __end__ [shape=circle, label="__end__"];
+
+  __start__ -> research;
+  decision -> __end__;
+  probability -> decision;
+  research -> stats;
+  stats -> probability;
+}`;
+
+        // Mermaid content for Memory Agent
+        const memoryMermaid = `flowchart TD
+    __start__([__start__])
+    memory[memory]
+    enrichment[enrichment]
+    reasoning[reasoning]
+    decide[decide]
+    __end__([__end__])
+
+    __start__ --> memory
+    decide --> __end__
+    enrichment --> reasoning
+    memory --> enrichment
+    reasoning --> decide`;
+
+        // Mermaid content for Planning Agent
+        const planningMermaid = `flowchart TD
+    __start__([__start__])
+    research[research]
+    stats[stats]
+    probability[probability]
+    decision[decision]
+    __end__([__end__])
+
+    __start__ --> research
+    decision --> __end__
+    probability --> decision
+    research --> stats
+    stats --> probability`;
+
+        // Initialize graphs
+        async function initGraphs() {
+            try {
+                // Load HPCC WASM
+                const hpccWasm = window["@hpcc-js/wasm"];
+
+                // Render Memory Agent graph
+                const memorySvg = await hpccWasm.graphviz.layout(memoryDot, "svg", "dot");
+                document.getElementById('memory-graphviz').innerHTML = memorySvg;
+
+                // Render Planning Agent graph
+                const planningSvg = await hpccWasm.graphviz.layout(planningDot, "svg", "dot");
+                document.getElementById('planning-graphviz').innerHTML = planningSvg;
+
+            } catch (error) {
+                console.error('Error rendering graphs:', error);
+                document.getElementById('memory-graphviz').innerHTML =
+                    '<p style="color: red;">Error loading graph visualization. Try opening the DOT files manually.</p>';
+                document.getElementById('planning-graphviz').innerHTML =
+                    '<p style="color: red;">Error loading graph visualization. Try opening the DOT files manually.</p>';
+            }
+        }
+
+        // Set Mermaid content
+        document.getElementById('memory-mermaid').textContent = memoryMermaid;
+        document.getElementById('planning-mermaid').textContent = planningMermaid;
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initGraphs);
+    </script>
+</body>
+</html>

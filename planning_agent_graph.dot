@@ -1,0 +1,17 @@
+digraph planning_agent {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  __start__ [shape=circle, label="__start__"];
+  research [label="research"];
+  stats [label="stats"];
+  probability [label="probability"];
+  decision [label="decision"];
+  __end__ [shape=circle, label="__end__"];
+
+  __start__ -> research;
+  decision -> __end__;
+  probability -> decision;
+  research -> stats;
+  stats -> probability;
+}

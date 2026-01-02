@@ -1,0 +1,110 @@
+{
+  "market": "Xi Jinping out in 2025?",
+  "analysis": {
+    "question": "Xi Jinping out in 2025?",
+    "action": "PASS",
+    "recommended_side": "NO",
+    "edge": 0.0,
+    "expected_value": 0.0,
+    "kelly_fraction": 0,
+    "analyzed_at": "2026-01-02T14:12:51.771818",
+    "full_result": {
+      "messages": [
+        "content='Xi Jinping out in 2025?' id='6d145383-d8c0-4dc2-aa87-28b53f428fe0'",
+        "content='Research complete for: Xi Jinping out in 2025?...' id='5a942e76-4b36-4bd7-9c92-b2222a12bf51'",
+        "content='Stats: Implied prob 0.4%, volume $75,115,456' id='abcf23bf-950a-4e88-8e61-ea0156480de5'",
+        "content='PROBABILITY: [0.20]  \\nCONFIDENCE: [MEDIUM]  \\nREASONING: Xi Jinping has consolidated significant power within the Chinese Communist Party, and there are no strong indicators of imminent removal based on historical trends and recent developments. While internal dissent and external pressures exist, the CCP has historically maintained tight control over leadership transitions. Given the time until resolution and the current market sentiment, I estimate a 20% chance of him being out by the end of 2025, reflecting uncertainty but a recognition of the stability he currently enjoys.' additional_kwargs={'refusal': None} response_metadata={'token_usage': {'completion_tokens': 113, 'prompt_tokens': 332, 'total_tokens': 445, 'completion_tokens_details': {'accepted_prediction_tokens': 0, 'audio_tokens': 0, 'reasoning_tokens': 0, 'rejected_prediction_tokens': 0}, 'prompt_tokens_details': {'audio_tokens': 0, 'cached_tokens': 0}}, 'model_name': 'gpt-4o-mini-2024-07-18', 'system_fingerprint': 'fp_29330a9688', 'finish_reason': 'stop', 'logprobs': None} id='run-f911eeb8-8a04-488d-bfea-d0d74b264bcc-0' usage_metadata={'input_tokens': 332, 'output_tokens': 113, 'total_tokens': 445}"
+      ],
+      "query": "Xi Jinping out in 2025?",
+      "target_market_id": "551963",
+      "market_data": {
+        "id": "551963",
+        "question": "Xi Jinping out in 2025?",
+        "description": "This market will resolve to \"Yes\" if China's General Secretary of the Communist Party, Xi Jinping, is removed from power for any length of time between June 12 and December 31, 2025, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nCCP General Secretary Xi Jinping will be considered removed from power if he announces his resignation from his role as General Secretary, or is otherwise dismissed, detained, disqualified, or otherwise loses his position or is prevented from fulfilling his duties as General Secretary within this market's timeframe.\n\nThe primary resolution source for this market will be a consensus of credible reporting.",
+        "category": "tech",
+        "outcomes": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prices": [
+          "0.0035",
+          "0.9965"
+        ],
+        "volume": 75115455.784458,
+        "liquidity": 706733.86873,
+        "active": true,
+        "end_date": "2025-12-31T23:55:00Z",
+        "slug": "xi-jinping-out-in-2025",
+        "clob_token_ids": "[\"114304586861386186441621124384163963092522056897081085884483958561365015034812\", \"112744882674787019048577842008042029962234998947364561417955402912669471494485\"]",
+        "event_id": "26857",
+        "tags": [],
+        "last_updated": "2025-12-28T12:41:28.034472"
+      },
+      "research_context": {
+        "timestamp": "2026-01-02T14:12:48.716615",
+        "query": "Xi Jinping out in 2025?",
+        "stored_research": [],
+        "related_markets": [
+          {
+            "question": "Will Saudi Aramco be the largest company in the world by mar",
+            "volume": 25192397.228934
+          },
+          {
+            "question": "Will Tesla be the largest company in the world by market cap",
+            "volume": 12046070.052878
+          },
+          {
+            "question": "Khamenei out as Supreme Leader of Iran in 2025?",
+            "volume": 10776635.079913
+          },
+          {
+            "question": "Will Microsoft have the top AI model on December 31?",
+            "volume": 8693401.958086
+          }
+        ],
+        "category_volume": 131823960.104269,
+        "market_share": 56.98164106513248,
+        "database_stats": {
+          "total_markets": 20716,
+          "total_volume": 3657511741.907347,
+          "total_categories": 9
+        }
+      },
+      "news_sentiment": {},
+      "implied_probability": 0.0035,
+      "price_history": [],
+      "volume_analysis": {
+        "total_volume": 75115455.784458,
+        "liquidity": 706733.86873,
+        "volume_to_liquidity": 106.28534885336738,
+        "price_momentum": 0,
+        "price_momentum_pct": 0,
+        "price_confidence": "HIGH"
+      },
+      "estimated_probability": 0.0035,
+      "probability_reasoning": "PROBABILITY: [0.20]  \nCONFIDENCE: [MEDIUM]  \nREASONING: Xi Jinping has consolidated significant power within the Chinese Communist Party, and there are no strong indicators of imminent removal based on historical trends and recent developments. While internal dissent and external pressures exist, the CCP has historically maintained tight control over leadership transitions. Given the time until resolution and the current market sentiment, I estimate a 20% chance of him being out by the end of 2025, reflecting uncertainty but a recognition of the stability he currently enjoys.",
+      "edge": 0.0,
+      "expected_value": 0.0,
+      "kelly_fraction": 0,
+      "recommendation": {
+        "market_id": "551963",
+        "market_question": "Xi Jinping out in 2025?",
+        "recommended_side": "NO",
+        "edge": 0.0,
+        "expected_value": 0.0,
+        "kelly_fraction": 0,
+        "estimated_probability": 0.0035,
+        "market_probability": 0.0035,
+        "volume": 75115455.784458,
+        "category": "tech",
+        "reasoning": "PROBABILITY: [0.20]  \nCONFIDENCE: [MEDIUM]  \nREASONING: Xi Jinping has consolidated significant power within the Chinese Communist Party, and there are no strong indicators of imminent removal based on historical trends and recent developments. While internal dissent and external pressures exist, the CCP has historically maintained tight control over leadership transitions. Given the time until resolution and the current market sentiment, I estimate a 20% chance of him being out by the end of 2025, reflecting uncertainty but a recognition of the stability he currently enjoys.",
+        "timestamp": "2026-01-02T14:12:51.764462",
+        "action": "PASS",
+        "confidence": "N/A",
+        "risk_factors": []
+      },
+      "error": null
+    }
+  },
+  "timestamp": "2026-01-02T14:12:51.771841"
+}

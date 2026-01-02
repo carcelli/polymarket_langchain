@@ -28,3 +28,5 @@ archive.zip
 .DS_Store
 local_db*
 .conda
+.pem 
+*.pem

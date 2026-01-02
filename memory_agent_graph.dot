@@ -1,0 +1,17 @@
+digraph memory_agent {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  __start__ [shape=circle, label="__start__"];
+  memory [label="memory"];
+  enrichment [label="enrichment"];
+  reasoning [label="reasoning"];
+  decide [label="decide"];
+  __end__ [shape=circle, label="__end__"];
+
+  __start__ -> memory;
+  decide -> __end__;
+  enrichment -> reasoning;
+  memory -> enrichment;
+  reasoning -> decide;
+}
