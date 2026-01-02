@@ -282,11 +282,11 @@ class DataQualityValidator:
 
             # Check for extreme skewness
             if abs(stats_report['skewness']) > 2:
-                issues.append(".2f"
+                issues.append(f"Extreme skewness: {stats_report['skewness']:.2f}")
             # Check for high percentage of zeros
             zero_pct = stats_report['zeros'] / len(values) * 100
             if zero_pct > 50:
-                issues.append(".1f"
+                issues.append(f"High zero percentage: {zero_pct:.1f}%")
             # Check for negative values in non-negative features
             if stats_report['negatives'] > 0:
                 neg_features = ['volume', 'liquidity', 'days_to_resolve']
@@ -458,4 +458,5 @@ class DataQualityValidator:
         validation_report['readiness_score'] = readiness_score
         validation_report['ready_for_ml'] = readiness_score >= 70
 
-        logger.info(".1f"        return validation_report
+        logger.info(".1f")
+        return validation_report

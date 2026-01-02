@@ -214,7 +214,7 @@ class EnsemblePredictor(MarketPredictor):
             model.fit(X, y)
             pred = model.predict(X)
             mse = mean_squared_error(y, pred)
-            print(".4f"
+            print(".4f")
         self.is_trained = True
 
     def predict(self, market_data: Dict[str, Any]) -> StrategyResult:

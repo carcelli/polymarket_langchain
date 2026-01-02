@@ -260,7 +260,8 @@ class AutoMLPipeline:
                     'training_samples': len(dataset)
                 }
 
-                logger.info(".4f"            except Exception as e:
+                logger.info(".4f")
+            except Exception as e:
                 logger.error(f"Failed to train {model_name}: {e}")
                 model_results[model_name] = {'error': str(e)}
 
