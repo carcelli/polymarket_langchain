@@ -65,9 +65,11 @@ def run_automl_pipeline(args):
     # Report results
     if results['success']:
         print("\\n✅ Pipeline completed successfully!")
-        print(".1f"        print("\\n📊 Results Summary:")
+        print(f"⏱️ Duration: {duration:.1f} seconds")
+        print("\\n📊 Results Summary:")
         print(f"   📈 Best Model: {results['best_model']['name']}")
-        print(".4f"        print(f"   📊 Data Samples: {results['data_summary']['final_samples']}")
+        print(f"   🎯 Best Score: {results['best_model'].get('score', 0):.4f}")
+        print(f"   📊 Data Samples: {results['data_summary']['final_samples']}")
         print(f"   🔧 Features: {results['data_summary']['features_count']}")
         print(f"   📁 Output Directory: {args.output_dir}")
 
@@ -80,9 +82,12 @@ def run_automl_pipeline(args):
         print("\\n🎯 Key Insights:")
         best_metrics = results['best_model'].get('metrics', {})
         if best_metrics:
-            print(".1%"            print(".3f"            print(".3f"    else:
-        print("\\n❌ Pipeline failed!")
-        print(f"Error: {results.get('error', 'Unknown error')}")
+            print(f"   📈 Accuracy: {best_metrics.get('accuracy', 0):.1%}")
+            print(f"   🎯 F1 Score: {best_metrics.get('f1', 0):.3f}")
+            print(f"   ⚡ Precision: {best_metrics.get('precision', 0):.3f}")
+        else:
+            print("\\n❌ Pipeline failed!")
+            print(f"Error: {results.get('error', 'Unknown error')}")
 
     return results
 
@@ -121,7 +126,8 @@ def check_data_quality(args):
         dist = balance.get('class_distribution', {})
         for cls, count in dist.items():
             pct = count / balance.get('total_samples', 1) * 100
-            print(".1f"    return quality_report
+            print(f"   {cls}: {count} samples ({pct:.1f}%)")
+    return quality_report
 
 
 def predict_with_model(args):
@@ -147,8 +153,11 @@ def predict_with_model(args):
 
         print("\\n🎯 Prediction Results:")
         print(f"   ❓ Question: {sample_market['question']}")
-        print(".1%"        print(".1%"        print(f"   💰 Recommended Bet: {result['recommended_bet']}")
-        print(".1%"        print(f"   🤖 Model: {result['model_name']}")
+        print(f"   📊 Yes Probability: {result.get('yes_probability', 0):.1%}")
+        print(f"   📊 No Probability: {result.get('no_probability', 0):.1%}")
+        print(f"   💰 Recommended Bet: {result['recommended_bet']}")
+        print(f"   🎯 Confidence: {result.get('confidence', 0):.1%}")
+        print(f"   🤖 Model: {result['model_name']}")
 
         if result['reasoning']:
             print(f"   📝 Reasoning: {result['reasoning'][:200]}...")

@@ -1,0 +1,170 @@
+[
+  {
+    "market_id": "551963",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "540236",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "516719",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540225",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540230",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540210",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.97) & Vol > 100k"
+  },
+  {
+    "market_id": "540213",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540222",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540228",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540206",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540212",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "540229",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "601700",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.96) & Vol > 100k"
+  },
+  {
+    "market_id": "566203",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.98) & Vol > 100k"
+  },
+  {
+    "market_id": "516861",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "516947",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (1.00) & Vol > 100k"
+  },
+  {
+    "market_id": "601697",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "566174",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.96) & Vol > 100k"
+  },
+  {
+    "market_id": "563368",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.95) & Vol > 100k"
+  },
+  {
+    "market_id": "516846",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.97) & Vol > 100k"
+  },
+  {
+    "market_id": "559684",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.98) & Vol > 100k"
+  },
+  {
+    "market_id": "559688",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "686122",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.90) & Vol > 100k"
+  },
+  {
+    "market_id": "559680",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.97) & Vol > 100k"
+  },
+  {
+    "market_id": "559685",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "559687",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.99) & Vol > 100k"
+  },
+  {
+    "market_id": "561251",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.98) & Vol > 100k"
+  },
+  {
+    "market_id": "559681",
+    "action": "BUY YES",
+    "size": 10.0,
+    "reasoning": "Strong ML Signal (0.92) & Vol > 100k"
+  }
+]

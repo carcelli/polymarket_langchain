@@ -12,9 +12,37 @@ from tavily import TavilyClient
 from agents.tooling import wrap_tool
 from agents.polymarket.gamma import GammaMarketClient
 
+import requests
+from markdownify import markdownify
+
 # Initialize clients
 tavily_client = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
 gamma_client = GammaMarketClient()
+
+ALLOWED_DOMAINS = ["https://langchain-ai.github.io/"]
+
+
+def _fetch_documentation_impl(url: str) -> str:
+    """
+    Fetch and convert documentation from a URL to Markdown.
+
+    Args:
+        url: The documentation URL to fetch (must be from allowed domains)
+
+    Returns:
+        Markdown content of the documentation page
+    """
+    try:
+        if not any(url.startswith(domain) for domain in ALLOWED_DOMAINS):
+            return (
+                "Error: URL not allowed. "
+                f"Must start with one of: {', '.join(ALLOWED_DOMAINS)}"
+            )
+        response = requests.get(url, timeout=10.0)
+        response.raise_for_status()
+        return markdownify(response.text)
+    except Exception as e:
+        return f"Error fetching documentation: {str(e)}"
 
 
 def _web_search_impl(
@@ -193,6 +221,13 @@ comprehensive_research = wrap_tool(
     name="comprehensive_research",
     description="Perform comprehensive research on a market including data, web results, and news",
 )
+
+fetch_documentation = wrap_tool(
+    _fetch_documentation_impl,
+    name="fetch_documentation",
+    description="Fetch and convert documentation from a URL to Markdown",
+)
+
 
 
 

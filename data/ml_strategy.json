@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-01-02T18:51:06.586912",
+  "data_source_stats": {
+    "total_markets": 20716,
+    "total_volume": 3657511741.907347,
+    "total_categories": 9
+  },
+  "pipeline_config": {
+    "target_variable": "outcome_yes_price > current_price",
+    "lookback_window_days": 30,
+    "min_volume_threshold": 5000,
+    "model_type": "XGBoost",
+    "features": [
+      "volume",
+      "liquidity",
+      "spread",
+      "sentiment_score",
+      "time_to_expiry"
+    ]
+  }
+}

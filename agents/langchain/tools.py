@@ -1124,6 +1124,9 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
     "preview_order": _preview_order_impl,
 }
 
+from agents.tools.research_tools import _fetch_documentation_impl
+_TOOL_FUNCTIONS["fetch_documentation"] = _fetch_documentation_impl
+
 
 def get_tool_functions() -> Dict[str, Callable]:
     """Get raw tool callables for non-LangChain configurations."""
@@ -1190,7 +1193,11 @@ def get_analysis_tools() -> List:
         search_news,
         query_markets_rag,
         create_markets_rag_database,
+        fetch_documentation,
     ]
+
+
+# Database / Memory Tools
 
 
 def get_database_tools() -> List:

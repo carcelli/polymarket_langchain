@@ -46,11 +46,82 @@ class MemoryManager:
         """
         )
 
-        # Create indexes for efficient querying
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON markets(category)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_active ON markets(active)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_volume ON markets(volume)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)")
+        # Add missing columns to existing tables (for schema evolution)
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN category TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN outcome_prices TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN volume REAL")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN liquidity REAL")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN active BOOLEAN")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN end_date TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN slug TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN clob_token_ids TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN event_id TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN tags TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE markets ADD COLUMN last_updated TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        # Create indexes for efficient querying (only if columns exist)
+        try:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON markets(category)")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_active ON markets(active)")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_volume ON markets(volume)")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)")
+        except sqlite3.OperationalError:
+            pass
 
         # News table
         cursor.execute(

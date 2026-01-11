@@ -136,7 +136,8 @@ class EdgeDetector(MLBettingStrategy):
 
             # Evaluate
             test_loss, test_acc = self.model.evaluate(X_test_scaled, y_test, verbose=0)
-            print(".4f"        else:
+            print(f"   Neural network accuracy: {test_acc:.4f}")
+        else:
             print("   Using simplified edge detection (no neural network)")
 
         self.is_trained = True
