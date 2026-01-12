@@ -29,27 +29,26 @@ CLOB API ◀──────────────────────�
 ```
 
 ## 🗂️ Repository layout
-- 🧠 `agents/` core library
-  - 🔌 `agents/polymarket/` Polymarket API clients (`polymarket.py`, `gamma.py`)
-  - 🧰 `agents/langchain/` LangChain tools + helpers (`tools.py`, `clob_tools.py`, `agent.py`)
-  - 🧭 `agents/graph/` LangGraph agents + state (`memory_agent.py`, `planning_agent.py`, `state.py`)
-  - 🧪 `agents/application/` workflows (`trade.py`, `executor.py`, `creator.py`, `cron.py`, `prompts.py`)
-  - 🧩 `agents/tools/` tool wrappers (`market_tools.py`, `trade_tools.py`, `research_tools.py`)
-  - 🔗 `agents/connectors/` RAG + search (`chroma.py`, `news.py`, `search.py`)
-  - 🗃️ `agents/memory/` SQLite manager (`manager.py`)
-  - 🤝 `agents/team/` ingestion team (`ingestion.py`)
-  - 🧱 `agents/utils/` models + helpers (`objects.py`, `utils.py`)
-  - 🧼 `agents/tooling.py` shared tool wrapper utils
+- 🧠 `src/polymarket_agents/` core library (Package: `polymarket_agents`)
+  - 🔌 `src/polymarket_agents/connectors/` API clients & Integrations (`polymarket.py`, `gamma.py`, `news.py`, `chroma.py`)
+  - 🧰 `src/polymarket_agents/langchain/` LangChain tools + helpers (`tools.py`, `clob_tools.py`)
+  - 🧭 `src/polymarket_agents/graph/` LangGraph agents + state (`memory_agent.py`, `planning_agent.py`, `state.py`)
+  - 🧪 `src/polymarket_agents/application/` workflows (`executor.py`, `creator.py`, `cron.py`)
+  - 🧩 `src/polymarket_agents/tools/` tool wrappers (`market_tools.py`, `trade_tools.py`, `research_tools.py`)
+  - 🗃️ `src/polymarket_agents/memory/` Memory management (`manager.py`)
+  - 🤖 `src/polymarket_agents/automl/` AutoML & Data Quality pipeline
+  - 🤖 `src/polymarket_agents/subagents/` Specialized Sub-agents (GitHub, ML, Risk)
+  - 🧱 `src/polymarket_agents/utils/` utilities (`config.py`, `objects.py`)
 - 🧰 `scripts/` runnable entry points (see scripts index below)
 - 🧪 `tests/` pytest/unittest coverage
 - 📚 `docs/` deep reference docs + examples
-- 🗃️ `data/` SQLite DBs + snapshots
+- 🗃️ `data/` Local data (ignored by git)
 - 📝 `logs/` runtime logs
 - 🧬 `langgraph.json` LangGraph config
 - ⚡ `fetch_active_bets.py` quick Gamma API sample
-- 🐳 `Dockerfile`, `environment.yml`, `requirements.txt`
+- 🐳 `Dockerfile`, `environment.yml`, `requirements.txt`, `pyproject.toml`
 - 🧹 `.langgraph_api/` local LangGraph runtime artifacts
-- 🙌 `CONTRIBUTING.md`, `LICENSE.md`
+- 🙌 `CONTRIBUTING.md`, `LICENSE.md`, `CHANGELOG.md`
 
 ## 🚀 Quick start
 1) Conda (recommended):
