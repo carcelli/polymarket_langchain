@@ -123,6 +123,11 @@ class MemoryManager:
         except sqlite3.OperationalError:
             pass
 
+        try:
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category_volume ON markets(category, volume DESC)")
+        except sqlite3.OperationalError:
+            pass
+
         # News table
         cursor.execute(
             """
@@ -460,16 +465,22 @@ class MemoryManager:
 
         return [self._parse_market_row(r) for r in rows]
 
-    def search_markets(self, query: str, limit: int = 20) -> List[Dict]:
-        """Search markets by question text."""
+    def search_markets(self, query: str, limit: int = 20, category: str = None) -> List[Dict]:
+        """Search markets by question text, optionally filtered by category."""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        cursor.execute(
-            "SELECT * FROM markets WHERE question LIKE ? ORDER BY volume DESC LIMIT ?",
-            (f"%{query}%", limit),
-        )
+        if category:
+            cursor.execute(
+                "SELECT * FROM markets WHERE question LIKE ? AND category = ? ORDER BY volume DESC LIMIT ?",
+                (f"%{query}%", category, limit),
+            )
+        else:
+            cursor.execute(
+                "SELECT * FROM markets WHERE question LIKE ? ORDER BY volume DESC LIMIT ?",
+                (f"%{query}%", limit),
+            )
 
         rows = cursor.fetchall()
         conn.close()

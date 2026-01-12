@@ -44,6 +44,7 @@ from typing import List, Optional, Dict, Callable
 from pydantic import BaseModel, Field
 
 from agents.tooling import wrap_tool
+from agents.config import MARKET_FOCUS
 
 # Lazy imports to avoid circular dependencies
 _polymarket = None
@@ -786,14 +787,18 @@ def _get_database_stats_impl() -> str:
         return f"Error getting database stats: {str(e)}"
 
 
-def _get_markets_by_category_impl(category: str, limit: int = 10) -> str:
+def _get_markets_by_category_impl(category: str = None, limit: int = 10) -> str:
     """Get markets from the database filtered by category.
+
+    If MARKET_FOCUS environment variable is set and no category specified,
+    defaults to that category. Set MARKET_FOCUS=sports to focus on sports.
 
     Categories include: politics, sports, crypto, tech, geopolitics,
     culture, finance, economy, science
 
     Args:
-        category: Category name to filter by (e.g., 'sports', 'politics')
+        category: Category name to filter by (e.g., 'sports', 'politics').
+                 If not provided, uses MARKET_FOCUS environment variable.
         limit: Maximum number of markets to return (default: 10)
 
     Returns:
@@ -801,7 +806,11 @@ def _get_markets_by_category_impl(category: str, limit: int = 10) -> str:
     """
     try:
         memory = _get_memory()
-        markets = memory.list_markets_by_category(category, limit=limit)
+        # Use MARKET_FOCUS as default if no category specified
+        effective_category = category or MARKET_FOCUS
+        if not effective_category:
+            return "Error: No category specified. Either provide a category parameter or set MARKET_FOCUS environment variable."
+        markets = memory.list_markets_by_category(effective_category, limit=limit)
 
         result = []
         for m in markets:
@@ -828,16 +837,22 @@ def _get_markets_by_category_impl(category: str, limit: int = 10) -> str:
 def _get_top_volume_markets_impl(limit: int = 10, category: str = None) -> str:
     """Get the highest volume markets from the database.
 
+    If MARKET_FOCUS environment variable is set, defaults to that category.
+    Set MARKET_FOCUS=sports to focus on sports markets only.
+
     Args:
         limit: Maximum number of markets to return (default: 10)
-        category: Optional category filter (e.g., 'sports', 'politics')
+        category: Optional category filter (e.g., 'sports', 'politics').
+                 If not provided, uses MARKET_FOCUS environment variable.
 
     Returns:
         List of top markets by volume
     """
     try:
         memory = _get_memory()
-        markets = memory.list_top_volume_markets(limit=limit, category=category)
+        # Use MARKET_FOCUS as default if no category specified
+        effective_category = category or MARKET_FOCUS
+        markets = memory.list_top_volume_markets(limit=limit, category=effective_category)
 
         result = []
         for m in markets:
@@ -860,8 +875,11 @@ def _get_top_volume_markets_impl(limit: int = 10, category: str = None) -> str:
         return f"Error getting top volume markets: {str(e)}"
 
 
-def _search_markets_db_impl(query: str, limit: int = 10) -> str:
+def _search_markets_db_impl(query: str, limit: int = 10, category: str = None) -> str:
     """Search markets in the database by question text.
+
+    If MARKET_FOCUS environment variable is set, searches only within that category.
+    Set MARKET_FOCUS=sports to focus on sports markets only.
 
     Performs a text search on market questions. For semantic search,
     use query_markets_rag instead.
@@ -869,13 +887,16 @@ def _search_markets_db_impl(query: str, limit: int = 10) -> str:
     Args:
         query: Text to search for in market questions
         limit: Maximum number of results (default: 10)
+        category: Optional category filter. If not provided, uses MARKET_FOCUS.
 
     Returns:
         List of matching markets sorted by volume
     """
     try:
         memory = _get_memory()
-        markets = memory.search_markets(query, limit=limit)
+        # Use MARKET_FOCUS as default category filter if specified
+        effective_category = category or MARKET_FOCUS
+        markets = memory.search_markets(query, limit=limit, category=effective_category)
 
         result = []
         for m in markets:

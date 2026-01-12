@@ -308,10 +308,10 @@ def stats_node(state: PlanningState) -> Dict:
 @traceable(name="probability_estimation", run_type="llm")
 def probability_node(state: PlanningState) -> Dict:
     """
-    Probability Node: LLM estimates true probability.
+    Probability Node: LLM + ML estimates true probability.
 
-    Uses research context and stats to estimate the "real" probability,
-    which is then compared to market price to find edge.
+    Uses research context, stats, and optionally XGBoost model to estimate
+    the "real" probability, which is then compared to market price to find edge.
     """
     # Check for upstream errors
     if state.get("error"):
@@ -329,6 +329,29 @@ def probability_node(state: PlanningState) -> Dict:
         return {"error": "No market data for probability estimation"}
 
     try:
+        # Try to get XGBoost prediction first
+        xgboost_prob = None
+        xgboost_reasoning = None
+
+        try:
+            from agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
+
+            # Check if model exists and is trained
+            model_path = "data/models/xgboost_probability_model.json"
+            if os.path.exists(model_path):
+                xgboost_strategy = XGBoostProbabilityStrategy()
+                xgboost_strategy.load_model(model_path)
+
+                # Make prediction
+                xgboost_result = xgboost_strategy.predict(market_data)
+                xgboost_prob = xgboost_result.predicted_probability
+                xgboost_reasoning = f"XGBoost predicts {xgboost_prob:.3f} (edge: {xgboost_result.edge:.1%})"
+                print(f"   🤖 XGBoost Prob: {xgboost_prob:.1%}")
+
+        except Exception as e:
+            print(f"   ⚠️  XGBoost unavailable: {e}")
+            xgboost_prob = None
+
         from langchain_openai import ChatOpenAI
 
         llm = ChatOpenAI(
@@ -363,6 +386,7 @@ Guidelines:
 3. Factor in time until resolution
 4. Be calibrated - avoid overconfidence
 5. Express genuine uncertainty
+6. If ML model prediction is provided, use it as a strong signal but apply your judgment
 
 Output format:
 PROBABILITY: [0.XX]
@@ -370,6 +394,11 @@ CONFIDENCE: [LOW/MEDIUM/HIGH]
 REASONING: [2-3 sentences explaining your estimate]
 
 Be specific and data-driven. If highly uncertain, lean toward 0.50."""
+
+        # Include XGBoost prediction in the prompt if available
+        ml_context = ""
+        if xgboost_prob is not None:
+            ml_context = f"\nMACHINE LEARNING PREDICTION: XGBoost model estimates {xgboost_prob:.1%} probability of YES."
 
         user_prompt = f"""Estimate the probability for this prediction market:
 
@@ -383,7 +412,7 @@ CURRENT MARKET PRICE: {implied_prob:.1%} (YES)
 VOLUME: ${market_data.get('volume', 0):,.0f}
 PRICE CONFIDENCE: {volume_analysis.get('price_confidence', 'UNKNOWN')}
 
-{f'RESEARCH NOTES:{chr(10)}{research_summary}' if research_summary else ''}
+{f'RESEARCH NOTES:{chr(10)}{research_summary}' if research_summary else ''}{ml_context}
 
 Based on your knowledge and the above context, what is the TRUE probability of YES?"""
 
@@ -415,10 +444,17 @@ Based on your knowledge and the above context, what is the TRUE probability of Y
         print(f"   📊 Market Price: {implied_prob:.1%}")
         print(f"   ⚡ Raw Edge: {(estimated_prob - implied_prob)*100:.1f}%")
 
+        # Combine reasoning with XGBoost info if available
+        combined_reasoning = reasoning
+        if xgboost_reasoning:
+            combined_reasoning = f"{xgboost_reasoning}\n\n{reasoning}"
+
         return {
             "estimated_probability": estimated_prob,
-            "probability_reasoning": reasoning,
+            "probability_reasoning": combined_reasoning,
             "messages": [response],
+            "xgboost_probability": xgboost_prob,
+            "xgboost_reasoning": xgboost_reasoning,
         }
 
     except Exception as e:

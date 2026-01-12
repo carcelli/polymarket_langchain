@@ -27,6 +27,12 @@ try:
 except ImportError:
     pass # Will handle gracefully
 
+try:
+    from agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
+    GRADIENT_BOOSTING_AVAILABLE = True
+except ImportError:
+    GRADIENT_BOOSTING_AVAILABLE = False
+
 # --- Configuration ---
 DATA_DIR = "data"
 STRATEGY_FILE = os.path.join(DATA_DIR, "ml_strategy.json")
@@ -261,6 +267,97 @@ def analyze():
 
 # ==============================================================================
 # ORCHESTRATOR
+# ==============================================================================
+# XGBOOST TRAINING (New ML Strategy)
+# ==============================================================================
+@cli.command()
+@click.option("--days-back", default=365, help="Days of historical data to use")
+@click.option("--min-volume", default=1000, help="Minimum market volume threshold")
+@click.option("--test-size", default=0.2, help="Fraction of data for testing")
+def train_xgboost(days_back, min_volume, test_size):
+    """Train Gradient Boosting probability calibration model."""
+    if not GRADIENT_BOOSTING_AVAILABLE:
+        console.print("[red]❌ Gradient Boosting not available. Install with: pip install scikit-learn[/red]")
+        return
+
+    console.print("[bold blue]🚀 Training XGBoost Probability Strategy[/bold blue]")
+    console.print(f"Parameters: {days_back} days back, min volume ${min_volume}, test size {test_size}")
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+    ) as progress:
+        task = progress.add_task("Training XGBoost model...", total=100)
+
+        try:
+            # Initialize strategy
+            progress.update(task, advance=10, description="Initializing XGBoost strategy...")
+            strategy = XGBoostProbabilityStrategy()
+
+            # Run full pipeline
+            progress.update(task, advance=20, description="Running ML pipeline...")
+            results = strategy.run_full_pipeline(
+                days_back=days_back,
+                min_volume=min_volume,
+                test_size=test_size
+            )
+
+            progress.update(task, advance=70, description="Pipeline completed, displaying results...")
+
+            # Display results
+            eval_metrics = results['evaluation_metrics']
+            backtest = results['backtest_results']
+
+            console.print("\n[green]✅ XGBoost Training Complete![/green]")
+
+            # Performance metrics
+            table = Table(title="Model Performance")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="magenta")
+
+            table.add_row("ROC-AUC", ".3f")
+            table.add_row("Accuracy", ".3f")
+            table.add_row("Brier Score", ".3f")
+            table.add_row("Log Loss", ".3f")
+            table.add_row("Mean Edge", ".1%")
+            table.add_row("Positive Edge %", ".1%")
+
+            console.print(table)
+
+            # Backtest results
+            backtest_table = Table(title="Backtest Results")
+            backtest_table.add_column("Metric", style="cyan")
+            backtest_table.add_column("Value", style="magenta")
+
+            backtest_table.add_row("Total Return", ".1f")
+            backtest_table.add_row("Number of Trades", str(backtest['num_trades']))
+            backtest_table.add_row("Win Rate", ".1%")
+            backtest_table.add_row("Sharpe Ratio", ".2f")
+            backtest_table.add_row("Max Drawdown", ".1%")
+
+            console.print(backtest_table)
+
+            # Top features
+            feature_importance = results['feature_importance']
+            if feature_importance:
+                console.print("\n[bold]Top 10 Important Features:[/bold]")
+                sorted_features = sorted(feature_importance.items(), key=lambda x: x[1], reverse=True)[:10]
+                for i, (feature, importance) in enumerate(sorted_features, 1):
+                    console.print("2d")
+
+            console.print(f"\n[blue]📁 Model saved to: {results['model_path']}[/blue]")
+            console.print("[green]🎯 Ready to use with planning agent![/green]")
+
+            progress.update(task, advance=100, description="Complete!")
+
+        except Exception as e:
+            progress.update(task, description=f"Error: {str(e)}")
+            console.print(f"[red]❌ Training failed: {e}[/red]")
+            raise click.ClickException(str(e))
+
+
 # ==============================================================================
 @cli.command()
 def run_all():
