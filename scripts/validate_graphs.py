@@ -15,7 +15,7 @@ def validate_memory_agent():
     """Validate memory agent graph."""
     print("🔍 Validating Memory Agent...")
     try:
-        from agents.graph.memory_agent import create_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent
 
         graph = create_memory_agent()
         print("  ✅ Graph compiles successfully")
@@ -44,7 +44,7 @@ def validate_planning_agent():
     """Validate planning agent graph."""
     print("🔍 Validating Planning Agent...")
     try:
-        from agents.graph.planning_agent import create_planning_agent
+        from polymarket_agents.graph.planning_agent import create_planning_agent
 
         graph = create_planning_agent()
         print("  ✅ Graph compiles successfully")

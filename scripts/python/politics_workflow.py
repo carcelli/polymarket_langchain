@@ -45,7 +45,7 @@ sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from agents.memory.manager import MemoryManager
+from polymarket_agents.memory.manager import MemoryManager
 
 
 # ============================================================================

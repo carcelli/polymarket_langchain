@@ -17,7 +17,7 @@ python scripts/python/cli.py run-planning-agent 'Russia x Ukraine ceasefire in 2
 python scripts/python/cli.py run-memory-agent 'Find interesting crypto markets'
 
 # 4. Run comprehensive workflow
-python market_analysis_workflow.py
+python scripts/workflows/market_analysis_workflow.py
 
 # 5. Check market volume leaders
 python -c "

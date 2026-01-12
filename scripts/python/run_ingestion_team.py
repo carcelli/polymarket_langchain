@@ -8,9 +8,9 @@ import sys
 import os
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+sys.path.append(str(Path(__file__).parents[2] / "src"))
 
-from agents.team.ingestion import IngestionTeam
+from polymarket_agents.team.ingestion import IngestionTeam
 
 
 def main():

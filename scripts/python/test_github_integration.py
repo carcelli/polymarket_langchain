@@ -31,7 +31,7 @@ def test_github_env():
 
 def test_toolkit_initialization():
     print("\nAttempting to initialize GitHubToolkit...")
-    from agents.tools.github_tools import _get_github_toolkit
+    from polymarket_agents.tools.github_tools import _get_github_toolkit
     
     toolkit = _get_github_toolkit()
     if toolkit:

@@ -7,8 +7,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage
-from agents.graph.state import AgentState
-from agents.tools.market_tools import fetch_active_markets
+from polymarket_agents.graph.state import AgentState
+from polymarket_agents.tools.market_tools import fetch_active_markets
 
 # --- Node Definitions ---
 

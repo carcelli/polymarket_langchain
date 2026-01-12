@@ -140,7 +140,7 @@ class Toolset:
         except Exception as e:
             return f"HTTP Request Error: {e}"
 
-from agents.utils.context import ContextManager, RuntimeContext
+from polymarket_agents.utils.context import ContextManager, RuntimeContext
 
 class DeepAgentCLI:
     def __init__(self, agent_name: str = "default", auto_approve: bool = False, sandbox_type: str = None):
@@ -353,13 +353,13 @@ class DeepAgentCLI:
             self.memory.save_memory(args["topic"], args["content"])
             return f"Memory saved: {args['topic']}"
         elif name == "get_issues":
-            from agents.tools.github_tools import _get_issues_impl
+            from polymarket_agents.tools.github_tools import _get_issues_impl
             return _get_issues_impl()
         elif name == "get_issue":
-            from agents.tools.github_tools import _get_issue_impl
+            from polymarket_agents.tools.github_tools import _get_issue_impl
             return _get_issue_impl(args["issue_number"])
         elif name == "create_issue_comment":
-            from agents.tools.github_tools import _create_issue_comment_impl
+            from polymarket_agents.tools.github_tools import _create_issue_comment_impl
             return _create_issue_comment_impl(args["issue_number"], args["body"])
         return "Unknown tool"
 

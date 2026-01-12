@@ -18,7 +18,7 @@ def get_all_markets(limit: int = 5, sort_by: str = "spread") -> None:
     Query Polymarket's markets
     """
     print(f"limit: int = {limit}, sort_by: str = {sort_by}")
-    from agents.polymarket.polymarket import Polymarket
+    from polymarket_agents.connectors.polymarket import Polymarket
 
     polymarket = Polymarket()
     markets = polymarket.get_all_markets()
@@ -34,7 +34,7 @@ def get_relevant_news(keywords: str) -> None:
     """
     Use NewsAPI to query the internet
     """
-    from agents.connectors.news import News
+    from polymarket_agents.connectors.news import News
 
     newsapi_client = News()
     articles = newsapi_client.get_articles_for_cli_keywords(keywords)
@@ -51,7 +51,7 @@ def get_all_events(
     print(
         f"limit: int = {limit}, sort_by: str = {sort_by}, include_closed: {include_closed}"
     )
-    from agents.polymarket.polymarket import Polymarket
+    from polymarket_agents.connectors.polymarket import Polymarket
 
     polymarket = Polymarket()
     events = polymarket.get_all_events()
@@ -68,7 +68,7 @@ def create_local_markets_rag(local_directory: str) -> None:
     """
     Create a local markets database for RAG
     """
-    from agents.connectors.chroma import PolymarketRAG
+    from polymarket_agents.connectors.chroma import PolymarketRAG
 
     polymarket_rag = PolymarketRAG()
     polymarket_rag.create_local_markets_rag(local_directory=local_directory)
@@ -79,7 +79,7 @@ def query_local_markets_rag(vector_db_directory: str, query: str) -> None:
     """
     RAG over a local database of Polymarket's events
     """
-    from agents.connectors.chroma import PolymarketRAG
+    from polymarket_agents.connectors.chroma import PolymarketRAG
 
     polymarket_rag = PolymarketRAG()
     response = polymarket_rag.query_local_markets_rag(
@@ -96,7 +96,7 @@ def ask_superforecaster(event_title: str, market_question: str, outcome: str) ->
     print(
         f"event: str = {event_title}, question: str = {market_question}, outcome (usually yes or no): str = {outcome}"
     )
-    from agents.application.executor import Executor
+    from polymarket_agents.application.executor import Executor
 
     executor = Executor()
     response = executor.get_superforecast(
@@ -110,7 +110,7 @@ def create_market() -> None:
     """
     Format a request to create a market on Polymarket
     """
-    from agents.application.creator import Creator
+    from polymarket_agents.application.creator import Creator
 
     c = Creator()
     market_description = c.one_best_market()
@@ -122,7 +122,7 @@ def ask_llm(user_input: str) -> None:
     """
     Ask a question to the LLM and get a response.
     """
-    from agents.application.executor import Executor
+    from polymarket_agents.application.executor import Executor
 
     executor = Executor()
     response = executor.get_llm_response(user_input)
@@ -134,7 +134,7 @@ def ask_polymarket_llm(user_input: str) -> None:
     """
     What types of markets do you want trade?
     """
-    from agents.application.executor import Executor
+    from polymarket_agents.application.executor import Executor
 
     executor = Executor()
     response = executor.get_polymarket_llm(user_input=user_input)
@@ -146,7 +146,7 @@ def run_autonomous_trader() -> None:
     """
     Let an autonomous system trade for you.
     """
-    from agents.application.trade import Trader
+    from polymarket_agents.application.trade import Trader
 
     trader = Trader()
     trader.one_best_trade()
@@ -176,7 +176,7 @@ def run_memory_agent(
     print("=" * 60)
 
     try:
-        from agents.graph.memory_agent import create_memory_agent, run_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
 
         graph = create_memory_agent()
         result = run_memory_agent(graph, query)
@@ -211,7 +211,7 @@ def run_planning_agent(
     print("=" * 60)
 
     try:
-        from agents.graph.planning_agent import analyze_bet
+        from polymarket_agents.graph.planning_agent import analyze_bet
 
         result = analyze_bet(query, market_id)
 
@@ -240,7 +240,7 @@ def scan_opportunities(
     print("=" * 60)
 
     try:
-        from agents.graph.planning_agent import find_value_opportunities
+        from polymarket_agents.graph.planning_agent import find_value_opportunities
 
         opportunities = find_value_opportunities(category=category)
         print(f"📊 Found {len(opportunities)} potential opportunities")
@@ -279,7 +279,7 @@ def run_deep_research_agent(
     print("=" * 60)
 
     try:
-        from agents.deep_research_agent import (
+        from polymarket_agents.deep_research_agent import (
             create_trading_agent_with_approval,
             create_conservative_trading_agent,
             create_autonomous_research_agent,
@@ -325,7 +325,7 @@ def run_ml_research_agent(
     print("=" * 60)
 
     try:
-        from agents.ml_strategies.research_agent import MLResearchAgent
+        from polymarket_agents.ml_strategies.research_agent import MLResearchAgent
 
         agent = MLResearchAgent()
         result = agent.run_research_cycle(focus_area=focus_area)

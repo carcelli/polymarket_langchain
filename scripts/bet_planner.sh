@@ -10,11 +10,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-export PYTHONPATH="$PROJECT_ROOT"
+export PYTHONPATH="$PROJECT_ROOT/src:$PROJECT_ROOT"
 
 if [ "$1" == "--portfolio" ]; then
     python -c "
-from agents.memory.manager import MemoryManager
+from polymarket_agents.memory.manager import MemoryManager
 mm = MemoryManager('data/markets.db')
 summary = mm.get_portfolio_summary()
 print()
@@ -30,7 +30,7 @@ print('=' * 40)
 "
 elif [ "$1" == "--scan" ]; then
     category="${2:-}"
-    python "$PROJECT_ROOT/agents/graph/planning_agent.py" --scan $category
+    python -m polymarket_agents.graph.planning_agent --scan $category
 else
     query="$*"
     if [ -z "$query" ]; then
@@ -41,6 +41,6 @@ else
         echo "  $0 --portfolio          # View positions"
         exit 1
     fi
-    python "$PROJECT_ROOT/agents/graph/planning_agent.py" "$query"
+    python -m polymarket_agents.graph.planning_agent "$query"
 fi
 

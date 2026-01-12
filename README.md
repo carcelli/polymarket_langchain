@@ -7,6 +7,7 @@ Build research, forecasting, and trading workflows on Polymarket using LangChain
 conda env create -f environment.yml
 conda activate polymarket-agent
 cp .env.example .env
+export PYTHONPATH=$PYTHONPATH:$(pwd)/src
 python scripts/python/refresh_markets.py --max-events 200
 python scripts/python/cli.py run-memory-agent "Find interesting markets"
 ```
@@ -45,7 +46,7 @@ CLOB API ◀──────────────────────�
 - 🗃️ `data/` Local data (ignored by git)
 - 📝 `logs/` runtime logs
 - 🧬 `langgraph.json` LangGraph config
-- ⚡ `fetch_active_bets.py` quick Gamma API sample
+- ⚡ `examples/fetch_active_bets.py` quick Gamma API sample
 - 🐳 `Dockerfile`, `environment.yml`, `requirements.txt`, `pyproject.toml`
 - 🧹 `.langgraph_api/` local LangGraph runtime artifacts
 - 🙌 `CONTRIBUTING.md`, `LICENSE.md`, `CHANGELOG.md`
@@ -61,7 +62,7 @@ conda activate polymarket-agent
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 ```
 
 Optional helper:
@@ -130,20 +131,21 @@ python scripts/python/cli.py scan-opportunities --category politics
 - 🔍 Opportunity Scanner: batch scan for positive edge.
 
 LangGraph config lives in `langgraph.json` and wires:
-- `memory_agent` to `agents/graph/memory_agent.py:create_memory_agent`
-- `planning_agent` to `agents/graph/planning_agent.py:create_planning_agent`
+- `memory_agent` to `polymarket_agents/graph/memory_agent.py:create_memory_agent`
+- `planning_agent` to `polymarket_agents/graph/planning_agent.py:create_planning_agent`
 
-Direct runs:
+Direct runs (ensure `src` is in PYTHONPATH):
 ```bash
-python agents/graph/memory_agent.py "What are the top crypto markets?"
-python agents/graph/planning_agent.py "Will the Fed cut rates in Q1 2025?"
-python agents/graph/planning_agent.py --scan politics
+export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+python -m polymarket_agents.graph.memory_agent "What are the top crypto markets?"
+python -m polymarket_agents.graph.planning_agent "Will the Fed cut rates in Q1 2025?"
+python -m polymarket_agents.graph.planning_agent --scan politics
 ```
 
 ### 🧑‍💻 Python usage
 ```python
-from agents.langchain.agent import create_polymarket_agent, run_agent
-from agents.graph.planning_agent import analyze_bet
+from polymarket_agents.langchain.agent import create_polymarket_agent, run_agent
+from polymarket_agents.graph.planning_agent import analyze_bet
 
 agent = create_polymarket_agent(model="gpt-4o-mini", temperature=0.1)
 print(run_agent(agent, "Find the best political market to trade"))
@@ -177,8 +179,8 @@ python scripts/python/cli.py query-local-markets-rag ./data "Which markets menti
 ```
 
 ### 🛰️ CLOB trading tools
-- Read-only and trading tools live in `agents/langchain/clob_tools.py`.
-- Simple trade helpers live in `agents/tools/trade_tools.py`.
+- Read-only and trading tools live in `src/polymarket_agents/langchain/clob_tools.py`.
+- Simple trade helpers live in `src/polymarket_agents/tools/trade_tools.py`.
 - Trading requires a wallet private key and (optionally) CLOB API credentials.
 
 ### 🖥️ Server
@@ -202,7 +204,7 @@ Schedule pipelines and backups:
 
 ### ⚡ Quick fetch example
 ```bash
-python fetch_active_bets.py
+python examples/fetch_active_bets.py
 ```
 
 ## 🧰 Scripts index (all entry points)
@@ -233,7 +235,7 @@ python fetch_active_bets.py
 - `scripts/validate_graphs.py` validate graph compilation
 - `scripts/test_graph.py` small graph smoke test
 - `scripts/test_trade_tools.py` mock trade tool tests
-- `fetch_active_bets.py` lightweight Gamma API sample
+- `examples/fetch_active_bets.py` lightweight Gamma API sample
 
 ## 🧱 Data & storage
 - `data/markets.db` main SQLite store (markets, news, price_history, bets, research, analytics).

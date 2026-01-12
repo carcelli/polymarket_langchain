@@ -55,7 +55,7 @@ class SportsMarketDataset:
         logger.info(f"Attempting to fetch resolved sports markets from API (last {days_back} days)...")
 
         try:
-            from agents.automl.data_ingestion import PolymarketDataIngestion
+            from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 
             ingestor = PolymarketDataIngestion()
 

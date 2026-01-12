@@ -10,5 +10,5 @@
 #   ./scripts/polymarket_agent.sh "Which NFL team should I bet on?"
 
 cd "$(dirname "$0")/.."
-PYTHONPATH=. python agents/graph/memory_agent.py "$@"
+PYTHONPATH=src:. python -m polymarket_agents.graph.memory_agent "$@"
 

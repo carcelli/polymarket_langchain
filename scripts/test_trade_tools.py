@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.tools.trade_tools import (
+from polymarket_agents.tools.trade_tools import (
     execute_market_order,
     execute_limit_order,
     cancel_all_orders,

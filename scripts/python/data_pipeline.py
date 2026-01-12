@@ -39,7 +39,7 @@ sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from agents.memory.manager import MemoryManager
+from polymarket_agents.memory.manager import MemoryManager
 
 
 @dataclass
@@ -259,7 +259,7 @@ class DataPipeline:
         for market in markets:
             try:
                 # Use news connector to fetch relevant news
-                from agents.connectors.news import News
+                from polymarket_agents.connectors.news import News
 
                 news_client = News()
                 keywords = market["question"][:100]  # Use question as keywords
@@ -390,7 +390,7 @@ class DataPipeline:
         """Generate a summary for a market using available tools."""
         try:
             # Try to use LLM if available
-            from agents.application.executor import Executor
+            from polymarket_agents.application.executor import Executor
 
             executor = Executor()
 

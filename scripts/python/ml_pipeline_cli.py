@@ -14,12 +14,12 @@ from rich.live import Live
 from rich.json import JSON
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+sys.path.append(str(Path(__file__).parents[2] / "src"))
 
 # --- Import Your Agent Components ---
-from agents.team.ingestion import IngestionTeam
-from agents.memory.manager import MemoryManager
-from agents.automl.data_ingestion import PolymarketDataIngestion
+from polymarket_agents.team.ingestion import IngestionTeam
+from polymarket_agents.memory.manager import MemoryManager
+from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 # Note: Assuming standard ML libs are available or using basic logic if not
 try:
     from sklearn.ensemble import RandomForestClassifier
@@ -28,7 +28,7 @@ except ImportError:
     pass # Will handle gracefully
 
 try:
-    from agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
+    from polymarket_agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
     GRADIENT_BOOSTING_AVAILABLE = True
 except ImportError:
     GRADIENT_BOOSTING_AVAILABLE = False

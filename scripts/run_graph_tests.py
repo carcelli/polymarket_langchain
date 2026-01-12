@@ -25,8 +25,8 @@ def run_unit_tests():
     # Test 1: Basic imports
     print("  📦 Testing imports...")
     try:
-        from agents.graph.state import AgentState
-        from agents.graph.memory_agent import (
+        from polymarket_agents.graph.state import AgentState
+        from polymarket_agents.graph.memory_agent import (
             MemoryAgentState,
             memory_node,
             create_memory_agent,
@@ -135,7 +135,7 @@ def run_integration_tests():
     print("🔗 Running Integration Tests...")
 
     try:
-        from agents.graph.memory_agent import create_memory_agent, run_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
         from unittest.mock import patch, MagicMock
 
         # Test full workflow
@@ -168,7 +168,7 @@ def run_validation_tests():
     print("✅ Running Validation Tests...")
 
     try:
-        from agents.graph.memory_agent import create_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent
 
         # Test graph structures
         memory_graph = create_memory_agent()
@@ -204,7 +204,7 @@ def run_performance_tests():
 
     try:
         import time
-        from agents.graph.memory_agent import create_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent
         from unittest.mock import patch, MagicMock
 
         graph = create_memory_agent()
@@ -250,14 +250,14 @@ def run_e2e_tests():
     print("🌐 Running End-to-End Tests...")
 
     try:
-        from agents.graph.memory_agent import create_memory_agent
+        from polymarket_agents.graph.memory_agent import create_memory_agent
         from unittest.mock import patch, MagicMock
 
         # Full end-to-end test with minimal mocking
         graph = create_memory_agent()
 
         with patch("agents.graph.memory_agent.MemoryManager") as mock_mm_class, patch(
-            "agents.polymarket.gamma.GammaMarketClient"
+            "polymarket_agents.connectors.gamma.GammaMarketClient"
         ) as mock_gamma_class:
 
             # Setup mocks
