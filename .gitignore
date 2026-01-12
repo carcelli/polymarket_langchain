@@ -1,32 +1,31 @@
-.venv
+# Python / venv
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 .env
-.idea
-.ipynb_checkpoints
-.mypy_cache
-.vscode
-__pycache__
-.pytest_cache
-htmlcov
-dist
-site
-.coverage
-coverage.xml
-.netlify
-test.db
-log.txt
-Pipfile.lock
-env3.*
-env
-docs_build
-site_build
-venv
-docs.zip
-archive.zip
-*~
-.*.sw?
-.cache
+
+# OS / IDE
 .DS_Store
-local_db*
-.conda
-.pem 
-*.pem
+*:Zone.Identifier
+.idea/
+
+# Generated artifacts
+*.png
+*.dot
+*.mermaid.md
+workflow_report_*.json
+.langgraph_api/
+
+# Stateful / large data — never commit
+data/
+agent_data/
+*.db
+*.pkl
+*.parquet
+*.json  # except config/manifests
+
+# Build / dist
+dist/
+build/
+*.egg-info/
