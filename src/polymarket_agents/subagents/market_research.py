@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 # Import our existing tools and utilities
 from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.utils.text import asciize
+from polymarket_agents.ml_strategies.registry import best_strategy
 
 
 def search_related_markets(query: str, limit: int = 5) -> List[Dict[str, Any]]:
@@ -63,6 +65,51 @@ def search_related_markets(query: str, limit: int = 5) -> List[Dict[str, Any]]:
         })
 
     return results
+
+
+def analyze_market_with_strategies(market_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Analyze a market using the registered ML strategy system.
+
+    Uses best_strategy to automatically select and run the most promising
+    ML strategy for the given market data.
+    """
+    try:
+        # Get ML strategy recommendation
+        strategy_result = best_strategy(market_data)
+
+        if "error" in strategy_result:
+            return {
+                "market_id": market_data.get("id", "unknown"),
+                "analysis_type": "ml_strategy",
+                "error": strategy_result["error"],
+                "strategies_available": strategy_result.get("strategies_tried", 0)
+            }
+
+        # Format for research output
+        return {
+            "market_id": market_data.get("id", market_data.get("market_id", "unknown")),
+            "market_question": market_data.get("question", "Unknown market"),
+            "analysis_type": "ml_strategy",
+            "selected_strategy": strategy_result.get("selected_strategy", "unknown"),
+            "edge": strategy_result.get("edge", 0.0),
+            "recommendation": strategy_result.get("recommendation", "HOLD"),
+            "confidence": strategy_result.get("confidence", 0.0),
+            "reasoning": strategy_result.get("reasoning", "ML strategy analysis"),
+            "strategies_compared": strategy_result.get("strategies_compared", 0),
+            "additional_insights": {
+                "momentum": strategy_result.get("momentum"),
+                "volume_ratio": strategy_result.get("volume_ratio"),
+                "data_points": strategy_result.get("data_points")
+            }
+        }
+
+    except Exception as e:
+        return {
+            "market_id": market_data.get("id", "unknown"),
+            "analysis_type": "ml_strategy",
+            "error": f"Strategy analysis failed: {str(e)}"
+        }
 
 
 def analyze_market_trends(market_id: str, days_back: int = 30) -> Dict[str, Any]:
@@ -164,7 +211,8 @@ RECOMMENDATIONS
    Keep your response under 600 words. Focus on synthesis, not raw data.""",
         "tools": [
             search_related_markets,
-            analyze_market_trends
+            analyze_market_trends,
+            analyze_market_with_strategies
         ],
 
         # Use a more analytical model for research

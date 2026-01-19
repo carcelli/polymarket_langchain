@@ -14,6 +14,7 @@ import logging
 import json
 
 from polymarket_agents.ml_strategies.base_strategy import MLBettingStrategy, StrategyResult
+from polymarket_agents.ml_strategies.registry import register_strategy
 from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 
 # Try to import XGBoost, fall back to sklearn if not available
@@ -31,6 +32,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+@register_strategy("xgboost_probability")
 class XGBoostProbabilityStrategy(MLBettingStrategy):
     """
     Gradient Boosting-based strategy for probability calibration and edge detection.
