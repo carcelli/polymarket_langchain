@@ -44,8 +44,22 @@ class Polymarket:
 
         self.chain_id = 137  # POLYGON
         self.private_key = os.getenv("POLYGON_WALLET_PRIVATE_KEY")
-        self.polygon_rpc = "https://polygon-rpc.com"
+        if not self.private_key:
+            raise ValueError("POLYGON_WALLET_PRIVATE_KEY missing from .env")
+            
+        self.polygon_rpc = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
         self.w3 = Web3(Web3.HTTPProvider(self.polygon_rpc))
+
+        # Validate RPC connection
+        if not self.w3.is_connected():
+            raise ConnectionError(f"Failed to connect to Polygon RPC: {self.polygon_rpc}")
+
+        # Derive and store account from private key
+        if self._is_valid_private_key(self.private_key):
+            self.account = self.w3.eth.account.from_key(self.private_key)
+            print(f"Wallet loaded: {self.account.address}")
+        else:
+            raise ValueError("Invalid private key format")
 
         self.exchange_address = "0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e"
         self.neg_risk_exchange_address = "0xC5d563A36AE78145C45a50134d48A1215220f80a"
@@ -315,6 +329,9 @@ class Polymarket:
         return float(self.client.get_price(token_id))
 
     def get_address_for_private_key(self):
+        if self.account:
+            return self.account.address
+        # Fallback for backward compatibility
         account = self.w3.eth.account.from_key(str(self.private_key))
         return account.address
 
@@ -365,10 +382,11 @@ class Polymarket:
         return resp
 
     def get_usdc_balance(self) -> float:
-        balance_res = self.usdc.functions.balanceOf(
-            self.get_address_for_private_key()
-        ).call()
-        return float(balance_res / 10e5)
+        """Fetch USDC balance on Polygon (6 decimals)."""
+        if not self.account:
+            raise ValueError("No account available - private key not loaded")
+        raw_balance = self.usdc.functions.balanceOf(self.account.address).call()
+        return raw_balance / 1e6  # USDC has 6 decimals on Polygon
 
 
 def test():

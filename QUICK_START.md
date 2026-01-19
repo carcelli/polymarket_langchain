@@ -121,32 +121,79 @@ python -m polymarket_agents.graph.memory_agent "Find high volume crypto markets"
 python -m polymarket_agents.graph.planning_agent "Should I bet on Bitcoin reaching new ATH by March 2026?"
 ```
 
-## 📊 Workflow: Paper Trading First! (RECOMMENDED)
+## 📊 Virtual Trading Systems (REQUIRED FIRST)
 
-⚠️ **DO NOT fund your wallet yet!** Paper trade first to prove edge.
+⚠️ **DO NOT fund your wallet yet!** Choose a virtual trading system to prove edge.
 
-1. **Start automated paper trading**:
-   ```bash
-   python scripts/auto_paper_trader.py
-   ```
-   This monitors for markets, makes predictions, and places virtual bets automatically.
+### **System 1: NBA Simulator** (⭐ Recommended Start)
+```bash
+# Best for beginners - clearest signal, proven inefficiencies
+python scripts/nba_simulator.py
 
-2. **Check performance after a week**:
-   ```bash
-   python scripts/paper_trading_system.py summary
-   ```
+# Conservative: 7% edge, $75k min volume, $15 bets
+python scripts/nba_simulator.py 0.07 75000 15.0 300
+```
+**Why start here:**
+- ✅ Longer horizons (hours, not minutes)
+- ✅ Fundamentals matter (records, venue, rest)
+- ✅ Baseline Log5 already showing 36% edge on 76ers/Pacers!
+- ✅ Easy to enhance (injuries, Elo, rest days)
 
-3. **Run backtests**:
-   ```bash
-   python scripts/backtest_updown.py
-   ```
+### **System 2: Virtual Trader** (Multi-Market Production)
+```bash
+# Unified system with auto strategy selection
+python scripts/virtual_trader.py
 
-4. **Only fund wallet after 200+ successful paper trades** with:
-   - Win rate > 55%
-   - Positive total P&L
-   - Max drawdown < 20%
+# NBA + crypto markets with 3% edge threshold
+python scripts/virtual_trader.py --markets nba crypto --min-edge 0.03
 
-See `docs/PAPER_TRADING_GUIDE.md` for complete details.
+# All markets with aggressive 2% edge
+python scripts/virtual_trader.py --markets all --min-edge 0.02
+```
+**Use after NBA edge proven:**
+- ✅ Planning agent integration
+- ✅ ML strategy registry
+- ✅ Multi-market support
+- ✅ Comprehensive risk management
+
+### **System 3: Crypto Up/Down Simulator** (Advanced)
+```bash
+# Ultra-short 5-15 min crypto markets
+python scripts/monitor_simulator.py
+
+# Custom: 55% confidence, 3% risk, 30s poll
+python scripts/monitor_simulator.py 0.55 0.03 30
+```
+**Use for:**
+- ⏱️ Testing execution speed
+- 🔬 Rapid iteration on signals
+- ⚠️ Low signal-to-noise (hardest to profit)
+
+### **Check Performance**
+```bash
+# NBA
+sqlite3 data/nba_simulator.db "SELECT COUNT(*), SUM(virtual_profit) FROM nba_bets WHERE resolved=TRUE"
+
+# Virtual Trader
+sqlite3 data/virtual_trader.db "SELECT market_type, COUNT(*), SUM(profit) FROM virtual_trades WHERE resolved=TRUE GROUP BY market_type"
+
+# Crypto
+sqlite3 data/simulator.db "SELECT SUM(virtual_profit) FROM trades WHERE resolved=TRUE"
+```
+
+### **Success Criteria Before Funding**
+**NBA (20+ games minimum):**
+- ✅ Win rate > 52%
+- ✅ Positive P&L
+- ✅ Max drawdown < 30%
+
+**Target (50+ bets across all systems):**
+- ✅ Win rate > 55%
+- ✅ ROI > 5%
+- ✅ Max drawdown < 20%
+- ✅ Sharpe ratio > 0.5
+
+See `docs/VIRTUAL_TRADING_GUIDE.md` for complete comparison.
 
 ## 📊 Workflow: Live Trading (After proving edge)
 
