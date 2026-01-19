@@ -3,21 +3,20 @@ import os
 import json
 import click
 import time
+from pathlib import Path
 import pandas as pd
 from datetime import datetime
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-from rich.layout import Layout
-from rich.live import Live
 from rich.json import JSON
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parents[2] / "src"))
 
 # --- Import Your Agent Components ---
-from polymarket_agents.team.ingestion import IngestionTeam
+from polymarket_agents.services.ingestion import IngestionTeam
 from polymarket_agents.memory.manager import MemoryManager
 from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 # Note: Assuming standard ML libs are available or using basic logic if not
