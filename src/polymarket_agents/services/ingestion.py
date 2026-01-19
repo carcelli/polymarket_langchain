@@ -9,6 +9,7 @@ from polymarket_agents.langchain.tools import (
     get_market_by_token,
 )
 from polymarket_agents.memory.manager import MemoryManager
+from polymarket_agents.utils.structures import StrKeyDict
 
 
 class IngestionTeam:
@@ -24,6 +25,10 @@ class IngestionTeam:
     def __init__(self, data_dir: str = "data"):
         self.data_dir = data_dir
         self.memory = MemoryManager(db_path=f"{self.data_dir}/memory.db")
+
+        # Robust Cache for Ingestion
+        # This prevents duplicate work even if IDs come in as ints or strings
+        self.processed_markets = StrKeyDict()
 
     def run_cycle(self, limit: int = 5):
         """Runs one ingestion cycle."""
@@ -41,6 +46,12 @@ class IngestionTeam:
         # 2. Researcher & Archivist Loop
         for market in markets:
             market_id = market.get("id")
+
+            # Check cache using the robust dict
+            if market_id in self.processed_markets:
+                print(f"Skipping known market {market_id}")
+                continue
+
             question = market.get("question")
             print(f"  - Researcher: Analyzing market '{question}' ({market_id})...")
 
@@ -65,6 +76,10 @@ class IngestionTeam:
             print(f"  - Archivist: Storing market {market_id} in memory...")
             try:
                 self.memory.add_market(market, news_articles)
+
+                # Store in cache to prevent duplicate processing
+                self.processed_markets[market_id] = True
+
             except Exception as e:
                 print(f"  ! Archivist failed to save to DB: {e}")
 
