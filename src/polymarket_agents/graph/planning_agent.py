@@ -639,29 +639,55 @@ def analyze_bet(query: str, market_id: str = None) -> Dict:
     Returns:
         Full analysis with recommendation
     """
-    graph = create_planning_agent()
+    # Start execution tracking
+    from polymarket_agents.memory.manager import MemoryManager
+    import json
 
-    initial_state = {
-        "messages": [HumanMessage(content=query)],
-        "query": query,
-        "target_market_id": market_id,
-        "market_data": {},
-        "research_context": {},
-        "news_sentiment": {},
-        "implied_probability": 0.5,
-        "price_history": [],
-        "volume_analysis": {},
-        "estimated_probability": 0.5,
-        "probability_reasoning": "",
-        "edge": 0,
-        "expected_value": 0,
-        "kelly_fraction": 0,
-        "recommendation": {},
-        "error": None,
-    }
+    memory = MemoryManager()
+    execution_id = memory.start_agent_execution(
+        agent_type="planning_agent", agent_name="planning_agent", query=query
+    )
 
-    result = graph.invoke(initial_state)
-    return result
+    try:
+        graph = create_planning_agent()
+
+        initial_state = {
+            "messages": [HumanMessage(content=query)],
+            "query": query,
+            "target_market_id": market_id,
+            "market_data": {},
+            "research_context": {},
+            "news_sentiment": {},
+            "implied_probability": 0.5,
+            "price_history": [],
+            "volume_analysis": {},
+            "estimated_probability": 0.5,
+            "probability_reasoning": "",
+            "edge": 0,
+            "expected_value": 0,
+            "kelly_fraction": 0,
+            "recommendation": {},
+            "error": None,
+        }
+
+        result = graph.invoke(initial_state)
+
+        # Complete execution tracking
+        result_summary = {
+            "recommendation": result.get("recommendation", {}),
+            "edge": result.get("edge"),
+            "estimated_probability": result.get("estimated_probability"),
+        }
+        memory.complete_agent_execution(
+            execution_id, result=json.dumps(result_summary), tokens_used=None
+        )
+
+        return result
+
+    except Exception as e:
+        # Mark execution as failed
+        memory.fail_agent_execution(execution_id, error=str(e))
+        raise
 
 
 @traceable(name="find_value_opportunities")

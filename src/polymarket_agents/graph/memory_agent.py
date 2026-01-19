@@ -495,6 +495,12 @@ def run_memory_agent(graph, query: str, verbose: bool = True) -> Dict[str, Any]:
     Returns:
         Final state with analysis and decision
     """
+    # Start execution tracking
+    memory = MemoryManager()
+    execution_id = memory.start_agent_execution(
+        agent_type="memory_agent", agent_name="memory_agent", query=query
+    )
+
     if verbose:
         print("\n" + "=" * 60)
         print(f"  MEMORY AGENT: {query[:50]}...")
@@ -523,9 +529,20 @@ def run_memory_agent(graph, query: str, verbose: bool = True) -> Dict[str, Any]:
                 print(result["analysis"]["llm_response"])
             print("-" * 60 + "\n")
 
+        # Complete execution tracking
+        result_summary = {
+            "analysis": result.get("analysis", {}),
+            "decision": result.get("decision", {}),
+        }
+        memory.complete_agent_execution(
+            execution_id, result=json.dumps(result_summary), tokens_used=None
+        )
+
         return result
 
     except Exception as e:
+        # Mark execution as failed
+        memory.fail_agent_execution(execution_id, error=str(e))
         return {"error": str(e)}
 
 

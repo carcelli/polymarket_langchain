@@ -46,6 +46,23 @@ CHAIN_ID: int = int(os.getenv("CHAIN_ID", "137"))  # Polygon mainnet
 MARKET_FOCUS = os.getenv("MARKET_FOCUS")
 
 # =============================================================================
+# LLM CONFIGURATION
+# =============================================================================
+
+# Default model for LangChain agents
+# Can be overridden per agent call, but provides centralized control
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o-mini")
+
+# Default temperature for different agent types
+DEFAULT_TEMPERATURE_ANALYSIS = 0.1  # For factual analysis
+DEFAULT_TEMPERATURE_CREATIVE = 0.3  # For research/generation
+DEFAULT_TEMPERATURE_STRUCTURED = 0.0  # For structured outputs
+
+# Model configurations for different use cases
+STRUCTURED_OUTPUT_MODELS = ["gpt-4o-2024-08-06", "gpt-4o-mini"]  # Models that support structured output well
+HIGH_REASONING_MODELS = ["gpt-4o-2024-08-06", "gpt-4o"]  # For complex analysis
+
+# =============================================================================
 # DATABASE CONFIGURATION
 # =============================================================================
 

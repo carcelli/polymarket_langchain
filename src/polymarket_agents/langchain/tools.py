@@ -53,6 +53,7 @@ _news = None
 _chroma = None
 _executor = None
 _memory = None
+_gamma_tool = None
 
 
 def _get_memory():
@@ -108,6 +109,16 @@ def _get_executor():
 
         _executor = Executor()
     return _executor
+
+
+def _get_gamma_tool():
+    """Get the Gamma markets tool instance."""
+    global _gamma_tool
+    if _gamma_tool is None:
+        from polymarket_agents.tools.gamma_markets import GammaMarketsTool
+
+        _gamma_tool = GammaMarketsTool()
+    return _gamma_tool
 
 
 # =============================================================================
@@ -1120,6 +1131,7 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
     "get_market_by_id": _get_market_by_id_impl,
     "get_current_markets_gamma": _get_current_markets_gamma_impl,
     "get_clob_tradable_markets": _get_clob_tradable_markets_impl,
+    "gamma_fetch_markets": lambda **kwargs: _get_gamma_tool()._run(**kwargs),
     "fetch_all_events": _fetch_all_events_impl,
     "fetch_tradeable_events": _fetch_tradeable_events_impl,
     "get_event_by_id": _get_event_by_id_impl,
@@ -1148,6 +1160,8 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
 from polymarket_agents.tools.research_tools import _fetch_documentation_impl
 _TOOL_FUNCTIONS["fetch_documentation"] = _fetch_documentation_impl
 
+fetch_documentation = wrap_tool(_fetch_documentation_impl, name="fetch_documentation")
+
 
 def get_tool_functions() -> Dict[str, Callable]:
     """Get raw tool callables for non-LangChain configurations."""
@@ -1168,6 +1182,7 @@ def get_market_tools() -> List:
         get_market_by_id,
         get_current_markets_gamma,
         get_clob_tradable_markets,
+        _get_gamma_tool(),  # Gamma API markets tool
     ]
 
 
@@ -1274,6 +1289,11 @@ get_current_markets_gamma(limit: int = 10)
 
 get_clob_tradable_markets(limit: int = 10)
     limit: Max markets. Type: int. Default: 10
+
+gamma_fetch_markets(active: bool = True, limit: int = 50, question_contains: str = None)
+    active: Only return open/active markets. Type: bool. Default: True
+    limit: Max markets to return (1-100). Type: int. Default: 50
+    question_contains: Filter by question substring. Type: str. Default: None
 
 
 2. EVENT TOOLS

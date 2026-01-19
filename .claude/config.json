@@ -1,0 +1,4 @@
+{
+"context_files": [".claude/code_guidelines.md"],
+"workspace": "src/polymarket_agents"
+}

@@ -236,6 +236,80 @@ class MemoryManager:
         """
         )
 
+        # Agent execution tracking table - track every agent run
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS agent_executions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_type TEXT NOT NULL,
+                agent_name TEXT NOT NULL,
+                query TEXT,
+                status TEXT NOT NULL,
+                started_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                completed_at TEXT,
+                duration_ms INTEGER,
+                current_node TEXT,
+                completed_nodes TEXT,
+                result TEXT,
+                error TEXT,
+                tokens_used INTEGER,
+                langsmith_run_id TEXT
+            )
+        """
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_agent_executions_started ON agent_executions(started_at DESC)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_agent_executions_status ON agent_executions(status)"
+        )
+
+        # Node execution tracking table - track individual node runs
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS node_executions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_execution_id INTEGER NOT NULL,
+                node_name TEXT NOT NULL,
+                node_type TEXT,
+                started_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                completed_at TEXT,
+                duration_ms INTEGER,
+                status TEXT,
+                input_data TEXT,
+                output_data TEXT,
+                error TEXT,
+                FOREIGN KEY (agent_execution_id) REFERENCES agent_executions(id)
+            )
+        """
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_node_executions_agent ON node_executions(agent_execution_id)"
+        )
+
+        # Agent performance metrics table - aggregate statistics
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS agent_performance_metrics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_type TEXT NOT NULL,
+                time_period TEXT NOT NULL,
+                total_runs INTEGER DEFAULT 0,
+                successful_runs INTEGER DEFAULT 0,
+                failed_runs INTEGER DEFAULT 0,
+                avg_duration_ms INTEGER,
+                avg_tokens_used INTEGER,
+                total_bets INTEGER DEFAULT 0,
+                winning_bets INTEGER DEFAULT 0,
+                total_pnl REAL DEFAULT 0.0,
+                win_rate REAL,
+                sharpe_ratio REAL,
+                calculated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(agent_type, time_period)
+            )
+        """
+        )
+
         conn.commit()
         conn.close()
 
@@ -1309,6 +1383,296 @@ class MemoryManager:
 
         conn.close()
         return stats
+
+    # =========================================================================
+    # AGENT EXECUTION TRACKING METHODS
+    # =========================================================================
+
+    def start_agent_execution(
+        self, agent_type: str, agent_name: str, query: str = None
+    ) -> int:
+        """
+        Start tracking a new agent execution.
+
+        Args:
+            agent_type: Type of agent ('memory_agent', 'planning_agent', 'subagent')
+            agent_name: Specific agent identifier
+            query: User query/input
+
+        Returns:
+            execution_id: ID of the new execution record
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            INSERT INTO agent_executions (agent_type, agent_name, query, status, started_at, completed_nodes)
+            VALUES (?, ?, ?, 'running', ?, '[]')
+        """,
+            (agent_type, agent_name, query, datetime.now().isoformat()),
+        )
+
+        execution_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+
+        return execution_id
+
+    def complete_agent_execution(
+        self,
+        execution_id: int,
+        result: str = None,
+        tokens_used: int = None,
+        langsmith_run_id: str = None,
+    ):
+        """Complete an agent execution with results."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Get start time to calculate duration
+        cursor.execute(
+            "SELECT started_at FROM agent_executions WHERE id = ?", (execution_id,)
+        )
+        row = cursor.fetchone()
+        if row:
+            started_at = datetime.fromisoformat(row[0])
+            completed_at = datetime.now()
+            duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+
+            cursor.execute(
+                """
+                UPDATE agent_executions
+                SET status = 'completed', completed_at = ?, duration_ms = ?,
+                    result = ?, tokens_used = ?, langsmith_run_id = ?
+                WHERE id = ?
+            """,
+                (
+                    completed_at.isoformat(),
+                    duration_ms,
+                    result,
+                    tokens_used,
+                    langsmith_run_id,
+                    execution_id,
+                ),
+            )
+
+        conn.commit()
+        conn.close()
+
+    def fail_agent_execution(self, execution_id: int, error: str):
+        """Mark an agent execution as failed."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Get start time to calculate duration
+        cursor.execute(
+            "SELECT started_at FROM agent_executions WHERE id = ?", (execution_id,)
+        )
+        row = cursor.fetchone()
+        if row:
+            started_at = datetime.fromisoformat(row[0])
+            completed_at = datetime.now()
+            duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+
+            cursor.execute(
+                """
+                UPDATE agent_executions
+                SET status = 'failed', completed_at = ?, duration_ms = ?, error = ?
+                WHERE id = ?
+            """,
+                (completed_at.isoformat(), duration_ms, error, execution_id),
+            )
+
+        conn.commit()
+        conn.close()
+
+    def update_current_node(self, execution_id: int, node_name: str):
+        """Update the currently executing node for an agent run."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Get current completed nodes
+        cursor.execute(
+            "SELECT completed_nodes FROM agent_executions WHERE id = ?", (execution_id,)
+        )
+        row = cursor.fetchone()
+        if row:
+            completed_nodes = json.loads(row[0] or "[]")
+            if node_name not in completed_nodes:
+                # Mark previous node as completed
+                cursor.execute(
+                    "SELECT current_node FROM agent_executions WHERE id = ?",
+                    (execution_id,),
+                )
+                prev_node = cursor.fetchone()
+                if prev_node and prev_node[0]:
+                    completed_nodes.append(prev_node[0])
+
+            cursor.execute(
+                """
+                UPDATE agent_executions
+                SET current_node = ?, completed_nodes = ?
+                WHERE id = ?
+            """,
+                (node_name, json.dumps(completed_nodes), execution_id),
+            )
+
+        conn.commit()
+        conn.close()
+
+    def track_node_execution(
+        self,
+        agent_execution_id: int,
+        node_name: str,
+        node_type: str = None,
+        input_data: str = None,
+        output_data: str = None,
+        error: str = None,
+        duration_ms: int = None,
+        status: str = "completed",
+    ) -> int:
+        """
+        Track an individual node execution within an agent run.
+
+        Args:
+            agent_execution_id: Parent agent execution ID
+            node_name: Name of the node
+            node_type: Type of node ('retriever', 'tool', 'llm', 'decision')
+            input_data: JSON snapshot of input state
+            output_data: JSON snapshot of output state
+            error: Error message if failed
+            duration_ms: Execution duration
+            status: 'completed', 'failed', or 'skipped'
+
+        Returns:
+            node_execution_id: ID of the node execution record
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        started_at = datetime.now()
+        completed_at = started_at if duration_ms else None
+
+        cursor.execute(
+            """
+            INSERT INTO node_executions
+            (agent_execution_id, node_name, node_type, started_at, completed_at,
+             duration_ms, status, input_data, output_data, error)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+            (
+                agent_execution_id,
+                node_name,
+                node_type,
+                started_at.isoformat(),
+                completed_at.isoformat() if completed_at else None,
+                duration_ms,
+                status,
+                input_data,
+                output_data,
+                error,
+            ),
+        )
+
+        node_execution_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+
+        return node_execution_id
+
+    def get_recent_executions(self, limit: int = 50) -> List[Dict]:
+        """Get recent agent executions."""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            SELECT * FROM agent_executions
+            ORDER BY started_at DESC
+            LIMIT ?
+        """,
+            (limit,),
+        )
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [dict(r) for r in rows]
+
+    def get_execution_metrics(self, time_period: str = "24h") -> Optional[Dict]:
+        """
+        Get execution metrics for a time period.
+
+        Args:
+            time_period: '1h', '24h', '7d', '30d'
+
+        Returns:
+            Metrics dict or None if no data
+        """
+        # Parse time period
+        hours_map = {"1h": 1, "24h": 24, "7d": 168, "30d": 720}
+        hours = hours_map.get(time_period, 24)
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Get execution stats
+        cursor.execute(
+            """
+            SELECT
+                COUNT(*) as total_runs,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as successful_runs,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_runs,
+                AVG(duration_ms) as avg_duration_ms,
+                AVG(tokens_used) as avg_tokens_used
+            FROM agent_executions
+            WHERE datetime(started_at) > datetime('now', ?)
+        """,
+            (f"-{hours} hours",),
+        )
+
+        row = cursor.fetchone()
+
+        if not row or row[0] == 0:
+            conn.close()
+            return None
+
+        # Get betting stats (from bets table) for the same period
+        cursor.execute(
+            """
+            SELECT
+                COUNT(*) as total_bets,
+                SUM(CASE WHEN status = 'WON' THEN 1 ELSE 0 END) as winning_bets,
+                SUM(realized_pnl) + SUM(unrealized_pnl) as total_pnl
+            FROM bets
+            WHERE datetime(entry_date) > datetime('now', ?)
+        """,
+            (f"-{hours} hours",),
+        )
+
+        bet_row = cursor.fetchone()
+        conn.close()
+
+        total_bets = bet_row[0] if bet_row else 0
+        winning_bets = bet_row[1] if bet_row else 0
+        total_pnl = bet_row[2] if bet_row else 0.0
+
+        win_rate = winning_bets / total_bets if total_bets > 0 else 0.0
+
+        return {
+            "total_runs": row[0],
+            "successful_runs": row[1],
+            "failed_runs": row[2],
+            "avg_duration_ms": int(row[3]) if row[3] else 0,
+            "avg_tokens_used": int(row[4]) if row[4] else 0,
+            "total_bets": total_bets,
+            "winning_bets": winning_bets,
+            "total_pnl": total_pnl,
+            "win_rate": win_rate,
+            "sharpe_ratio": 0.0,  # TODO: Calculate Sharpe ratio
+        }
 
     def _row_to_market_dict(self, row) -> Dict[str, Any]:
         """Convert a database row to a market dictionary."""
