@@ -123,9 +123,11 @@ python -m polymarket_agents.graph.planning_agent "Should I bet on Bitcoin reachi
 
 ## 📊 Virtual Trading Systems (REQUIRED FIRST)
 
-⚠️ **DO NOT fund your wallet yet!** Choose a virtual trading system to prove edge.
+⚠️ **DO NOT fund your wallet yet!** Run virtual trading to prove edge.
 
-### **System 1: NBA Simulator** (⭐ Recommended Start)
+### 🏀 **Sports Focus** (⭐ Recommended Start)
+
+#### NBA Simulator
 ```bash
 # Best for beginners - clearest signal, proven inefficiencies
 python scripts/nba_simulator.py
@@ -133,30 +135,21 @@ python scripts/nba_simulator.py
 # Conservative: 7% edge, $75k min volume, $15 bets
 python scripts/nba_simulator.py 0.07 75000 15.0 300
 ```
+
 **Why start here:**
-- ✅ Longer horizons (hours, not minutes)
+- ✅ Log5 baseline showing **36% edge** opportunities!
+- ✅ Longer horizons (hours → days, not minutes)
 - ✅ Fundamentals matter (records, venue, rest)
-- ✅ Baseline Log5 already showing 36% edge on 76ers/Pacers!
-- ✅ Easy to enhance (injuries, Elo, rest days)
+- ✅ Easy to enhance (injuries, Elo, player matchups)
 
-### **System 2: Virtual Trader** (Multi-Market Production)
-```bash
-# Unified system with auto strategy selection
-python scripts/virtual_trader.py
+**Files:**
+- `scripts/nba_market_fetcher.py` - Discover NBA markets
+- `scripts/nba_predictor.py` - Log5 + home advantage
+- `scripts/nba_simulator.py` - Paper trading system
 
-# NBA + crypto markets with 3% edge threshold
-python scripts/virtual_trader.py --markets nba crypto --min-edge 0.03
+### 🪙 **Crypto Focus** (High Frequency)
 
-# All markets with aggressive 2% edge
-python scripts/virtual_trader.py --markets all --min-edge 0.02
-```
-**Use after NBA edge proven:**
-- ✅ Planning agent integration
-- ✅ ML strategy registry
-- ✅ Multi-market support
-- ✅ Comprehensive risk management
-
-### **System 3: Crypto Up/Down Simulator** (Advanced)
+#### Crypto 15M Simulator
 ```bash
 # Ultra-short 5-15 min crypto markets
 python scripts/monitor_simulator.py
@@ -164,10 +157,38 @@ python scripts/monitor_simulator.py
 # Custom: 55% confidence, 3% risk, 30s poll
 python scripts/monitor_simulator.py 0.55 0.03 30
 ```
+
 **Use for:**
 - ⏱️ Testing execution speed
 - 🔬 Rapid iteration on signals
-- ⚠️ Low signal-to-noise (hardest to profit)
+- ⚠️ Harder to profit (noise dominates short timeframes)
+
+**Files:**
+- `scripts/crypto_market_fetcher.py` - Discover crypto Up/Down markets
+- `scripts/crypto_predictor.py` - Momentum + RSI + volume
+- `scripts/monitor_simulator.py` - Paper trading system
+
+### 🎯 **Unified System** (Multi-Market Production)
+
+#### Virtual Trader
+```bash
+# Auto-selects best strategy per market type
+python scripts/virtual_trader.py
+
+# NBA + crypto markets with 3% edge threshold
+python scripts/virtual_trader.py --markets nba crypto --min-edge 0.03
+
+# NBA only (recommended after proving edge)
+python scripts/virtual_trader.py --markets nba --min-edge 0.05
+```
+
+**Features:**
+- ✅ Auto strategy selection (NBA → Log5, Crypto → Technical)
+- ✅ Planning agent integration (future)
+- ✅ ML strategy registry
+- ✅ Kelly criterion position sizing
+- ✅ Risk management (drawdown limits, circuit breakers)
+- ✅ Performance tracking by market type
 
 ### **Check Performance**
 ```bash

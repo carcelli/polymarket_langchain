@@ -247,9 +247,10 @@ class VirtualTrader:
         Get prediction for market using appropriate strategy.
         
         Tries in order:
-        1. Planning agent (if available)
-        2. ML strategy registry
-        3. Baseline heuristics
+        1. NBA predictor for sports
+        2. Crypto predictor for Up/Down
+        3. Planning agent (if available)
+        4. ML strategy registry
         
         Returns:
             Dict with model_prob, edge, recommendation, strategy
@@ -292,6 +293,54 @@ class VirtualTrader:
                     }
             except Exception as e:
                 print(f"NBA predictor error: {e}")
+        
+        # Try Crypto predictor for Up/Down
+        if market_type == 'crypto':
+            try:
+                from crypto_predictor import CryptoPredictor
+                
+                # Initialize if not cached
+                if not hasattr(self, '_crypto_predictor'):
+                    self._crypto_predictor = CryptoPredictor()
+                
+                # Parse asset from market
+                question = market.get('question', '').lower()
+                asset = None
+                if 'bitcoin' in question or 'btc' in question:
+                    asset = 'BTC'
+                elif 'ethereum' in question or 'eth' in question:
+                    asset = 'ETH'
+                elif 'solana' in question or 'sol' in question:
+                    asset = 'SOL'
+                
+                if asset:
+                    # Get market prices
+                    outcome_prices = market.get('outcome_prices', [0.5, 0.5])
+                    if isinstance(outcome_prices, str):
+                        import json
+                        outcome_prices = json.loads(outcome_prices.replace("'", '"'))
+                    
+                    up_price = float(outcome_prices[0]) if len(outcome_prices) > 0 else 0.5
+                    down_price = float(outcome_prices[1]) if len(outcome_prices) > 1 else 0.5
+                    
+                    direction, confidence, details = self._crypto_predictor.predict_direction(
+                        asset,
+                        market_up_price=up_price,
+                        market_down_price=down_price,
+                        duration_minutes=15
+                    )
+                    
+                    if direction and abs(details['edge']) > self.min_edge:
+                        return {
+                            'model_prob': details['model_prob'],
+                            'edge': details['edge'],
+                            'recommendation': 'BUY',
+                            'strategy': 'crypto_technical',
+                            'bet_side': direction,
+                            'confidence': confidence
+                        }
+            except Exception as e:
+                print(f"Crypto predictor error: {e}")
         
         # Try ML strategy registry
         try:
