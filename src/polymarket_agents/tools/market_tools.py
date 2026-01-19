@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 
 # Modular Imports
-from polymarket_agents.utils.database import fetch_market_metadata, fetch_price_history_raw
+from polymarket_agents.utils.database import fetch_market_metadata, get_price_stream, PricePoint
 from polymarket_agents.utils.analytics import calculate_price_trend
 
 class GetMarketHistoryArgs(BaseModel):
@@ -32,27 +32,27 @@ def get_market_history(market_id: str, days_back: int = 30) -> str:
             "status": "failed"
         })
 
-    # 2. Fetch History (Data Access)
+    # 2. Consume Generator (Data Access)
+    # TEXTBOOK CONCEPT: List Comprehension + Generator Consumption
+    # We stay lazy as long as possible, only materializing the list here.
     try:
-        raw_rows = fetch_price_history_raw(market_id, days_back)
+        price_points = [p for p in get_price_stream(market_id, days_back)]
     except Exception as e:
         return json.dumps({"error": f"Database read failed: {str(e)}"})
 
-    # 3. Format Data (Transformation)
-    formatted_history = []
-    for row in raw_rows:
-        date, yes, no, vol = row
-        formatted_history.append({
-            "date": date,
-            "yes_price": yes,
-            "no_price": no,
-            "volume": vol,
-            # Explicit semantics for the LLM
-            "implied_probability": yes 
-        })
+    # 3. Apply Business Logic (Analytics)
+    # Operates on the list of NamedTuples for performance and type safety.
+    trend = calculate_price_trend(price_points)
 
-    # 4. Apply Business Logic (Analytics)
-    trend = calculate_price_trend(formatted_history)
+    # 4. Format for JSON (Transformation)
+    # TEXTBOOK CONCEPT: List Comprehension with _asdict()
+    formatted_history = [
+        {
+            **p._asdict(),
+            "implied_probability": p.yes_price # Explicit semantic for LLM
+        }
+        for p in price_points
+    ]
 
     # 5. Construct Final Response
     response = {
