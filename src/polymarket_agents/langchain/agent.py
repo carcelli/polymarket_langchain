@@ -149,6 +149,46 @@ def create_simple_analyst(model: str = "gpt-4o-mini"):
     )
 
 
+def create_probability_extraction_agent(model: str = "gpt-4o-mini"):
+    """Create an agent specialized for extracting implied probabilities from Polymarket data.
+
+    Focuses on converting market prices to probabilities and analyzing crowd wisdom
+    for business forecasting applications (recessions, elections, economic events).
+
+    Args:
+        model: OpenAI model to use
+
+    Returns:
+        AgentExecutor for probability extraction tasks
+    """
+    from polymarket_agents.langchain.tools import (
+        get_current_markets_gamma,
+        get_market_by_id,
+        get_superforecast,
+        analyze_market_with_llm,
+        get_top_volume_markets,
+        search_markets_db,
+        get_database_stats,
+    )
+
+    probability_tools = [
+        get_current_markets_gamma,
+        get_market_by_id,
+        get_superforecast,
+        analyze_market_with_llm,
+        get_top_volume_markets,
+        search_markets_db,
+        get_database_stats,
+    ]
+
+    return create_polymarket_agent(
+        model=model,
+        tools=probability_tools,
+        temperature=0.0,  # Deterministic for probability extraction
+        max_iterations=8,
+    )
+
+
 def create_research_agent(model: str = "gpt-4o-mini"):
     """Create an agent specialized for market research with news integration.
 
@@ -278,6 +318,93 @@ def find_best_trade(
     }
 
 
+def create_ml_forecast_comparison_agent(model: str = "gpt-4o-mini"):
+    """Create an agent that compares Polymarket crowd wisdom against ML model forecasts.
+
+    Useful for small businesses to validate their internal forecasting models
+    against market-based probabilities for events like recessions, elections, etc.
+
+    Args:
+        model: OpenAI model to use
+
+    Returns:
+        AgentExecutor for ML comparison tasks
+    """
+    from polymarket_agents.langchain.tools import (
+        get_current_markets_gamma,
+        get_superforecast,
+        analyze_market_with_llm,
+        search_markets_db,
+        get_top_volume_markets,
+        get_market_from_db,
+        list_recent_markets,
+    )
+
+    comparison_tools = [
+        get_current_markets_gamma,
+        get_superforecast,
+        analyze_market_with_llm,
+        search_markets_db,
+        get_top_volume_markets,
+        get_market_from_db,
+        list_recent_markets,
+    ]
+
+    return create_polymarket_agent(
+        model=model,
+        tools=comparison_tools,
+        temperature=0.2,  # Balanced creativity for analysis
+        max_iterations=12,  # More iterations for complex comparisons
+    )
+
+
+def compare_ml_vs_market_forecast(
+    ml_forecast: float,
+    event_description: str,
+    model: str = "gpt-4o-mini"
+) -> Dict[str, Any]:
+    """Compare your ML model's forecast against Polymarket crowd wisdom.
+
+    Args:
+        ml_forecast: Your ML model's probability estimate (0.0 to 1.0)
+        event_description: Description of the event being forecasted
+        model: OpenAI model to use
+
+    Returns:
+        Dict with comparison analysis and insights
+    """
+    agent = create_ml_forecast_comparison_agent(model=model)
+
+    query = f"""
+    Compare my ML model's forecast against Polymarket crowd wisdom for this event:
+
+    Event: {event_description}
+    My ML Forecast: {ml_forecast:.1%} probability
+
+    Steps to follow:
+    1. Search for relevant Polymarket markets matching this event
+    2. Get current market prices and implied probabilities
+    3. Analyze the difference between my forecast and market consensus
+    4. Consider reasons for any discrepancies (market efficiency, information asymmetry, etc.)
+    5. Provide business insights: Should I trust my model or the market?
+
+    Return analysis with:
+    - Market consensus probability
+    - Forecast difference (my model vs market)
+    - Confidence assessment for both approaches
+    - Business implications and recommended actions
+    """
+
+    result = run_agent(agent, query)
+
+    return {
+        "comparison": result,
+        "ml_forecast": ml_forecast,
+        "event": event_description,
+        "market_model": model,
+    }
+
+
 def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") -> str:
     """Deep dive analysis on a specific market.
 
@@ -292,9 +419,9 @@ def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") ->
 
     query = f"""
     Provide a comprehensive analysis of this prediction market:
-    
+
     "{market_question}"
-    
+
     Include:
     1. Current market price and liquidity
     2. Relevant news and recent developments
@@ -310,6 +437,150 @@ def analyze_specific_market(market_question: str, model: str = "gpt-4o-mini") ->
 # =============================================================================
 # LANGGRAPH MULTI-STEP AGENT (Advanced)
 # =============================================================================
+
+
+def create_crypto_agent(model: str = "gpt-4o-mini", risk_tolerance: str = "medium"):
+    """Create a crypto-focused agent for cryptocurrency markets and predictions.
+
+    Specialized for analyzing Bitcoin, Ethereum, and crypto market events.
+    Perfect for crypto traders and businesses with crypto exposure.
+
+    Args:
+        model: OpenAI model to use
+        risk_tolerance: "low", "medium", or "high"
+
+    Returns:
+        AgentExecutor configured for crypto analysis
+    """
+    return create_business_domain_agent("crypto", model, risk_tolerance)
+
+
+def create_sports_agent(model: str = "gpt-4o-mini", risk_tolerance: str = "medium"):
+    """Create a sports-focused agent for sports betting and outcomes.
+
+    Specialized for major sports events, championships, and tournament predictions.
+    Great for sports analytics and betting businesses.
+
+    Args:
+        model: OpenAI model to use
+        risk_tolerance: "low", "medium", or "high"
+
+    Returns:
+        AgentExecutor configured for sports analysis
+    """
+    return create_business_domain_agent("sports", model, risk_tolerance)
+
+
+def create_business_domain_agent(
+    domain: str = "crypto",
+    model: str = "gpt-4o-mini",
+    risk_tolerance: str = "medium"
+):
+    """Create a domain-specialized agent for business-relevant market analysis.
+
+    Args:
+        domain: "economy", "politics", "crypto", "sports", or "general"
+        model: OpenAI model to use
+        risk_tolerance: "low", "medium", or "high"
+
+    Returns:
+        AgentExecutor configured for the specific business domain
+    """
+    from polymarket_agents.langchain.tools import (
+        get_markets_by_category,
+        get_top_volume_markets,
+        search_markets_db,
+        get_superforecast,
+        analyze_market_with_llm,
+        search_news,
+    )
+
+    # Domain-specific configurations (focusing on crypto and sports)
+    domain_configs = {
+        "crypto": {
+            "categories": ["crypto"],
+            "focus": "cryptocurrency prices, adoption, regulation, market predictions",
+            "keywords": ["bitcoin", "ethereum", "crypto", "blockchain", "regulation", "defi", "nft"]
+        },
+        "sports": {
+            "categories": ["sports"],
+            "focus": "sports outcomes, championships, player performance, tournament results",
+            "keywords": ["championship", "season", "playoffs", "tournament", "super bowl", "world series", "finals"]
+        },
+        "economy": {
+            "categories": ["economy", "finance"],
+            "focus": "economic indicators, recessions, inflation, GDP growth",
+            "keywords": ["recession", "inflation", "GDP", "Fed", "economy", "unemployment"]
+        },
+        "politics": {
+            "categories": ["politics"],
+            "focus": "elections, policy changes, political events",
+            "keywords": ["election", "president", "congress", "policy", "political"]
+        }
+    }
+
+    config = domain_configs.get(domain, {
+        "categories": None,
+        "focus": f"{domain} events and outcomes",
+        "keywords": [domain]
+    })
+
+    domain_tools = [
+        get_markets_by_category,
+        get_top_volume_markets,
+        search_markets_db,
+        get_superforecast,
+        analyze_market_with_llm,
+        search_news,
+    ]
+
+    agent = create_polymarket_agent(
+        model=model,
+        tools=domain_tools,
+        temperature=0.1,
+    )
+
+    # Store domain config for use in prompts
+    agent.domain_config = config
+    agent.risk_tolerance = risk_tolerance
+
+    return agent
+
+
+def analyze_business_risks(
+    business_type: str,
+    domain: str = "crypto",
+    model: str = "gpt-4o-mini"
+) -> str:
+    """Analyze business risks using Polymarket data for a specific business type.
+
+    Args:
+        business_type: Description of your business (e.g., "crypto trading firm")
+        domain: Business domain to focus on ("crypto", "sports", "economy", "politics")
+        model: OpenAI model to use
+
+    Returns:
+        Risk analysis and recommendations
+    """
+    agent = create_business_domain_agent(domain=domain, model=model)
+
+    query = f"""
+    Analyze business risks for a {business_type} using Polymarket prediction markets.
+
+    Business Type: {business_type}
+    Risk Domain Focus: {domain}
+
+    Provide:
+    1. Current market probabilities for relevant {domain} events
+    2. Risk assessment: Which events pose the biggest threats/opportunities?
+    3. Probability-weighted impact analysis
+    4. Recommended risk mitigation strategies
+    5. Market-based contingency planning advice
+
+    Focus on actionable insights for small business owners.
+    """
+
+    return run_agent(agent, query)
 
 
 def create_langgraph_trader():
@@ -380,23 +651,97 @@ def create_langgraph_trader():
 # EXAMPLE USAGE
 # =============================================================================
 
+def demo_probability_extraction():
+    """Demo the probability extraction agent."""
+    print("\n" + "="*60)
+    print("PROBABILITY EXTRACTION AGENT DEMO")
+    print("="*60)
+
+    agent = create_probability_extraction_agent()
+
+    query = """
+    Extract implied probabilities from current Polymarket data for major 2026 US economic events.
+    Focus on recession risks, Fed policy, and GDP growth. Summarize the top 5 markets with
+    highest volume and provide business-relevant insights for small business planning.
+    """
+
+    print("Query:", query.strip())
+    result = run_agent(agent, query)
+    print("\nResult:")
+    print(result)
+    return result
+
+
+def demo_ml_comparison():
+    """Demo comparing ML forecast against market consensus."""
+    print("\n" + "="*60)
+    print("ML FORECAST COMPARISON DEMO")
+    print("="*60)
+
+    # Example: Your ML model predicts 35% recession probability
+    ml_forecast = 0.35
+    event = "US recession in 2026"
+
+    print(f"Your ML Forecast: {ml_forecast:.1%} probability of {event}")
+
+    comparison = compare_ml_vs_market_forecast(
+        ml_forecast=ml_forecast,
+        event_description=event
+    )
+
+    print("\nComparison Analysis:")
+    print(comparison["comparison"])
+    return comparison
+
+
+def demo_business_risks():
+    """Demo business risk analysis using domain-specific agents."""
+    print("\n" + "="*60)
+    print("BUSINESS RISK ANALYSIS DEMO")
+    print("="*60)
+
+    business_type = "small retail business with physical locations"
+    domain = "economy"
+
+    print(f"Business Type: {business_type}")
+    print(f"Risk Domain: {domain}")
+
+    analysis = analyze_business_risks(
+        business_type=business_type,
+        domain=domain
+    )
+
+    print("\nRisk Analysis:")
+    print(analysis)
+    return analysis
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print("Polymarket LangChain Agent Examples")
     print("=" * 60)
 
-    # Example 1: Simple analysis
-    print("\n1. Creating simple analyst agent...")
-    agent = create_simple_analyst()
+    try:
+        # Demo 1: Probability extraction for business forecasting
+        demo_probability_extraction()
 
-    # Example 2: Run a query
-    print("\n2. Fetching current markets...")
-    result = run_agent(
-        agent, "What are the top 3 most interesting markets to trade right now?"
-    )
-    print(result)
+        # Demo 2: ML forecast comparison
+        demo_ml_comparison()
 
-    # Example 3: Find best trade (commented out - runs full workflow)
-    # print("\n3. Finding best trade...")
-    # trade = find_best_trade(category="politics", risk_tolerance="medium")
-    # print(trade["recommendation"])
+        # Demo 3: Business risk analysis
+        demo_business_risks()
+
+        print("\n" + "="*60)
+        print("TARGET EVENTS FOR TESTING:")
+        print("="*60)
+        print("• US 2026 Midterm Elections")
+        print("• Federal Reserve Interest Rate Decisions")
+        print("• Q4 2026 GDP Growth Forecasts")
+        print("• Bitcoin ETF Approval Outcomes")
+        print("• Major Tech Company Earnings (Meta, Google, Amazon)")
+        print("• Global Climate Agreement Progress")
+        print("• US-China Trade Relations")
+
+    except Exception as e:
+        print(f"Demo error: {e}")
+        print("Make sure you have OPENAI_API_KEY set and required dependencies installed.")

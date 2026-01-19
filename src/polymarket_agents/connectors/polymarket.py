@@ -28,7 +28,7 @@ from py_clob_client.clob_types import (
 )
 from py_clob_client.order_builder.constants import BUY
 
-from agents.utils.objects import SimpleMarket, SimpleEvent
+from polymarket_agents.utils.objects import SimpleMarket, SimpleEvent
 
 load_dotenv()
 
