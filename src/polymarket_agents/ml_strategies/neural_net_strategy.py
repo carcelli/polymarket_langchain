@@ -118,9 +118,8 @@ class NeuralNetStrategy(MLBettingStrategy):
         lr: float = 0.1,
         epochs: int = 20,
         bias: float | None = 1.0,
-        analyzer=None,
     ):
-        super().__init__("NeuralNetPredictor", analyzer)
+        super().__init__("NeuralNetPredictor")
         self.structure = structure
         self.lr = lr
         self.epochs = epochs

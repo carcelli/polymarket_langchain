@@ -14,7 +14,7 @@ from pathlib import Path
 
 from .github_agent import create_github_subagent, check_github_repo_status
 from ..ml_strategies import MarketPredictor, EdgeDetector
-from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.analysis import MarketAnalyzer
 
 
 class MLTestGenerator:
@@ -44,7 +44,7 @@ import pandas as pd
 from typing import Dict, List, Any
 
 from polymarket_agents.ml_strategies.{strategy_class.lower()} import {strategy_class}
-from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.analysis import MarketAnalyzer
 
 
 class Test{strategy_class}:
@@ -374,7 +374,7 @@ import pandas as pd
 from typing import Dict, List, Any
 
 {strategy_imports}
-from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.analysis import MarketAnalyzer
 
 
 class TestStrategyComparison:

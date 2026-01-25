@@ -17,19 +17,19 @@ class TestToolImports(unittest.TestCase):
 
     def test_import_tools_module(self):
         """Test tools module imports."""
-        from agents.langchain import tools
+        from polymarket_agents.langchain import tools
 
         self.assertIsNotNone(tools)
 
     def test_import_get_all_tools(self):
         """Test get_all_tools function exists."""
-        from agents.langchain.tools import get_all_tools
+        from polymarket_agents.langchain.tools import get_all_tools
 
         self.assertTrue(callable(get_all_tools))
 
     def test_get_all_tools_returns_list(self):
         """Test get_all_tools returns a list of tools."""
-        from agents.langchain.tools import get_all_tools
+        from polymarket_agents.langchain.tools import get_all_tools
 
         tools = get_all_tools()
         self.assertIsInstance(tools, list)
@@ -37,7 +37,7 @@ class TestToolImports(unittest.TestCase):
 
     def test_get_market_tools(self):
         """Test get_market_tools function."""
-        from agents.langchain.tools import get_market_tools
+        from polymarket_agents.langchain.tools import get_market_tools
 
         tools = get_market_tools()
         self.assertIsInstance(tools, list)
@@ -45,7 +45,7 @@ class TestToolImports(unittest.TestCase):
 
     def test_get_event_tools(self):
         """Test get_event_tools function."""
-        from agents.langchain.tools import get_event_tools
+        from polymarket_agents.langchain.tools import get_event_tools
 
         tools = get_event_tools()
         self.assertIsInstance(tools, list)
@@ -53,7 +53,7 @@ class TestToolImports(unittest.TestCase):
 
     def test_get_read_only_tools(self):
         """Test get_read_only_tools function."""
-        from agents.langchain.tools import get_read_only_tools
+        from polymarket_agents.langchain.tools import get_read_only_tools
 
         tools = get_read_only_tools()
         self.assertIsInstance(tools, list)
@@ -61,7 +61,7 @@ class TestToolImports(unittest.TestCase):
 
     def test_get_trading_tools(self):
         """Test get_trading_tools function."""
-        from agents.langchain.tools import get_trading_tools
+        from polymarket_agents.langchain.tools import get_trading_tools
 
         tools = get_trading_tools()
         self.assertIsInstance(tools, list)
@@ -69,7 +69,7 @@ class TestToolImports(unittest.TestCase):
 
     def test_get_analysis_tools(self):
         """Test get_analysis_tools function."""
-        from agents.langchain.tools import get_analysis_tools
+        from polymarket_agents.langchain.tools import get_analysis_tools
 
         tools = get_analysis_tools()
         self.assertIsInstance(tools, list)
@@ -81,7 +81,7 @@ class TestToolSchemas(unittest.TestCase):
 
     def test_market_query_input(self):
         """Test MarketQueryInput schema."""
-        from agents.langchain.tools import MarketQueryInput
+        from polymarket_agents.langchain.tools import MarketQueryInput
 
         # Test with defaults
         input_default = MarketQueryInput()
@@ -95,7 +95,7 @@ class TestToolSchemas(unittest.TestCase):
 
     def test_order_input(self):
         """Test OrderInput schema."""
-        from agents.langchain.tools import OrderInput
+        from polymarket_agents.langchain.tools import OrderInput
 
         order = OrderInput(token_id="12345", price=0.65, size=100.0, side="BUY")
         self.assertEqual(order.token_id, "12345")
@@ -105,7 +105,7 @@ class TestToolSchemas(unittest.TestCase):
 
     def test_forecast_input(self):
         """Test ForecastInput schema."""
-        from agents.langchain.tools import ForecastInput
+        from polymarket_agents.langchain.tools import ForecastInput
 
         forecast = ForecastInput(
             event_title="Test Event", market_question="Will X happen?", outcome="Yes"
@@ -120,7 +120,7 @@ class TestToolFunctionality(unittest.TestCase):
 
     def test_preview_order_buy(self):
         """Test preview_order for BUY side."""
-        from agents.langchain.tools import preview_order
+        from polymarket_agents.langchain.tools import preview_order
 
         result = preview_order.invoke(
             {"token_id": "12345", "price": 0.65, "size": 100.0, "side": "BUY"}
@@ -134,7 +134,7 @@ class TestToolFunctionality(unittest.TestCase):
 
     def test_preview_order_sell(self):
         """Test preview_order for SELL side."""
-        from agents.langchain.tools import preview_order
+        from polymarket_agents.langchain.tools import preview_order
 
         result = preview_order.invoke(
             {"token_id": "12345", "price": 0.65, "size": 100.0, "side": "SELL"}
@@ -146,7 +146,7 @@ class TestToolFunctionality(unittest.TestCase):
 
     def test_preview_order_invalid_side(self):
         """Test preview_order rejects invalid side."""
-        from agents.langchain.tools import preview_order
+        from polymarket_agents.langchain.tools import preview_order
 
         result = preview_order.invoke(
             {"token_id": "12345", "price": 0.65, "size": 100.0, "side": "INVALID"}
@@ -156,7 +156,7 @@ class TestToolFunctionality(unittest.TestCase):
 
     def test_preview_order_invalid_price(self):
         """Test preview_order rejects invalid price."""
-        from agents.langchain.tools import preview_order
+        from polymarket_agents.langchain.tools import preview_order
 
         result = preview_order.invoke(
             {
@@ -175,7 +175,7 @@ class TestToolHasCorrectMetadata(unittest.TestCase):
 
     def test_tools_have_names(self):
         """Test all tools have names."""
-        from agents.langchain.tools import get_all_tools
+        from polymarket_agents.langchain.tools import get_all_tools
 
         for tool in get_all_tools():
             self.assertIsNotNone(tool.name)
@@ -184,7 +184,7 @@ class TestToolHasCorrectMetadata(unittest.TestCase):
 
     def test_tools_have_descriptions(self):
         """Test all tools have descriptions."""
-        from agents.langchain.tools import get_all_tools
+        from polymarket_agents.langchain.tools import get_all_tools
 
         for tool in get_all_tools():
             self.assertIsNotNone(tool.description)
@@ -193,7 +193,7 @@ class TestToolHasCorrectMetadata(unittest.TestCase):
 
     def test_tool_names_are_unique(self):
         """Test all tool names are unique."""
-        from agents.langchain.tools import get_all_tools
+        from polymarket_agents.langchain.tools import get_all_tools
 
         tools = get_all_tools()
         names = [t.name for t in tools]
@@ -205,7 +205,7 @@ class TestAgentCreation(unittest.TestCase):
 
     def test_import_agent_module(self):
         """Test agent module imports."""
-        from agents.langchain import agent
+        from polymarket_agents.langchain import agent
 
         self.assertTrue(hasattr(agent, "create_polymarket_agent"))
         self.assertTrue(hasattr(agent, "create_simple_analyst"))
@@ -213,7 +213,7 @@ class TestAgentCreation(unittest.TestCase):
 
     def test_agent_functions_callable(self):
         """Test agent functions are callable."""
-        from agents.langchain.agent import (
+        from polymarket_agents.langchain.agent import (
             create_polymarket_agent,
             create_simple_analyst,
             create_research_agent,
@@ -235,14 +235,14 @@ class TestArgumentReference(unittest.TestCase):
 
     def test_argument_reference_exists(self):
         """Test ARGUMENT_REFERENCE constant exists."""
-        from agents.langchain.tools import ARGUMENT_REFERENCE
+        from polymarket_agents.langchain.tools import ARGUMENT_REFERENCE
 
         self.assertIsInstance(ARGUMENT_REFERENCE, str)
         self.assertGreater(len(ARGUMENT_REFERENCE), 100)
 
     def test_print_argument_reference(self):
         """Test print_argument_reference function exists."""
-        from agents.langchain.tools import print_argument_reference
+        from polymarket_agents.langchain.tools import print_argument_reference
 
         self.assertTrue(callable(print_argument_reference))
 

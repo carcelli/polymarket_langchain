@@ -10,7 +10,7 @@ from typing import List, Dict, Any
 from datetime import datetime, timedelta
 
 # Import our existing tools and utilities
-from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.analysis import MarketAnalyzer
 from polymarket_agents.utils.text import asciize
 from polymarket_agents.ml_strategies.registry import best_strategy
 

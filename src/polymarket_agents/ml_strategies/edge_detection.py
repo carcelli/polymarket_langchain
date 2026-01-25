@@ -31,8 +31,8 @@ class EdgeDetector(MLBettingStrategy):
     and predict when markets are mispriced.
     """
 
-    def __init__(self, analyzer=None, hidden_layers=[64, 32], learning_rate=0.001):
-        super().__init__("NeuralNetwork_EdgeDetector", analyzer)
+    def __init__(self, hidden_layers=[64, 32], learning_rate=0.001):
+        super().__init__("NeuralNetwork_EdgeDetector")
 
         if not TENSORFLOW_AVAILABLE:
             print("⚠️ Using simplified edge detection without neural networks")

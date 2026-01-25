@@ -12,8 +12,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
-from market_analysis_workflow import MarketAnalyzer
-
 
 @dataclass
 class StrategyResult:
@@ -41,9 +39,8 @@ class MLBettingStrategy(ABC):
     and result formatting.
     """
 
-    def __init__(self, name: str, analyzer: Optional[MarketAnalyzer] = None):
+    def __init__(self, name: str):
         self.name = name
-        self.analyzer = analyzer or MarketAnalyzer()
         self.trained = False
         self.feature_columns = []
 

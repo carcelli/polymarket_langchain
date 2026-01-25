@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from agents.graph.memory_agent import create_memory_agent, run_memory_agent
-from agents.graph.planning_agent import analyze_bet
+from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
+from polymarket_agents.graph.planning_agent import analyze_bet
 
 
 class TestEndToEndGraphs(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestEndToEndGraphs(unittest.TestCase):
         # We will mock run_memory_agent's internals if needed, but let's try to see if it runs.
         # Since we don't have a real API key for OpenAI probably, we should mock the LLM calls.
 
-        with patch("agents.graph.memory_agent.run_memory_agent") as mock_run:
+        with patch("polymarket_agents.graph.memory_agent.run_memory_agent") as mock_run:
             mock_run.return_value = {
                 "analysis": {"llm_response": "Analysis of the market indicates..."},
                 "memory_context": {},
@@ -52,8 +52,8 @@ class TestEndToEndGraphs(unittest.TestCase):
         from langchain_core.messages import AIMessage
 
         # Mock the necessary components
-        with patch("agents.memory.manager.MemoryManager") as mock_mm, patch(
-            "agents.polymarket.gamma.GammaMarketClient"
+        with patch("polymarket_agents.memory.manager.MemoryManager") as mock_mm, patch(
+            "polymarket_agents.connectors.gamma.GammaMarketClient"
         ) as mock_gamma, patch("langchain_openai.ChatOpenAI") as mock_llm_class:
 
             # Configure LLM mock to return AIMessage

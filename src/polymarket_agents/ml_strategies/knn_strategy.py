@@ -10,8 +10,8 @@ from .evaluation import classification_report
 class KNNEdgeDetector(MLBettingStrategy):
     """k-NN strategy using Euclidean distance with distance-weighted voting."""
 
-    def __init__(self, k: int = 5, analyzer=None):
-        super().__init__("KNNEdgeDetector", analyzer)
+    def __init__(self, k: int = 5):
+        super().__init__("KNNEdgeDetector")
         self.k = k
         self.historical_data = None  # Set during training
 

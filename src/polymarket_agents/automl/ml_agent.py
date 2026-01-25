@@ -10,6 +10,8 @@ from datetime import datetime
 import json
 import logging
 
+import pandas as pd
+
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI

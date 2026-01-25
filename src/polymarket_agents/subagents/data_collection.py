@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import json
 
 # Import our existing utilities
-from market_analysis_workflow import MarketAnalyzer
+from polymarket_agents.analysis import MarketAnalyzer
 
 
 def collect_market_data(

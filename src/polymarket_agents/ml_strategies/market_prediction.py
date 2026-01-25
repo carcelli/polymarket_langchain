@@ -23,8 +23,8 @@ class MarketPredictor(MLBettingStrategy):
     of market outcomes, then identifies edges against current market prices.
     """
 
-    def __init__(self, analyzer=None, n_estimators=100, max_depth=10):
-        super().__init__("RandomForest_MarketPredictor", analyzer)
+    def __init__(self, n_estimators=100, max_depth=10):
+        super().__init__("RandomForest_MarketPredictor")
         self.regressor = RandomForestRegressor(
             n_estimators=n_estimators, max_depth=max_depth, random_state=42, n_jobs=-1
         )
@@ -186,8 +186,8 @@ class EnsemblePredictor(MarketPredictor):
     Ensemble version using multiple models for improved predictions.
     """
 
-    def __init__(self, analyzer=None):
-        super().__init__(analyzer)
+    def __init__(self):
+        super().__init__()
         self.models = {
             "rf_small": RandomForestRegressor(
                 n_estimators=50, max_depth=5, random_state=42

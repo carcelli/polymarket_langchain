@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import os
 
-from agents.tools.github_tools import (
+from polymarket_agents.tools.github_tools import (
     _get_github_toolkit,
     _get_issues_impl,
     _get_issue_impl,
@@ -12,8 +12,8 @@ from agents.tools.github_tools import (
 
 class TestGitHubTools(unittest.TestCase):
 
-    @patch("agents.tools.github_tools.GitHubToolkit")
-    @patch("agents.tools.github_tools.GitHubAPIWrapper")
+    @patch("polymarket_agents.tools.github_tools.GitHubToolkit")
+    @patch("polymarket_agents.tools.github_tools.GitHubAPIWrapper")
     @patch.dict(
         os.environ,
         {
@@ -37,7 +37,7 @@ class TestGitHubTools(unittest.TestCase):
         toolkit = _get_github_toolkit()
         self.assertIsNone(toolkit)
 
-    @patch("agents.tools.github_tools._get_github_toolkit")
+    @patch("polymarket_agents.tools.github_tools._get_github_toolkit")
     def test_get_issues_impl(self, mock_get_toolkit):
         mock_tool = MagicMock()
         mock_tool.name = "Get Issues"
@@ -51,7 +51,7 @@ class TestGitHubTools(unittest.TestCase):
         self.assertEqual(result, "Issue list")
         mock_tool.invoke.assert_called_once()
 
-    @patch("agents.tools.github_tools._get_github_toolkit")
+    @patch("polymarket_agents.tools.github_tools._get_github_toolkit")
     def test_get_issue_impl(self, mock_get_toolkit):
         mock_tool = MagicMock()
         mock_tool.name = "Get Issue"
@@ -65,7 +65,7 @@ class TestGitHubTools(unittest.TestCase):
         self.assertEqual(result, "Issue details")
         mock_tool.invoke.assert_called_once_with({"issue_number": 1})
 
-    @patch("agents.tools.github_tools._get_github_toolkit")
+    @patch("polymarket_agents.tools.github_tools._get_github_toolkit")
     def test_create_issue_comment_impl(self, mock_get_toolkit):
         mock_tool = MagicMock()
         mock_tool.name = "Comment on Issue"

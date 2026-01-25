@@ -15,13 +15,13 @@ class TestCLOBToolImports(unittest.TestCase):
 
     def test_import_clob_tools_module(self):
         """Test importing the clob_tools module."""
-        from agents.langchain import clob_tools
+        from polymarket_agents.langchain import clob_tools
 
         self.assertIsNotNone(clob_tools)
 
     def test_import_tool_collections(self):
         """Test importing tool collection functions."""
-        from agents.langchain.clob_tools import (
+        from polymarket_agents.langchain.clob_tools import (
             get_all_clob_tools,
             get_clob_market_tools,
             get_clob_trading_tools,
@@ -39,7 +39,7 @@ class TestCLOBToolImports(unittest.TestCase):
 
     def test_import_individual_market_tools(self):
         """Test importing individual market data tools."""
-        from agents.langchain.clob_tools import (
+        from polymarket_agents.langchain.clob_tools import (
             clob_health_check,
             clob_get_server_time,
             clob_get_midpoint,
@@ -65,7 +65,7 @@ class TestCLOBToolImports(unittest.TestCase):
 
     def test_import_individual_trading_tools(self):
         """Test importing individual trading tools."""
-        from agents.langchain.clob_tools import (
+        from polymarket_agents.langchain.clob_tools import (
             clob_create_limit_order,
             clob_create_market_order,
             clob_cancel_order,
@@ -85,7 +85,7 @@ class TestCLOBToolImports(unittest.TestCase):
 
     def test_import_individual_rfq_tools(self):
         """Test importing individual RFQ tools."""
-        from agents.langchain.clob_tools import (
+        from polymarket_agents.langchain.clob_tools import (
             clob_create_rfq_request,
             clob_get_rfq_requests,
             clob_create_rfq_quote,
@@ -103,7 +103,7 @@ class TestCLOBToolImports(unittest.TestCase):
 
     def test_import_from_init(self):
         """Test importing from __init__.py."""
-        from agents.langchain import (
+        from polymarket_agents.langchain import (
             get_all_clob_tools,
             get_clob_market_tools,
             get_combined_tools,
@@ -121,7 +121,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_clob_market_tools_count(self):
         """Test market tools collection has expected count."""
-        from agents.langchain.clob_tools import get_clob_market_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_market_tools
 
         tools = get_clob_market_tools()
         self.assertIsInstance(tools, list)
@@ -129,7 +129,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_clob_trading_tools_count(self):
         """Test trading tools collection has expected count."""
-        from agents.langchain.clob_tools import get_clob_trading_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_trading_tools
 
         tools = get_clob_trading_tools()
         self.assertIsInstance(tools, list)
@@ -137,7 +137,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_clob_account_tools_count(self):
         """Test account tools collection has expected count."""
-        from agents.langchain.clob_tools import get_clob_account_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_account_tools
 
         tools = get_clob_account_tools()
         self.assertIsInstance(tools, list)
@@ -145,7 +145,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_clob_rfq_tools_count(self):
         """Test RFQ tools collection has expected count."""
-        from agents.langchain.clob_tools import get_clob_rfq_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_rfq_tools
 
         tools = get_clob_rfq_tools()
         self.assertIsInstance(tools, list)
@@ -153,7 +153,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_all_clob_tools_count(self):
         """Test all CLOB tools collection has expected total."""
-        from agents.langchain.clob_tools import get_all_clob_tools
+        from polymarket_agents.langchain.clob_tools import get_all_clob_tools
 
         tools = get_all_clob_tools()
         self.assertIsInstance(tools, list)
@@ -162,7 +162,7 @@ class TestCLOBToolCollections(unittest.TestCase):
 
     def test_get_clob_readonly_tools(self):
         """Test readonly tools only includes market tools."""
-        from agents.langchain.clob_tools import (
+        from polymarket_agents.langchain.clob_tools import (
             get_clob_readonly_tools,
             get_clob_market_tools,
         )
@@ -177,7 +177,7 @@ class TestCLOBToolsHaveRequiredAttributes(unittest.TestCase):
 
     def test_market_tools_have_name_and_description(self):
         """Test market tools have name and description."""
-        from agents.langchain.clob_tools import get_clob_market_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_market_tools
 
         tools = get_clob_market_tools()
         for tool in tools:
@@ -189,7 +189,7 @@ class TestCLOBToolsHaveRequiredAttributes(unittest.TestCase):
 
     def test_trading_tools_have_name_and_description(self):
         """Test trading tools have name and description."""
-        from agents.langchain.clob_tools import get_clob_trading_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_trading_tools
 
         tools = get_clob_trading_tools()
         for tool in tools:
@@ -198,7 +198,7 @@ class TestCLOBToolsHaveRequiredAttributes(unittest.TestCase):
 
     def test_rfq_tools_have_name_and_description(self):
         """Test RFQ tools have name and description."""
-        from agents.langchain.clob_tools import get_clob_rfq_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_rfq_tools
 
         tools = get_clob_rfq_tools()
         for tool in tools:
@@ -211,7 +211,7 @@ class TestCLOBToolArgumentReference(unittest.TestCase):
 
     def test_argument_reference_exists(self):
         """Test CLOB argument reference string exists."""
-        from agents.langchain.clob_tools import CLOB_ARGUMENT_REFERENCE
+        from polymarket_agents.langchain.clob_tools import CLOB_ARGUMENT_REFERENCE
 
         self.assertIsNotNone(CLOB_ARGUMENT_REFERENCE)
         self.assertIn("CLOB TOOLS", CLOB_ARGUMENT_REFERENCE)
@@ -221,7 +221,7 @@ class TestCLOBToolArgumentReference(unittest.TestCase):
 
     def test_print_argument_reference_callable(self):
         """Test print_clob_argument_reference is callable."""
-        from agents.langchain.clob_tools import print_clob_argument_reference
+        from polymarket_agents.langchain.clob_tools import print_clob_argument_reference
 
         self.assertTrue(callable(print_clob_argument_reference))
 
@@ -231,8 +231,8 @@ class TestCLOBCombinedTools(unittest.TestCase):
 
     def test_get_combined_tools(self):
         """Test get_combined_tools returns both agent and CLOB tools."""
-        from agents.langchain import get_combined_tools, get_all_tools
-        from agents.langchain.clob_tools import get_all_clob_tools
+        from polymarket_agents.langchain import get_combined_tools, get_all_tools
+        from polymarket_agents.langchain.clob_tools import get_all_clob_tools
 
         combined = get_combined_tools()
         agent_tools = get_all_tools()
@@ -242,8 +242,8 @@ class TestCLOBCombinedTools(unittest.TestCase):
 
     def test_get_combined_readonly_tools(self):
         """Test get_combined_readonly_tools returns readonly tools from both."""
-        from agents.langchain import get_combined_readonly_tools, get_read_only_tools
-        from agents.langchain.clob_tools import get_clob_readonly_tools
+        from polymarket_agents.langchain import get_combined_readonly_tools, get_read_only_tools
+        from polymarket_agents.langchain.clob_tools import get_clob_readonly_tools
 
         combined = get_combined_readonly_tools()
         agent_readonly = get_read_only_tools()
@@ -255,11 +255,11 @@ class TestCLOBCombinedTools(unittest.TestCase):
 class TestCLOBToolsMocked(unittest.TestCase):
     """Test CLOB tools with mocked client."""
 
-    @patch("agents.langchain.clob_tools._clob_client_readonly")
+    @patch("polymarket_agents.langchain.clob_tools._clob_client_readonly")
     def test_health_check_with_mock(self, mock_client):
         """Test health check tool with mocked client."""
-        from agents.langchain.clob_tools import clob_health_check
-        import agents.langchain.clob_tools as clob_module
+        from polymarket_agents.langchain.clob_tools import clob_health_check
+        import polymarket_agents.langchain.clob_tools as clob_module
 
         # Reset the global client
         clob_module._clob_client_readonly = None
@@ -273,11 +273,11 @@ class TestCLOBToolsMocked(unittest.TestCase):
             result = clob_health_check.invoke({})
             self.assertIn("OK", result)
 
-    @patch("agents.langchain.clob_tools._clob_client_readonly")
+    @patch("polymarket_agents.langchain.clob_tools._clob_client_readonly")
     def test_get_midpoint_with_mock(self, mock_client):
         """Test get_midpoint tool with mocked client."""
-        from agents.langchain.clob_tools import clob_get_midpoint
-        import agents.langchain.clob_tools as clob_module
+        from polymarket_agents.langchain.clob_tools import clob_get_midpoint
+        import polymarket_agents.langchain.clob_tools as clob_module
 
         clob_module._clob_client_readonly = None
 
@@ -296,7 +296,7 @@ class TestCLOBPydanticSchemas(unittest.TestCase):
 
     def test_clob_order_args_schema(self):
         """Test CLOBOrderArgs schema."""
-        from agents.langchain.clob_tools import CLOBOrderArgs
+        from polymarket_agents.langchain.clob_tools import CLOBOrderArgs
 
         # Valid order
         order = CLOBOrderArgs(token_id="12345", price=0.50, size=10.0, side="BUY")
@@ -307,7 +307,7 @@ class TestCLOBPydanticSchemas(unittest.TestCase):
 
     def test_clob_market_order_args_schema(self):
         """Test CLOBMarketOrderArgs schema."""
-        from agents.langchain.clob_tools import CLOBMarketOrderArgs
+        from polymarket_agents.langchain.clob_tools import CLOBMarketOrderArgs
 
         order = CLOBMarketOrderArgs(token_id="12345", amount=100.0, side="SELL")
         self.assertEqual(order.token_id, "12345")

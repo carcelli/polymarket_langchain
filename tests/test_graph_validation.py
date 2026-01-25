@@ -1,7 +1,7 @@
 import unittest
 from langgraph.graph import StateGraph, END
-from agents.graph.memory_agent import create_memory_agent
-from agents.graph.planning_agent import create_planning_agent
+from polymarket_agents.graph.memory_agent import create_memory_agent
+from polymarket_agents.graph.planning_agent import create_planning_agent
 
 
 class TestGraphStructure(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestGraphStructure(unittest.TestCase):
 
     def test_graph_reducer_functions(self):
         """Test that state reducers work correctly."""
-        from agents.graph.state import AgentState
+        from polymarket_agents.graph.state import AgentState
         from langchain_core.messages import HumanMessage, AIMessage
 
         # Test messages reducer
