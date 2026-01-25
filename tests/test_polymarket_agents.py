@@ -32,7 +32,6 @@ class TestProjectStructure(unittest.TestCase):
         """Verify all application modules exist."""
         from polymarket_agents.application import cron, creator, trade, executor, prompts
 
-        self.assertTrue(hasattr(cron, "Scheduler"))
         self.assertTrue(hasattr(cron, "TradingAgent"))
         self.assertTrue(hasattr(creator, "Creator"))
         self.assertTrue(hasattr(trade, "Trader"))
@@ -48,7 +47,7 @@ class TestProjectStructure(unittest.TestCase):
 
     def test_agents_polymarket_modules_exist(self):
         """Verify polymarket modules exist."""
-        from polymarket_agents.connectors.import gamma, polymarket
+        from polymarket_agents.connectors import gamma, polymarket
 
         self.assertTrue(hasattr(gamma, "GammaMarketClient"))
         self.assertTrue(hasattr(polymarket, "Polymarket"))

@@ -41,7 +41,7 @@ class TestToolImports(unittest.TestCase):
 
         tools = get_market_tools()
         self.assertIsInstance(tools, list)
-        self.assertEqual(len(tools), 6)
+        self.assertEqual(len(tools), 7)
 
     def test_get_event_tools(self):
         """Test get_event_tools function."""
@@ -73,7 +73,7 @@ class TestToolImports(unittest.TestCase):
 
         tools = get_analysis_tools()
         self.assertIsInstance(tools, list)
-        self.assertEqual(len(tools), 6)
+        self.assertEqual(len(tools), 7)
 
 
 class TestToolSchemas(unittest.TestCase):
