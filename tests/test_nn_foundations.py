@@ -15,7 +15,7 @@ from polymarket_agents.ml_foundations import (
     precision_recall,
     sigmoid,
     softmax,
-    cross_entropy_loss
+    cross_entropy_loss,
 )
 
 
@@ -83,8 +83,12 @@ class TestUtils:
         # Some errors
         cm = np.array([[8, 2], [1, 9]])
         prec, rec = precision_recall(cm)
-        expected_prec = (8/10 + 9/10) / 2  # Class 0: 8/(8+2)=0.8, Class 1: 9/(9+1)=0.9
-        expected_rec = (8/9 + 9/11) / 2    # Class 0: 8/(8+1)≈0.889, Class 1: 9/(9+2)≈0.818
+        expected_prec = (
+            8 / 10 + 9 / 10
+        ) / 2  # Class 0: 8/(8+2)=0.8, Class 1: 9/(9+1)=0.9
+        expected_rec = (
+            8 / 9 + 9 / 11
+        ) / 2  # Class 0: 8/(8+1)≈0.889, Class 1: 9/(9+2)≈0.818
         assert abs(prec - expected_prec) < 0.01
         assert abs(rec - expected_rec) < 0.01
 
@@ -153,24 +157,21 @@ class TestNeuralNetwork:
             n_outputs=1,
             lr=0.5,
             use_softmax=False,
-            random_seed=42
+            random_seed=42,
         )
 
         # XOR training data
-        X = np.array([
-            [0, 0],
-            [0, 1],
-            [1, 0],
-            [1, 1]
-        ])
+        X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 
         # Target: XOR outputs
-        y = np.array([
-            [0.01],  # 0 XOR 0 = 0
-            [0.99],  # 0 XOR 1 = 1
-            [0.99],  # 1 XOR 0 = 1
-            [0.01]   # 1 XOR 1 = 0
-        ])
+        y = np.array(
+            [
+                [0.01],  # 0 XOR 0 = 0
+                [0.99],  # 0 XOR 1 = 1
+                [0.99],  # 1 XOR 0 = 1
+                [0.01],  # 1 XOR 1 = 0
+            ]
+        )
 
         # Train for many epochs
         losses = nn.batch_train(X, y, epochs=5000, verbose=False)
@@ -196,23 +197,27 @@ class TestNeuralNetwork:
             n_outputs=3,
             lr=0.1,
             use_softmax=True,
-            random_seed=42
+            random_seed=42,
         )
 
         # Create simple training data
-        X = np.array([
-            [1, 0, 0, 0],  # Class 0 pattern
-            [0, 1, 0, 0],  # Class 1 pattern
-            [0, 0, 1, 0],  # Class 2 pattern
-            [0, 0, 0, 1],  # Class 2 pattern
-        ])
+        X = np.array(
+            [
+                [1, 0, 0, 0],  # Class 0 pattern
+                [0, 1, 0, 0],  # Class 1 pattern
+                [0, 0, 1, 0],  # Class 2 pattern
+                [0, 0, 0, 1],  # Class 2 pattern
+            ]
+        )
 
-        y = np.array([
-            [0.99, 0.01, 0.01],  # Class 0
-            [0.01, 0.99, 0.01],  # Class 1
-            [0.01, 0.01, 0.99],  # Class 2
-            [0.01, 0.01, 0.99],  # Class 2
-        ])
+        y = np.array(
+            [
+                [0.99, 0.01, 0.01],  # Class 0
+                [0.01, 0.99, 0.01],  # Class 1
+                [0.01, 0.01, 0.99],  # Class 2
+                [0.01, 0.01, 0.99],  # Class 2
+            ]
+        )
 
         # Train
         nn.batch_train(X, y, epochs=1000, verbose=False)
@@ -227,13 +232,17 @@ class TestNeuralNetwork:
             confidence = full_pred[pred_class]
 
             # Should have reasonable confidence in prediction
-            assert confidence > 0.2, f"Low confidence {confidence:.3f} for class {pred_class}"
+            assert (
+                confidence > 0.2
+            ), f"Low confidence {confidence:.3f} for class {pred_class}"
             # Ideally should get it right, but XOR test is more important
             # assert pred_class == true_class, f"Misclassified {x}: predicted {pred_class}, true {true_class}"
 
     def test_evaluation(self):
         """Test network evaluation metrics."""
-        nn = NeuralNetwork(n_inputs=2, n_hidden=3, n_outputs=1, use_softmax=False, random_seed=42)
+        nn = NeuralNetwork(
+            n_inputs=2, n_hidden=3, n_outputs=1, use_softmax=False, random_seed=42
+        )
 
         # Simple test data
         X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
@@ -241,16 +250,18 @@ class TestNeuralNetwork:
 
         results = nn.evaluate(X, y)
 
-        assert 'accuracy' in results
-        assert 'avg_loss' in results
-        assert 'predictions' in results
-        assert isinstance(results['predictions'], np.ndarray)
-        assert results['predictions'].shape == (4, 1)
+        assert "accuracy" in results
+        assert "avg_loss" in results
+        assert "predictions" in results
+        assert isinstance(results["predictions"], np.ndarray)
+        assert results["predictions"].shape == (4, 1)
 
     def test_evaluate_dataset(self):
         """Test comprehensive dataset evaluation."""
         # Multi-class classification
-        nn = NeuralNetwork(n_inputs=4, n_hidden=5, n_outputs=3, use_softmax=True, random_seed=42)
+        nn = NeuralNetwork(
+            n_inputs=4, n_hidden=5, n_outputs=3, use_softmax=True, random_seed=42
+        )
 
         # Create test data
         X = np.random.randn(20, 4)
@@ -258,47 +269,76 @@ class TestNeuralNetwork:
 
         results = nn.evaluate_dataset(X, y_onehot)
 
-        required_keys = ['accuracy', 'precision', 'recall', 'f1_score', 'confusion_matrix']
+        required_keys = [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1_score",
+            "confusion_matrix",
+        ]
         for key in required_keys:
             assert key in results, f"Missing key: {key}"
 
-        assert isinstance(results['confusion_matrix'], np.ndarray)
-        assert results['confusion_matrix'].shape == (3, 3)
-        assert 0 <= results['accuracy'] <= 1
-        assert 0 <= results['precision'] <= 1
-        assert 0 <= results['recall'] <= 1
-        assert 0 <= results['f1_score'] <= 1
+        assert isinstance(results["confusion_matrix"], np.ndarray)
+        assert results["confusion_matrix"].shape == (3, 3)
+        assert 0 <= results["accuracy"] <= 1
+        assert 0 <= results["precision"] <= 1
+        assert 0 <= results["recall"] <= 1
+        assert 0 <= results["f1_score"] <= 1
 
     def test_predict_method(self):
         """Test predict method returns appropriate types."""
         # Classification network
-        nn_clf = NeuralNetwork(n_inputs=2, n_hidden=3, n_outputs=3, use_softmax=True, random_seed=42)
+        nn_clf = NeuralNetwork(
+            n_inputs=2, n_hidden=3, n_outputs=3, use_softmax=True, random_seed=42
+        )
         x = np.array([0.5, 0.7])
         pred_clf = nn_clf.predict(x)
-        assert isinstance(pred_clf, (int, np.integer)), f"Expected int, got {type(pred_clf)}"
+        assert isinstance(
+            pred_clf, (int, np.integer)
+        ), f"Expected int, got {type(pred_clf)}"
 
         # Regression/binary network
-        nn_reg = NeuralNetwork(n_inputs=2, n_hidden=3, n_outputs=1, use_softmax=False, random_seed=42)
+        nn_reg = NeuralNetwork(
+            n_inputs=2, n_hidden=3, n_outputs=1, use_softmax=False, random_seed=42
+        )
         pred_reg = nn_reg.predict(x)
-        assert isinstance(pred_reg, np.ndarray), f"Expected ndarray, got {type(pred_reg)}"
+        assert isinstance(
+            pred_reg, np.ndarray
+        ), f"Expected ndarray, got {type(pred_reg)}"
 
     def test_multilayer_network(self):
         """Test multi-layer network creation and training."""
         # Create 4-layer network [4, 6, 4, 2]
         nn = NeuralNetwork.from_layers([4, 6, 4, 2], random_seed=42)
 
-        assert len(nn.weights) == 3, f"Expected 3 weight matrices, got {len(nn.weights)}"
-        assert nn.weights[0].shape == (6, 5), f"First layer shape: expected (6, 5), got {nn.weights[0].shape}"
-        assert nn.weights[1].shape == (4, 7), f"Second layer shape: expected (4, 7), got {nn.weights[1].shape}"
-        assert nn.weights[2].shape == (2, 5), f"Third layer shape: expected (2, 5), got {nn.weights[2].shape}"
+        assert (
+            len(nn.weights) == 3
+        ), f"Expected 3 weight matrices, got {len(nn.weights)}"
+        assert nn.weights[0].shape == (
+            6,
+            5,
+        ), f"First layer shape: expected (6, 5), got {nn.weights[0].shape}"
+        assert nn.weights[1].shape == (
+            4,
+            7,
+        ), f"Second layer shape: expected (4, 7), got {nn.weights[1].shape}"
+        assert nn.weights[2].shape == (
+            2,
+            5,
+        ), f"Third layer shape: expected (2, 5), got {nn.weights[2].shape}"
 
         # Test forward pass
         x = np.array([0.1, 0.2, 0.3, 0.4])
         output, activations = nn.forward(x)
 
         assert output.shape == (2,), f"Output shape: expected (2,), got {output.shape}"
-        assert len(activations) == 4, f"Expected 4 activation layers, got {len(activations)}"
-        assert activations[0].shape == (5,), f"Input activation shape: expected (5,), got {activations[0].shape}"
+        assert (
+            len(activations) == 4
+        ), f"Expected 4 activation layers, got {len(activations)}"
+        assert activations[0].shape == (
+            5,
+        ), f"Input activation shape: expected (5,), got {activations[0].shape}"
 
         # Test training
         target = np.array([1, 0])  # One-hot for class 0
@@ -312,10 +352,16 @@ class TestNeuralNetwork:
         nn_old = NeuralNetwork(n_inputs=4, n_hidden=5, n_outputs=3, random_seed=42)
 
         # Should have old attributes
-        assert hasattr(nn_old, 'wih'), "Should have wih attribute"
-        assert hasattr(nn_old, 'who'), "Should have who attribute"
-        assert nn_old.wih.shape == (5, 5), f"wih shape: expected (5, 5), got {nn_old.wih.shape}"
-        assert nn_old.who.shape == (3, 6), f"who shape: expected (3, 6), got {nn_old.who.shape}"
+        assert hasattr(nn_old, "wih"), "Should have wih attribute"
+        assert hasattr(nn_old, "who"), "Should have who attribute"
+        assert nn_old.wih.shape == (
+            5,
+            5,
+        ), f"wih shape: expected (5, 5), got {nn_old.wih.shape}"
+        assert nn_old.who.shape == (
+            3,
+            6,
+        ), f"who shape: expected (3, 6), got {nn_old.who.shape}"
 
         # Should work with old methods
         x = np.array([0.1, 0.2, 0.3, 0.4])
@@ -333,7 +379,7 @@ class TestNeuralNetwork:
 
         nn1 = NeuralNetwork(n_inputs=2, n_hidden=3, n_outputs=1, random_seed=42)
 
-        with tempfile.NamedTemporaryFile(suffix='.npz', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".npz", delete=False) as f:
             filepath = f.name
 
         try:
@@ -365,15 +411,17 @@ class TestPolymarketIntegration:
             n_hidden=3,
             n_outputs=1,  # Binary: above/below current probability
             use_softmax=False,
-            random_seed=42
+            random_seed=42,
         )
 
         # Mock market data: [volume, spread, sentiment, age, liquidity]
-        market_features = np.array([
-            [1000, 0.05, 0.7, 30, 0.8],   # Likely to rise
-            [100, 0.15, 0.3, 5, 0.3],     # Likely to fall
-            [500, 0.08, 0.6, 15, 0.6],    # Mixed
-        ])
+        market_features = np.array(
+            [
+                [1000, 0.05, 0.7, 30, 0.8],  # Likely to rise
+                [100, 0.15, 0.3, 5, 0.3],  # Likely to fall
+                [500, 0.08, 0.6, 15, 0.6],  # Mixed
+            ]
+        )
 
         # Target: probability direction (1=rise, 0=fall)
         targets = np.array([[0.99], [0.01], [0.5]])
@@ -393,14 +441,16 @@ class TestPolymarketIntegration:
             n_hidden=2,
             n_outputs=1,  # Edge prediction
             use_softmax=False,
-            random_seed=42
+            random_seed=42,
         )
 
         # Features from Polymarket data
-        features = np.array([
-            [0.65, 1000, 0.02],  # High volume, tight spread
-            [0.52, 100, 0.08],   # Low volume, wide spread
-        ])
+        features = np.array(
+            [
+                [0.65, 1000, 0.02],  # High volume, tight spread
+                [0.52, 100, 0.08],  # Low volume, wide spread
+            ]
+        )
 
         # Target: edge exists (1=yes, 0=no)
         targets = np.array([[0.99], [0.01]])

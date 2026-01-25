@@ -17,12 +17,15 @@ import logging
 # Add project root to path
 sys.path.append(str(Path(__file__).parents[2] / "src"))
 
-from polymarket_agents.automl import AutoMLPipeline, PolymarketDataIngestion, DataQualityValidator
+from polymarket_agents.automl import (
+    AutoMLPipeline,
+    PolymarketDataIngestion,
+    DataQualityValidator,
+)
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -34,13 +37,13 @@ def run_automl_pipeline(args):
 
     # Configuration
     config = {
-        'output_dir': args.output_dir,
-        'data_days_back': args.days_back,
-        'min_volume': args.min_volume,
-        'test_size': args.test_size,
-        'models_to_train': args.models,
-        'enable_github_integration': args.github,
-        'auto_generate_tests': args.generate_tests
+        "output_dir": args.output_dir,
+        "data_days_back": args.days_back,
+        "min_volume": args.min_volume,
+        "test_size": args.test_size,
+        "models_to_train": args.models,
+        "enable_github_integration": args.github,
+        "auto_generate_tests": args.generate_tests,
     }
 
     print(f"Configuration:")
@@ -63,7 +66,7 @@ def run_automl_pipeline(args):
     duration = (end_time - start_time).total_seconds()
 
     # Report results
-    if results['success']:
+    if results["success"]:
         print("\\n✅ Pipeline completed successfully!")
         print(f"⏱️ Duration: {duration:.1f} seconds")
         print("\\n📊 Results Summary:")
@@ -73,14 +76,14 @@ def run_automl_pipeline(args):
         print(f"   🔧 Features: {results['data_summary']['features_count']}")
         print(f"   📁 Output Directory: {args.output_dir}")
 
-        if args.github and 'tests' in results.get('reports', {}):
+        if args.github and "tests" in results.get("reports", {}):
             print("\\n🧪 Automated Tests Generated:")
-            test_files = results['reports']['tests'].get('files', {})
+            test_files = results["reports"]["tests"].get("files", {})
             for filename in test_files.keys():
                 print(f"   • {filename}")
 
         print("\\n🎯 Key Insights:")
-        best_metrics = results['best_model'].get('metrics', {})
+        best_metrics = results["best_model"].get("metrics", {})
         if best_metrics:
             print(f"   📈 Accuracy: {best_metrics.get('accuracy', 0):.1%}")
             print(f"   🎯 F1 Score: {best_metrics.get('f1', 0):.3f}")
@@ -99,7 +102,9 @@ def check_data_quality(args):
 
     # Load data
     ingestion = PolymarketDataIngestion()
-    data = ingestion.create_training_dataset(days_back=args.days_back, min_volume=args.min_volume)
+    data = ingestion.create_training_dataset(
+        days_back=args.days_back, min_volume=args.min_volume
+    )
 
     if data.empty:
         print("❌ No data available")
@@ -111,21 +116,23 @@ def check_data_quality(args):
 
     print("\\n📊 Data Quality Report:")
     print(f"   📈 Readiness Score: {quality_report['readiness_score']}/100")
-    print(f"   📋 Ready for ML: {'✅ Yes' if quality_report['ready_for_ml'] else '❌ No'}")
+    print(
+        f"   📋 Ready for ML: {'✅ Yes' if quality_report['ready_for_ml'] else '❌ No'}"
+    )
     print(f"   📏 Dataset Shape: {quality_report['dataset_info']['shape']}")
 
-    if quality_report['recommendations']:
+    if quality_report["recommendations"]:
         print("\\n💡 Recommendations:")
-        for rec in quality_report['recommendations'][:5]:
+        for rec in quality_report["recommendations"][:5]:
             print(f"   • {rec}")
 
     # Class balance
-    balance = quality_report.get('class_balance', {})
+    balance = quality_report.get("class_balance", {})
     if balance:
         print("\\n⚖️ Class Balance:")
-        dist = balance.get('class_distribution', {})
+        dist = balance.get("class_distribution", {})
         for cls, count in dist.items():
-            pct = count / balance.get('total_samples', 1) * 100
+            pct = count / balance.get("total_samples", 1) * 100
             print(f"   {cls}: {count} samples ({pct:.1f}%)")
     return quality_report
 
@@ -141,12 +148,12 @@ def predict_with_model(args):
 
         # Create sample market data (in practice, this would come from API)
         sample_market = {
-            'id': 'prediction_test',
-            'question': args.question or 'Will this prediction be accurate?',
-            'category': args.category or 'politics',
-            'volume': args.volume or 50000,
-            'outcome_prices': [args.price, 1 - args.price],
-            'liquidity': args.liquidity or 10000
+            "id": "prediction_test",
+            "question": args.question or "Will this prediction be accurate?",
+            "category": args.category or "politics",
+            "volume": args.volume or 50000,
+            "outcome_prices": [args.price, 1 - args.price],
+            "liquidity": args.liquidity or 10000,
         }
 
         result = pipeline.predict_with_deployed_model(sample_market)
@@ -159,7 +166,7 @@ def predict_with_model(args):
         print(f"   🎯 Confidence: {result.get('confidence', 0):.1%}")
         print(f"   🤖 Model: {result['model_name']}")
 
-        if result['reasoning']:
+        if result["reasoning"]:
             print(f"   📝 Reasoning: {result['reasoning'][:200]}...")
 
     except Exception as e:
@@ -191,26 +198,28 @@ def show_pipeline_history(args):
 
     for i, result_file in enumerate(result_files[:10]):  # Show last 10
         try:
-            with open(result_file, 'r') as f:
+            with open(result_file, "r") as f:
                 results = json.load(f)
 
-            success = results.get('success', False)
+            success = results.get("success", False)
             status = "✅ Success" if success else "❌ Failed"
 
-            start_time = results.get('pipeline_metadata', {}).get('start_time', 'Unknown')
-            duration = results.get('pipeline_metadata', {}).get('duration_seconds', 0)
+            start_time = results.get("pipeline_metadata", {}).get(
+                "start_time", "Unknown"
+            )
+            duration = results.get("pipeline_metadata", {}).get("duration_seconds", 0)
 
             if success:
-                best_model = results.get('best_model', {}).get('name', 'Unknown')
-                score = results.get('best_model', {}).get('score', 0)
-                samples = results.get('data_summary', {}).get('final_samples', 0)
+                best_model = results.get("best_model", {}).get("name", "Unknown")
+                score = results.get("best_model", {}).get("score", 0)
+                samples = results.get("data_summary", {}).get("final_samples", 0)
 
                 print(f"{i+1}. {result_file.name}")
                 print(f"   {status} - {best_model} (score: {score:.4f})")
                 print(f"   📊 {samples} samples, {duration:.1f}s")
                 print(f"   🕐 {start_time}")
             else:
-                error = results.get('error', 'Unknown error')
+                error = results.get("error", "Unknown error")
                 print(f"{i+1}. {result_file.name}")
                 print(f"   {status} - {error[:50]}...")
                 print(f"   🕐 {start_time}")
@@ -240,58 +249,88 @@ Examples:
 
   # Show pipeline history
   python automl_cli.py history
-        """
+        """,
     )
 
-    parser.add_argument('--verbose', '-v', action='store_true',
-                       help='Enable verbose logging')
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+    )
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Run pipeline command
-    run_parser = subparsers.add_parser('run', help='Run complete AutoML pipeline')
-    run_parser.add_argument('--days-back', type=int, default=365,
-                           help='Days of historical data to use')
-    run_parser.add_argument('--min-volume', type=float, default=1000,
-                           help='Minimum market volume threshold')
-    run_parser.add_argument('--test-size', type=float, default=0.2,
-                           help='Test set size (0.0-1.0)')
-    run_parser.add_argument('--models', nargs='+',
-                           default=['MarketPredictor', 'EdgeDetector'],
-                           help='Models to train')
-    run_parser.add_argument('--output-dir', type=str, default='./automl_output',
-                           help='Output directory for results')
-    run_parser.add_argument('--github', action='store_true',
-                           help='Enable GitHub integration for test commits')
-    run_parser.add_argument('--generate-tests', action='store_true', default=True,
-                           help='Generate automated tests')
+    run_parser = subparsers.add_parser("run", help="Run complete AutoML pipeline")
+    run_parser.add_argument(
+        "--days-back", type=int, default=365, help="Days of historical data to use"
+    )
+    run_parser.add_argument(
+        "--min-volume", type=float, default=1000, help="Minimum market volume threshold"
+    )
+    run_parser.add_argument(
+        "--test-size", type=float, default=0.2, help="Test set size (0.0-1.0)"
+    )
+    run_parser.add_argument(
+        "--models",
+        nargs="+",
+        default=["MarketPredictor", "EdgeDetector"],
+        help="Models to train",
+    )
+    run_parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="./automl_output",
+        help="Output directory for results",
+    )
+    run_parser.add_argument(
+        "--github",
+        action="store_true",
+        help="Enable GitHub integration for test commits",
+    )
+    run_parser.add_argument(
+        "--generate-tests",
+        action="store_true",
+        default=True,
+        help="Generate automated tests",
+    )
 
     # Quality check command
-    quality_parser = subparsers.add_parser('quality', help='Check data quality')
-    quality_parser.add_argument('--days-back', type=int, default=180,
-                               help='Days of data to check')
-    quality_parser.add_argument('--min-volume', type=float, default=1000,
-                               help='Minimum volume threshold')
+    quality_parser = subparsers.add_parser("quality", help="Check data quality")
+    quality_parser.add_argument(
+        "--days-back", type=int, default=180, help="Days of data to check"
+    )
+    quality_parser.add_argument(
+        "--min-volume", type=float, default=1000, help="Minimum volume threshold"
+    )
 
     # Predict command
-    predict_parser = subparsers.add_parser('predict', help='Make predictions with deployed model')
-    predict_parser.add_argument('--question', type=str,
-                               help='Market question')
-    predict_parser.add_argument('--category', type=str, default='politics',
-                               help='Market category')
-    predict_parser.add_argument('--price', type=float, default=0.5,
-                               help='Current market price (0.0-1.0)')
-    predict_parser.add_argument('--volume', type=int, default=50000,
-                               help='Market volume')
-    predict_parser.add_argument('--liquidity', type=int, default=10000,
-                               help='Market liquidity')
-    predict_parser.add_argument('--model-name', type=str,
-                               help='Specific model name to use')
+    predict_parser = subparsers.add_parser(
+        "predict", help="Make predictions with deployed model"
+    )
+    predict_parser.add_argument("--question", type=str, help="Market question")
+    predict_parser.add_argument(
+        "--category", type=str, default="politics", help="Market category"
+    )
+    predict_parser.add_argument(
+        "--price", type=float, default=0.5, help="Current market price (0.0-1.0)"
+    )
+    predict_parser.add_argument(
+        "--volume", type=int, default=50000, help="Market volume"
+    )
+    predict_parser.add_argument(
+        "--liquidity", type=int, default=10000, help="Market liquidity"
+    )
+    predict_parser.add_argument(
+        "--model-name", type=str, help="Specific model name to use"
+    )
 
     # History command
-    history_parser = subparsers.add_parser('history', help='Show pipeline run history')
-    history_parser.add_argument('--output-dir', type=str, default='./automl_output',
-                               help='Output directory to check')
+    history_parser = subparsers.add_parser("history", help="Show pipeline run history")
+    history_parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="./automl_output",
+        help="Output directory to check",
+    )
 
     args = parser.parse_args()
 
@@ -303,13 +342,13 @@ Examples:
         return
 
     try:
-        if args.command == 'run':
+        if args.command == "run":
             run_automl_pipeline(args)
-        elif args.command == 'quality':
+        elif args.command == "quality":
             check_data_quality(args)
-        elif args.command == 'predict':
+        elif args.command == "predict":
             predict_with_model(args)
-        elif args.command == 'history':
+        elif args.command == "history":
             show_pipeline_history(args)
 
     except KeyboardInterrupt:
@@ -319,6 +358,7 @@ Examples:
         print(f"\\n❌ Error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

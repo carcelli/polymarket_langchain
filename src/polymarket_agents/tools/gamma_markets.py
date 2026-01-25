@@ -16,9 +16,14 @@ from typing import Optional, List, Dict, Any
 
 class GammaMarketsInput(BaseModel):
     """Input schema for Gamma markets API queries."""
+
     active: Optional[bool] = Field(True, description="Only return open/active markets.")
-    limit: Optional[int] = Field(50, ge=1, le=100, description="Max markets to return (Gamma caps ~100).")
-    question_contains: Optional[str] = Field(None, description="Substring filter on market question/title.")
+    limit: Optional[int] = Field(
+        50, ge=1, le=100, description="Max markets to return (Gamma caps ~100)."
+    )
+    question_contains: Optional[str] = Field(
+        None, description="Substring filter on market question/title."
+    )
 
 
 class GammaMarketsTool(BaseTool):
@@ -121,15 +126,14 @@ class GammaMarketsTool(BaseTool):
         except httpx.TimeoutException:
             return [{"error": "Request timeout - Gamma API may be slow"}]
         except httpx.HTTPStatusError as e:
-            return [{"error": f"HTTP {e.response.status_code}: {e.response.text[:200]}"}]
+            return [
+                {"error": f"HTTP {e.response.status_code}: {e.response.text[:200]}"}
+            ]
         except Exception as e:
             return [{"error": f"Unexpected error: {str(e)}"}]
 
     def get_markets_with_edge(
-        self,
-        limit: int = 20,
-        min_volume: float = 1000,
-        edge_threshold: float = 0.1
+        self, limit: int = 20, min_volume: float = 1000, edge_threshold: float = 0.1
     ) -> List[Dict[str, Any]]:
         """
         Get markets with potential edge - high volume and probabilities away from 50%.
@@ -147,15 +151,19 @@ class GammaMarketsTool(BaseTool):
         """
         all_markets = self._run(active=True, limit=100)  # Get more to filter
 
-        if not all_markets or isinstance(all_markets[0], dict) and 'error' in all_markets[0]:
+        if (
+            not all_markets
+            or isinstance(all_markets[0], dict)
+            and "error" in all_markets[0]
+        ):
             return all_markets
 
         # Calculate edge scores and filter
         markets_with_edge = []
         for market in all_markets:
-            if isinstance(market, dict) and 'error' not in market:
-                volume = market.get('volume', 0)
-                yes_prob = market.get('yes_prob', 0.5)
+            if isinstance(market, dict) and "error" not in market:
+                volume = market.get("volume", 0)
+                yes_prob = market.get("yes_prob", 0.5)
 
                 # Skip low volume markets
                 if volume < min_volume:
@@ -171,12 +179,12 @@ class GammaMarketsTool(BaseTool):
                 # Edge score: volume × edge (higher = more interesting)
                 edge_score = volume * edge
 
-                market['edge_score'] = edge_score
-                market['edge'] = edge
+                market["edge_score"] = edge_score
+                market["edge"] = edge
                 markets_with_edge.append(market)
 
         # Sort by edge score descending
-        markets_with_edge.sort(key=lambda x: x['edge_score'], reverse=True)
+        markets_with_edge.sort(key=lambda x: x["edge_score"], reverse=True)
 
         return markets_with_edge[:limit]
 
@@ -187,4 +195,6 @@ if __name__ == "__main__":
     result = tool._run(active=True, limit=5, question_contains="election")
     print("Sample markets:")
     for market in result[:3]:
-        print(f"  {market.get('question', 'N/A')[:60]}... | Yes: {market.get('yes_prob', 'N/A'):.1%} | Vol: ${market.get('volume', 0):,.0f}")
+        print(
+            f"  {market.get('question', 'N/A')[:60]}... | Yes: {market.get('yes_prob', 'N/A'):.1%} | Vol: ${market.get('volume', 0):,.0f}"
+        )

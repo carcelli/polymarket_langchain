@@ -25,6 +25,7 @@ class Validated:
     Similar to the book's Validated class, but designed to work
     with dataclass fields via __post_init__.
     """
+
     def __init__(self, storage_name: Optional[str] = None):
         self.storage_name = storage_name
 
@@ -52,7 +53,7 @@ class Quantity(Validated):
 
     def validate(self, value):
         if value <= 0:
-            raise ValueError('value must be > 0')
+            raise ValueError("value must be > 0")
         return float(value)
 
 
@@ -62,7 +63,7 @@ class NonBlank(Validated):
     def validate(self, value):
         value = value.strip()
         if not value:
-            raise ValueError('value cannot be empty or blank')
+            raise ValueError("value cannot be empty or blank")
         return value
 
 
@@ -74,9 +75,10 @@ class LineItem:
     This achieves the same validation and storage isolation as the
     metaclass approach, but with modern, readable Python.
     """
-    description: str = field(default='', metadata={'validator': NonBlank()})
-    weight: float = field(default=0.0, metadata={'validator': Quantity()})
-    price: float = field(default=0.0, metadata={'validator': Quantity()})
+
+    description: str = field(default="", metadata={"validator": NonBlank()})
+    weight: float = field(default=0.0, metadata={"validator": Quantity()})
+    price: float = field(default=0.0, metadata={"validator": Quantity()})
 
     def __post_init__(self):
         """
@@ -86,13 +88,13 @@ class LineItem:
         but happens at runtime when the object is created.
         """
         for f in self.__dataclass_fields__.values():
-            validator = f.metadata.get('validator')
+            validator = f.metadata.get("validator")
             if validator:
                 # Get the current value (from dataclass default or __init__)
                 value = getattr(self, f.name)
 
                 # Create unique storage name (like the metaclass did)
-                storage_name = f'_{type(validator).__name__}#{f.name}'
+                storage_name = f"_{type(validator).__name__}#{f.name}"
                 validator.storage_name = storage_name
 
                 # Validate and store the value
@@ -114,12 +116,12 @@ class LineItem:
     def to_dict(self):
         """Convert to dictionary respecting field order."""
         return {
-            f.name: getattr(self, f.name)
-            for f in self.__dataclass_fields__.values()
+            f.name: getattr(self, f.name) for f in self.__dataclass_fields__.values()
         }
 
 
 # ===== ADVANCED EXAMPLE: TIME-SERIES MODEL =====
+
 
 @dataclass
 class TimeSeriesPoint:
@@ -128,20 +130,21 @@ class TimeSeriesPoint:
 
     Shows how this pattern extends to more complex domain models.
     """
-    timestamp: str = field(metadata={'validator': NonBlank()})
-    symbol: str = field(metadata={'validator': NonBlank()})
-    price: float = field(default=0.0, metadata={'validator': Quantity()})
-    volume: int = field(default=0, metadata={'validator': lambda x: int(max(0, x))})
+
+    timestamp: str = field(metadata={"validator": NonBlank()})
+    symbol: str = field(metadata={"validator": NonBlank()})
+    price: float = field(default=0.0, metadata={"validator": Quantity()})
+    volume: int = field(default=0, metadata={"validator": lambda x: int(max(0, x))})
 
     def __post_init__(self):
         # Apply validation to all fields with validators
         for f in self.__dataclass_fields__.values():
-            validator = f.metadata.get('validator')
+            validator = f.metadata.get("validator")
             if validator and callable(validator):
                 value = getattr(self, f.name)
-                if hasattr(validator, 'validate'):
+                if hasattr(validator, "validate"):
                     # Descriptor validator
-                    storage_name = f'_{type(validator).__name__}#{f.name}'
+                    storage_name = f"_{type(validator).__name__}#{f.name}"
                     validator.storage_name = storage_name
                     validated_value = validator.validate(value)
                     setattr(self, storage_name, validated_value)
@@ -154,6 +157,7 @@ class TimeSeriesPoint:
 
 
 # ===== DEMONSTRATION =====
+
 
 def demo_dataclass_validation():
     """Demonstrate dataclass-based validation."""
@@ -191,7 +195,9 @@ def demo_dataclass_validation():
     except ValueError as e:
         print(f"Empty timestamp: {e}")
 
-    print("\n✅ Dataclass validation provides same benefits with modern, readable code!")
+    print(
+        "\n✅ Dataclass validation provides same benefits with modern, readable code!"
+    )
 
 
 if __name__ == "__main__":

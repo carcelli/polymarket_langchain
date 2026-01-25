@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 # GitHub Integration Setup
 def check_github_config():
     """Check if GitHub App configuration is properly set up."""
-    required_vars = ['GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY', 'GITHUB_REPOSITORY']
+    required_vars = ["GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY", "GITHUB_REPOSITORY"]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
 
     if missing_vars:
@@ -18,21 +19,21 @@ def check_github_config():
         return False
 
     # Check if private key looks valid
-    private_key = os.getenv('GITHUB_APP_PRIVATE_KEY')
+    private_key = os.getenv("GITHUB_APP_PRIVATE_KEY")
 
     # Handle file paths
     actual_key_path = private_key
-    if private_key.startswith('/polymarket_langchain/'):
-        actual_key_path = private_key.replace('/polymarket_langchain/', './')
+    if private_key.startswith("/polymarket_langchain/"):
+        actual_key_path = private_key.replace("/polymarket_langchain/", "./")
 
-    if private_key.startswith('-----BEGIN'):
+    if private_key.startswith("-----BEGIN"):
         print("   Private key: PEM format (direct content)")
     elif os.path.exists(actual_key_path):
         print(f"   Private key: File path ({actual_key_path})")
         # Check file content
-        with open(actual_key_path, 'r') as f:
+        with open(actual_key_path, "r") as f:
             file_content = f.read()
-        if not file_content.startswith('-----BEGIN'):
+        if not file_content.startswith("-----BEGIN"):
             print("⚠️  Private key file doesn't contain valid PEM content")
             return False
     else:
@@ -67,11 +68,12 @@ def check_github_config():
         print("   Check: App installed on repo, permissions correct, private key valid")
         return False
 
+
 # Polymarket Configuration
 def check_polymarket_config():
     """Check if Polymarket API configuration is set up."""
-    api_vars = ['OPENAI_API_KEY']
-    optional_vars = ['POLYGON_WALLET_PRIVATE_KEY', 'NEWSAPI_API_KEY', 'TAVILY_API_KEY']
+    api_vars = ["OPENAI_API_KEY"]
+    optional_vars = ["POLYGON_WALLET_PRIVATE_KEY", "NEWSAPI_API_KEY", "TAVILY_API_KEY"]
 
     missing_required = [var for var in api_vars if not os.getenv(var)]
     missing_optional = [var for var in optional_vars if not os.getenv(var)]
@@ -90,6 +92,7 @@ def check_polymarket_config():
         print(f"ℹ️  Optional APIs available: {', '.join(missing_optional)}")
 
     return True
+
 
 if __name__ == "__main__":
     print("🚀 Polymarket Agent Setup Check")

@@ -55,10 +55,12 @@ class TestEndToEndGraphs(unittest.TestCase):
         with patch("agents.memory.manager.MemoryManager") as mock_mm, patch(
             "agents.polymarket.gamma.GammaMarketClient"
         ) as mock_gamma, patch("langchain_openai.ChatOpenAI") as mock_llm_class:
-            
+
             # Configure LLM mock to return AIMessage
             mock_llm_instance = MagicMock()
-            mock_llm_instance.invoke.return_value = AIMessage(content="Analysis complete")
+            mock_llm_instance.invoke.return_value = AIMessage(
+                content="Analysis complete"
+            )
             mock_llm_class.return_value = mock_llm_instance
 
             # Setup mocks with realistic data
@@ -75,6 +77,6 @@ class TestEndToEndGraphs(unittest.TestCase):
 
             # Test the planning workflow
             result = analyze_bet("Will Candidate A win the election?")
-            
+
             # Verify planning analysis completed
             self.assertIsInstance(result, dict)

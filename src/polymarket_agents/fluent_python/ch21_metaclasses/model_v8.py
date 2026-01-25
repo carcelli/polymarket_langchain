@@ -17,13 +17,14 @@ from collections import OrderedDict
 
 class AutoStorage:
     """Descriptor with automatic storage name assignment."""
+
     __counter = 0
 
     def __init__(self):
         cls = self.__class__
         prefix = cls.__name__
         index = cls.__counter
-        self.storage_name = '_{}#{}'.format(prefix, index)
+        self.storage_name = "_{}#{}".format(prefix, index)
         cls.__counter += 1
 
     def __get__(self, instance, owner):
@@ -52,7 +53,7 @@ class Quantity(Validated):
 
     def validate(self, instance, value):
         if value <= 0:
-            raise ValueError('value must be > 0')
+            raise ValueError("value must be > 0")
         return float(value)
 
 
@@ -62,7 +63,7 @@ class NonBlank(Validated):
     def validate(self, instance, value):
         value = value.strip()
         if len(value) == 0:
-            raise ValueError('value cannot be empty or blank')
+            raise ValueError("value cannot be empty or blank")
         return value
 
 
@@ -81,32 +82,36 @@ class EntityMeta(type):
 
     def __new__(meta_cls, name, bases, namespace, **kwargs):
         # Get field declaration order from OrderedDict keys
-        fields = [key for key in namespace.keys()
-                 if isinstance(namespace[key], Validated)]
+        fields = [
+            key for key in namespace.keys() if isinstance(namespace[key], Validated)
+        ]
 
         # Store field order for potential use in serialization/validation
-        namespace['_field_order'] = tuple(fields)
+        namespace["_field_order"] = tuple(fields)
 
         # Assign storage names to descriptors
         for key, attr in namespace.items():
             if isinstance(attr, Validated):
-                attr.storage_name = f'_{attr.__class__.__name__}#{key}'
+                attr.storage_name = f"_{attr.__class__.__name__}#{key}"
 
         return super().__new__(meta_cls, name, bases, namespace, **kwargs)
 
 
 class Entity(metaclass=EntityMeta):
     """Business entity base class with field ordering."""
+
     _field_order = ()  # Default empty tuple
 
 
 # ===== EXAMPLE USAGE =====
 
+
 class LineItem(Entity):
     """Line item with validated fields in specific order."""
+
     description = NonBlank()  # First field
-    weight = Quantity()       # Second field
-    price = Quantity()        # Third field
+    weight = Quantity()  # Second field
+    price = Quantity()  # Third field
 
     def __init__(self, description, weight, price):
         self.description = description
@@ -118,13 +123,11 @@ class LineItem(Entity):
 
     def to_dict(self):
         """Serialize respecting field order."""
-        return OrderedDict(
-            (field, getattr(self, field))
-            for field in self._field_order
-        )
+        return OrderedDict((field, getattr(self, field)) for field in self._field_order)
 
 
 # ===== DEMONSTRATION =====
+
 
 def demo_v8():
     """Demonstrate the v8 metaclass with field ordering."""
@@ -146,7 +149,9 @@ def demo_v8():
     print("\n📦 Storage details:")
     for field in item._field_order:
         descriptor = getattr(type(item), field)
-        print(f"{field}: storage_name='{descriptor.storage_name}', value={getattr(item, field)}")
+        print(
+            f"{field}: storage_name='{descriptor.storage_name}', value={getattr(item, field)}"
+        )
 
     # Test validation with ordered error reporting
     print("\n❌ Validation examples:")

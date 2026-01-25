@@ -6,6 +6,7 @@ Verifies that:
 2. MemoryManager methods work correctly
 3. Dashboard can query execution data without errors
 """
+
 import os
 import tempfile
 from pathlib import Path
@@ -44,9 +45,7 @@ class TestExecutionTracking:
     def test_start_agent_execution(self, memory_manager):
         """Test starting an agent execution."""
         execution_id = memory_manager.start_agent_execution(
-            agent_type="memory_agent",
-            agent_name="test_agent",
-            query="Test query"
+            agent_type="memory_agent", agent_name="test_agent", query="Test query"
         )
         assert execution_id is not None
         assert isinstance(execution_id, int)
@@ -56,17 +55,13 @@ class TestExecutionTracking:
         """Test completing an agent execution."""
         # Start execution
         execution_id = memory_manager.start_agent_execution(
-            agent_type="memory_agent",
-            agent_name="test_agent",
-            query="Test query"
+            agent_type="memory_agent", agent_name="test_agent", query="Test query"
         )
 
         # Complete execution
         result = {"analysis": "test analysis", "decision": "PASS"}
         memory_manager.complete_agent_execution(
-            execution_id=execution_id,
-            result=json.dumps(result),
-            tokens_used=100
+            execution_id=execution_id, result=json.dumps(result), tokens_used=100
         )
 
         # Verify completion
@@ -80,9 +75,7 @@ class TestExecutionTracking:
         """Test failing an agent execution."""
         # Start execution
         execution_id = memory_manager.start_agent_execution(
-            agent_type="planning_agent",
-            agent_name="test_agent",
-            query="Test query"
+            agent_type="planning_agent", agent_name="test_agent", query="Test query"
         )
 
         # Fail execution
@@ -103,12 +96,12 @@ class TestExecutionTracking:
             execution_id = memory_manager.start_agent_execution(
                 agent_type="memory_agent",
                 agent_name=f"test_agent_{i}",
-                query=f"Test query {i}"
+                query=f"Test query {i}",
             )
             memory_manager.complete_agent_execution(
                 execution_id=execution_id,
                 result=json.dumps({"test": i}),
-                tokens_used=i * 10
+                tokens_used=i * 10,
             )
 
         # Get recent executions
@@ -128,21 +121,15 @@ class TestExecutionTracking:
         """Test metrics calculation with execution data."""
         # Create successful execution
         execution_id_1 = memory_manager.start_agent_execution(
-            agent_type="memory_agent",
-            agent_name="test_agent",
-            query="Test query 1"
+            agent_type="memory_agent", agent_name="test_agent", query="Test query 1"
         )
         memory_manager.complete_agent_execution(
-            execution_id=execution_id_1,
-            result=json.dumps({"test": 1}),
-            tokens_used=100
+            execution_id=execution_id_1, result=json.dumps({"test": 1}), tokens_used=100
         )
 
         # Create failed execution
         execution_id_2 = memory_manager.start_agent_execution(
-            agent_type="planning_agent",
-            agent_name="test_agent",
-            query="Test query 2"
+            agent_type="planning_agent", agent_name="test_agent", query="Test query 2"
         )
         memory_manager.fail_agent_execution(execution_id_2, error="Test error")
 
@@ -158,9 +145,7 @@ class TestExecutionTracking:
         """Test tracking individual node executions."""
         # Start agent execution
         execution_id = memory_manager.start_agent_execution(
-            agent_type="memory_agent",
-            agent_name="test_agent",
-            query="Test query"
+            agent_type="memory_agent", agent_name="test_agent", query="Test query"
         )
 
         # Track a node execution
@@ -171,7 +156,7 @@ class TestExecutionTracking:
             input_data=json.dumps({"query": "test"}),
             output_data=json.dumps({"results": 5}),
             duration_ms=150,
-            status="completed"
+            status="completed",
         )
 
         assert node_id is not None
@@ -184,7 +169,7 @@ class TestExecutionTracking:
         execution_id = memory_manager.start_agent_execution(
             agent_type="memory_agent",
             agent_name="memory_agent",
-            query="Find crypto markets"
+            query="Find crypto markets",
         )
 
         # Track multiple nodes
@@ -197,14 +182,14 @@ class TestExecutionTracking:
                 input_data="{}",
                 output_data="{}",
                 duration_ms=100,
-                status="completed"
+                status="completed",
             )
 
         # Complete execution
         memory_manager.complete_agent_execution(
             execution_id=execution_id,
             result=json.dumps({"markets_found": 10}),
-            tokens_used=500
+            tokens_used=500,
         )
 
         # Verify
@@ -230,14 +215,12 @@ class TestDashboardDataLayer:
         """Test recent executions return expected structure."""
         # Create a test execution
         execution_id = memory_manager.start_agent_execution(
-            agent_type="memory_agent",
-            agent_name="test_agent",
-            query="Test query"
+            agent_type="memory_agent", agent_name="test_agent", query="Test query"
         )
         memory_manager.complete_agent_execution(
             execution_id=execution_id,
             result=json.dumps({"test": "result"}),
-            tokens_used=100
+            tokens_used=100,
         )
 
         # Get executions

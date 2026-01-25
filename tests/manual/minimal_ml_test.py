@@ -25,28 +25,27 @@ def test_database_core():
 
         # Create experiment
         experiment_id = db.create_experiment(
-            name="Minimal Test",
-            description="Testing core database functionality"
+            name="Minimal Test", description="Testing core database functionality"
         )
         print(f"✅ Created experiment: {experiment_id}")
 
         # Create simple model entry
         model_info = {
-            'name': 'TestModel',
-            'model_type': 'Test',
-            'algorithm': 'Test',
-            'hyperparameters': {'test': True},
-            'feature_columns': ['test_feature'],
-            'training_samples': 10,
-            'training_start_time': datetime.now().isoformat(),
-            'training_end_time': datetime.now().isoformat()
+            "name": "TestModel",
+            "model_type": "Test",
+            "algorithm": "Test",
+            "hyperparameters": {"test": True},
+            "feature_columns": ["test_feature"],
+            "training_samples": 10,
+            "training_start_time": datetime.now().isoformat(),
+            "training_end_time": datetime.now().isoformat(),
         }
 
         model_id = db.save_model(experiment_id, model_info)
         print(f"✅ Saved model: {model_id}")
 
         # Save simple metrics
-        metrics = {'accuracy': 0.8, 'test_metric': 0.9}
+        metrics = {"accuracy": 0.8, "test_metric": 0.9}
         db.save_model_metrics(model_id, metrics)
         print(f"✅ Saved metrics: {metrics}")
 
@@ -64,6 +63,7 @@ def test_database_core():
     except Exception as e:
         print(f"❌ Database test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -85,16 +85,18 @@ def test_data_ingestion_core():
         np.random.seed(42)
         mock_data = []
         for i in range(10):
-            mock_data.append({
-                'market_id': f'mock_{i}',
-                'question': f'Question {i}?',
-                'category': 'test',
-                'volume': 1000 + i * 100,
-                'yes_price': 0.5 + np.random.random() * 0.4,
-                'no_price': 0.5 - np.random.random() * 0.4,
-                'resolved': True,
-                'actual_outcome': np.random.choice([0, 1])
-            })
+            mock_data.append(
+                {
+                    "market_id": f"mock_{i}",
+                    "question": f"Question {i}?",
+                    "category": "test",
+                    "volume": 1000 + i * 100,
+                    "yes_price": 0.5 + np.random.random() * 0.4,
+                    "no_price": 0.5 - np.random.random() * 0.4,
+                    "resolved": True,
+                    "actual_outcome": np.random.choice([0, 1]),
+                }
+            )
 
         mock_df = pd.DataFrame(mock_data)
         print(f"✅ Created mock data: {len(mock_df)} samples")
@@ -112,6 +114,7 @@ def test_data_ingestion_core():
     except Exception as e:
         print(f"❌ Data ingestion test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -123,23 +126,24 @@ def test_github_basic():
 
     try:
         # Test basic GitHub agent import and test generation
-        from polymarket_agents.subagents.github_ml_agent import generate_ml_strategy_test
+        from polymarket_agents.subagents.github_ml_agent import (
+            generate_ml_strategy_test,
+        )
 
         test_code = generate_ml_strategy_test(
-            "BasicTest",
-            "predictor",
-            "Basic integration test"
+            "BasicTest", "predictor", "Basic integration test"
         )
 
         print(f"✅ Generated test code: {len(test_code)} characters")
 
         # Save test file
         import os
+
         test_dir = "integration_tests"
         os.makedirs(test_dir, exist_ok=True)
 
         test_file = os.path.join(test_dir, "basic_test.py")
-        with open(test_file, 'w') as f:
+        with open(test_file, "w") as f:
             f.write(test_code)
 
         print(f"✅ Saved test file: {test_file}")
@@ -162,7 +166,7 @@ def run_minimal_test():
     tests = [
         ("Database Core", test_database_core),
         ("Data Ingestion Core", test_data_ingestion_core),
-        ("GitHub Basic", test_github_basic)
+        ("GitHub Basic", test_github_basic),
     ]
 
     results = {}

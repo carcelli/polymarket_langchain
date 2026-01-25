@@ -24,7 +24,7 @@ def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
             "edge": 0.0,
             "recommendation": "HOLD",
             "confidence": 0.0,
-            "reasoning": "Insufficient price history for momentum analysis"
+            "reasoning": "Insufficient price history for momentum analysis",
         }
 
     # Get recent vs older prices
@@ -59,7 +59,7 @@ def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "confidence": confidence,
         "reasoning": reasoning,
         "momentum": momentum,
-        "data_points": len(history)
+        "data_points": len(history),
     }
 
 
@@ -79,7 +79,7 @@ def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
             "edge": 0.0,
             "recommendation": "HOLD",
             "confidence": 0.0,
-            "reasoning": "No volume history available"
+            "reasoning": "No volume history available",
         }
 
     # Calculate volume ratio
@@ -109,5 +109,5 @@ def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "reasoning": reasoning,
         "volume_ratio": volume_ratio,
         "current_volume": volume,
-        "avg_volume": avg_volume
+        "avg_volume": avg_volume,
     }

@@ -45,7 +45,9 @@ class PolymarketDataOrganizer:
     - Query optimization
     """
 
-    def __init__(self, data_dir: str = "./data", vector_store_dir: str = "./vector_stores"):
+    def __init__(
+        self, data_dir: str = "./data", vector_store_dir: str = "./vector_stores"
+    ):
         self.data_dir = Path(data_dir)
         self.vector_store_dir = Path(vector_store_dir)
         self.vector_store_dir.mkdir(exist_ok=True)
@@ -71,12 +73,12 @@ class PolymarketDataOrganizer:
             Dictionary with data statistics and structure
         """
         inventory = {
-            'timestamp': datetime.now().isoformat(),
-            'total_size_mb': 0,
-            'databases': {},
-            'json_files': {},
-            'vector_stores': {},
-            'data_breakdown': {}
+            "timestamp": datetime.now().isoformat(),
+            "total_size_mb": 0,
+            "databases": {},
+            "json_files": {},
+            "vector_stores": {},
+            "data_breakdown": {},
         }
 
         # Check databases
@@ -84,62 +86,70 @@ class PolymarketDataOrganizer:
         for db_file in db_files:
             size_mb = db_file.stat().st_size / (1024 * 1024)
 
-            db_info = {
-                'size_mb': round(size_mb, 2),
-                'tables': {},
-                'record_counts': {}
-            }
+            db_info = {"size_mb": round(size_mb, 2), "tables": {}, "record_counts": {}}
 
             try:
                 with sqlite3.connect(str(db_file)) as conn:
                     # Get table names
-                    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-                    db_info['tables'] = [t[0] for t in tables]
+                    tables = conn.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table';"
+                    ).fetchall()
+                    db_info["tables"] = [t[0] for t in tables]
 
                     # Get record counts
-                    for table in db_info['tables']:
-                        count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-                        db_info['record_counts'][table] = count
+                    for table in db_info["tables"]:
+                        count = conn.execute(
+                            f"SELECT COUNT(*) FROM {table}"
+                        ).fetchone()[0]
+                        db_info["record_counts"][table] = count
 
             except Exception as e:
-                db_info['error'] = str(e)
+                db_info["error"] = str(e)
 
-            inventory['databases'][db_file.name] = db_info
-            inventory['total_size_mb'] += size_mb
+            inventory["databases"][db_file.name] = db_info
+            inventory["total_size_mb"] += size_mb
 
         # Check JSON files
-        json_files = list(self.data_dir.glob("*.json")) + list(Path(".").glob("workflow_report_*.json"))
+        json_files = list(self.data_dir.glob("*.json")) + list(
+            Path(".").glob("workflow_report_*.json")
+        )
         for json_file in json_files:
             size_kb = json_file.stat().st_size / 1024
 
-            inventory['json_files'][json_file.name] = {
-                'size_kb': round(size_kb, 2),
-                'path': str(json_file)
+            inventory["json_files"][json_file.name] = {
+                "size_kb": round(size_kb, 2),
+                "path": str(json_file),
             }
-            inventory['total_size_mb'] += size_kb / 1024
+            inventory["total_size_mb"] += size_kb / 1024
 
         # Check vector stores
         if self.vector_store_dir.exists():
             vector_files = list(self.vector_store_dir.glob("*"))
             for vf in vector_files:
                 size_mb = vf.stat().st_size / (1024 * 1024)
-                inventory['vector_stores'][vf.name] = round(size_mb, 2)
-                inventory['total_size_mb'] += size_mb
+                inventory["vector_stores"][vf.name] = round(size_mb, 2)
+                inventory["total_size_mb"] += size_mb
 
         # Data breakdown analysis
-        inventory['data_breakdown'] = self._analyze_data_breakdown()
+        inventory["data_breakdown"] = self._analyze_data_breakdown()
 
         return inventory
 
     def _analyze_data_breakdown(self) -> Dict[str, Any]:
         """Analyze breakdown of different data types."""
         breakdown = {
-            'markets_data': {'count': 0, 'description': 'Polymarket trading data'},
-            'ml_experiments': {'count': 0, 'description': 'ML model training experiments'},
-            'ml_models': {'count': 0, 'description': 'Trained ML models'},
-            'workflows': {'count': 0, 'description': 'Automated ML workflow executions'},
-            'reports': {'count': 0, 'description': 'Generated analysis reports'},
-            'memory': {'count': 0, 'description': 'Agent conversation memory'}
+            "markets_data": {"count": 0, "description": "Polymarket trading data"},
+            "ml_experiments": {
+                "count": 0,
+                "description": "ML model training experiments",
+            },
+            "ml_models": {"count": 0, "description": "Trained ML models"},
+            "workflows": {
+                "count": 0,
+                "description": "Automated ML workflow executions",
+            },
+            "reports": {"count": 0, "description": "Generated analysis reports"},
+            "memory": {"count": 0, "description": "Agent conversation memory"},
         }
 
         # Markets data
@@ -147,7 +157,9 @@ class PolymarketDataOrganizer:
         if markets_db.exists():
             try:
                 with sqlite3.connect(str(markets_db)) as conn:
-                    breakdown['markets_data']['count'] = conn.execute("SELECT COUNT(*) FROM markets").fetchone()[0]
+                    breakdown["markets_data"]["count"] = conn.execute(
+                        "SELECT COUNT(*) FROM markets"
+                    ).fetchone()[0]
             except:
                 pass
 
@@ -156,20 +168,26 @@ class PolymarketDataOrganizer:
         if ml_db.exists():
             try:
                 with sqlite3.connect(str(ml_db)) as conn:
-                    breakdown['ml_experiments']['count'] = conn.execute("SELECT COUNT(*) FROM experiments").fetchone()[0]
-                    breakdown['ml_models']['count'] = conn.execute("SELECT COUNT(*) FROM models").fetchone()[0]
-                    breakdown['workflows']['count'] = conn.execute("SELECT COUNT(*) FROM workflows").fetchone()[0]
+                    breakdown["ml_experiments"]["count"] = conn.execute(
+                        "SELECT COUNT(*) FROM experiments"
+                    ).fetchone()[0]
+                    breakdown["ml_models"]["count"] = conn.execute(
+                        "SELECT COUNT(*) FROM models"
+                    ).fetchone()[0]
+                    breakdown["workflows"]["count"] = conn.execute(
+                        "SELECT COUNT(*) FROM workflows"
+                    ).fetchone()[0]
             except:
                 pass
 
         # Reports
         reports = list(Path(".").glob("workflow_report_*.json"))
-        breakdown['reports']['count'] = len(reports)
+        breakdown["reports"]["count"] = len(reports)
 
         # Memory
         memory_db = self.data_dir / "memory.db"
         if memory_db.exists():
-            breakdown['memory']['count'] = 1  # Exists indicator
+            breakdown["memory"]["count"] = 1  # Exists indicator
 
         return breakdown
 
@@ -190,31 +208,37 @@ class PolymarketDataOrganizer:
         print("   📊 Creating markets vector store...")
         markets_store = self._create_markets_vector_store()
         if markets_store:
-            stores_created['markets'] = {
-                'documents': markets_store['doc_count'],
-                'path': str(self.vector_store_dir / 'markets_vectorstore')
+            stores_created["markets"] = {
+                "documents": markets_store["doc_count"],
+                "path": str(self.vector_store_dir / "markets_vectorstore"),
             }
-            markets_store['store'].save_local(str(self.vector_store_dir / 'markets_vectorstore'))
+            markets_store["store"].save_local(
+                str(self.vector_store_dir / "markets_vectorstore")
+            )
 
         # 2. ML results vector store
         print("   🤖 Creating ML results vector store...")
         ml_store = self._create_ml_vector_store()
         if ml_store:
-            stores_created['ml_results'] = {
-                'documents': ml_store['doc_count'],
-                'path': str(self.vector_store_dir / 'ml_results_vectorstore')
+            stores_created["ml_results"] = {
+                "documents": ml_store["doc_count"],
+                "path": str(self.vector_store_dir / "ml_results_vectorstore"),
             }
-            ml_store['store'].save_local(str(self.vector_store_dir / 'ml_results_vectorstore'))
+            ml_store["store"].save_local(
+                str(self.vector_store_dir / "ml_results_vectorstore")
+            )
 
         # 3. Combined vector store
         print("   🔗 Creating combined vector store...")
         combined_store = self._create_combined_vector_store()
         if combined_store:
-            stores_created['combined'] = {
-                'documents': combined_store['doc_count'],
-                'path': str(self.vector_store_dir / 'combined_vectorstore')
+            stores_created["combined"] = {
+                "documents": combined_store["doc_count"],
+                "path": str(self.vector_store_dir / "combined_vectorstore"),
             }
-            combined_store['store'].save_local(str(self.vector_store_dir / 'combined_vectorstore'))
+            combined_store["store"].save_local(
+                str(self.vector_store_dir / "combined_vectorstore")
+            )
 
         print(f"✅ Created {len(stores_created)} vector stores")
         return stores_created
@@ -228,12 +252,15 @@ class PolymarketDataOrganizer:
         try:
             # Load market data
             with sqlite3.connect(str(markets_db)) as conn:
-                df = pd.read_sql_query("""
+                df = pd.read_sql_query(
+                    """
                     SELECT id, question, description, category, volume, active
                     FROM markets
                     WHERE active = 1 AND volume > 1000
                     LIMIT 5000  -- Limit for demo, can increase for production
-                """, conn)
+                """,
+                    conn,
+                )
 
             if df.empty:
                 return None
@@ -249,11 +276,11 @@ class PolymarketDataOrganizer:
                 """.strip()
 
                 metadata = {
-                    'market_id': row['id'],
-                    'category': row['category'],
-                    'volume': float(row['volume']),
-                    'active': bool(row['active']),
-                    'data_type': 'market'
+                    "market_id": row["id"],
+                    "category": row["category"],
+                    "volume": float(row["volume"]),
+                    "active": bool(row["active"]),
+                    "data_type": "market",
                 }
 
                 documents.append(Document(page_content=content, metadata=metadata))
@@ -262,9 +289,9 @@ class PolymarketDataOrganizer:
             vectorstore = FAISS.from_documents(documents, self.embeddings)
 
             return {
-                'store': vectorstore,
-                'doc_count': len(documents),
-                'sample_doc': documents[0] if documents else None
+                "store": vectorstore,
+                "doc_count": len(documents),
+                "sample_doc": documents[0] if documents else None,
             }
 
         except Exception as e:
@@ -284,7 +311,20 @@ class PolymarketDataOrganizer:
                 # Experiments
                 experiments = conn.execute("SELECT * FROM experiments").fetchall()
                 for exp in experiments:
-                    exp_dict = dict(zip(['experiment_id', 'workflow_id', 'name', 'phase', 'status', 'results', 'created_at'], exp))
+                    exp_dict = dict(
+                        zip(
+                            [
+                                "experiment_id",
+                                "workflow_id",
+                                "name",
+                                "phase",
+                                "status",
+                                "results",
+                                "created_at",
+                            ],
+                            exp,
+                        )
+                    )
 
                     content = f"""
                     Experiment: {exp_dict['name']}
@@ -294,12 +334,12 @@ class PolymarketDataOrganizer:
                     """.strip()
 
                     metadata = {
-                        'experiment_id': exp_dict['experiment_id'],
-                        'workflow_id': exp_dict['workflow_id'],
-                        'phase': exp_dict['phase'],
-                        'status': exp_dict['status'],
-                        'data_type': 'experiment',
-                        'created_at': exp_dict['created_at']
+                        "experiment_id": exp_dict["experiment_id"],
+                        "workflow_id": exp_dict["workflow_id"],
+                        "phase": exp_dict["phase"],
+                        "status": exp_dict["status"],
+                        "data_type": "experiment",
+                        "created_at": exp_dict["created_at"],
                     }
 
                     documents.append(Document(page_content=content, metadata=metadata))
@@ -307,7 +347,19 @@ class PolymarketDataOrganizer:
                 # Models
                 models = conn.execute("SELECT * FROM models").fetchall()
                 for model in models:
-                    model_dict = dict(zip(['model_id', 'experiment_id', 'name', 'type', 'metrics', 'created_at'], model))
+                    model_dict = dict(
+                        zip(
+                            [
+                                "model_id",
+                                "experiment_id",
+                                "name",
+                                "type",
+                                "metrics",
+                                "created_at",
+                            ],
+                            model,
+                        )
+                    )
 
                     content = f"""
                     Model: {model_dict['name']}
@@ -316,11 +368,11 @@ class PolymarketDataOrganizer:
                     """.strip()
 
                     metadata = {
-                        'model_id': model_dict['model_id'],
-                        'experiment_id': model_dict['experiment_id'],
-                        'model_type': model_dict['type'],
-                        'data_type': 'model',
-                        'created_at': model_dict['created_at']
+                        "model_id": model_dict["model_id"],
+                        "experiment_id": model_dict["experiment_id"],
+                        "model_type": model_dict["type"],
+                        "data_type": "model",
+                        "created_at": model_dict["created_at"],
                     }
 
                     documents.append(Document(page_content=content, metadata=metadata))
@@ -332,9 +384,9 @@ class PolymarketDataOrganizer:
             vectorstore = FAISS.from_documents(documents, self.embeddings)
 
             return {
-                'store': vectorstore,
-                'doc_count': len(documents),
-                'sample_doc': documents[0] if documents else None
+                "store": vectorstore,
+                "doc_count": len(documents),
+                "sample_doc": documents[0] if documents else None,
             }
 
         except Exception as e:
@@ -368,9 +420,9 @@ class PolymarketDataOrganizer:
         try:
             vectorstore = FAISS.from_documents(all_documents, self.embeddings)
             return {
-                'store': vectorstore,
-                'doc_count': len(all_documents),
-                'sample_doc': all_documents[0] if all_documents else None
+                "store": vectorstore,
+                "doc_count": len(all_documents),
+                "sample_doc": all_documents[0] if all_documents else None,
             }
         except Exception as e:
             print(f"❌ Error creating combined vector store: {e}")
@@ -384,21 +436,24 @@ class PolymarketDataOrganizer:
 
         try:
             with sqlite3.connect(str(markets_db)) as conn:
-                df = pd.read_sql_query("""
+                df = pd.read_sql_query(
+                    """
                     SELECT id, question, description, category, volume, active
                     FROM markets
                     WHERE active = 1 AND volume > 1000
                     LIMIT 1000  -- Smaller limit for combined store
-                """, conn)
+                """,
+                    conn,
+                )
 
             documents = []
             for _, row in df.iterrows():
                 content = f"Market: {row['question']} | Category: {row['category']} | Volume: ${row['volume']:,.0f}"
                 metadata = {
-                    'market_id': row['id'],
-                    'category': row['category'],
-                    'volume': float(row['volume']),
-                    'data_type': 'market'
+                    "market_id": row["id"],
+                    "category": row["category"],
+                    "volume": float(row["volume"]),
+                    "data_type": "market",
                 }
                 documents.append(Document(page_content=content, metadata=metadata))
 
@@ -417,25 +472,31 @@ class PolymarketDataOrganizer:
             documents = []
             with sqlite3.connect(str(ml_db)) as conn:
                 # Experiments (summarized)
-                experiments = conn.execute("SELECT experiment_id, name, phase, status FROM experiments").fetchall()
+                experiments = conn.execute(
+                    "SELECT experiment_id, name, phase, status FROM experiments"
+                ).fetchall()
                 for exp in experiments:
-                    content = f"ML Experiment: {exp[1]} | Phase: {exp[2]} | Status: {exp[3]}"
+                    content = (
+                        f"ML Experiment: {exp[1]} | Phase: {exp[2]} | Status: {exp[3]}"
+                    )
                     metadata = {
-                        'experiment_id': exp[0],
-                        'phase': exp[2],
-                        'status': exp[3],
-                        'data_type': 'experiment'
+                        "experiment_id": exp[0],
+                        "phase": exp[2],
+                        "status": exp[3],
+                        "data_type": "experiment",
                     }
                     documents.append(Document(page_content=content, metadata=metadata))
 
                 # Models (summarized)
-                models = conn.execute("SELECT model_id, name, type FROM models").fetchall()
+                models = conn.execute(
+                    "SELECT model_id, name, type FROM models"
+                ).fetchall()
                 for model in models:
                     content = f"ML Model: {model[1]} | Type: {model[2]}"
                     metadata = {
-                        'model_id': model[0],
-                        'model_type': model[2],
-                        'data_type': 'model'
+                        "model_id": model[0],
+                        "model_type": model[2],
+                        "data_type": "model",
                     }
                     documents.append(Document(page_content=content, metadata=metadata))
 
@@ -457,15 +518,19 @@ class PolymarketDataOrganizer:
 
         # Vector search tools
         vector_store_paths = {
-            'markets': self.vector_store_dir / 'markets_vectorstore',
-            'ml_results': self.vector_store_dir / 'ml_results_vectorstore',
-            'combined': self.vector_store_dir / 'combined_vectorstore'
+            "markets": self.vector_store_dir / "markets_vectorstore",
+            "ml_results": self.vector_store_dir / "ml_results_vectorstore",
+            "combined": self.vector_store_dir / "combined_vectorstore",
         }
 
         for store_name, store_path in vector_store_paths.items():
             if store_path.exists():
                 try:
-                    vectorstore = FAISS.load_local(str(store_path), self.embeddings, allow_dangerous_deserialization=True)
+                    vectorstore = FAISS.load_local(
+                        str(store_path),
+                        self.embeddings,
+                        allow_dangerous_deserialization=True,
+                    )
 
                     # Create search tool
                     @tool
@@ -474,28 +539,33 @@ class PolymarketDataOrganizer:
                         docs = vectorstore.similarity_search(query, k=k)
                         results = []
                         for doc in docs:
-                            results.append({
-                                'content': doc.page_content,
-                                'metadata': doc.metadata,
-                                'score': getattr(doc, 'score', None)
-                            })
+                            results.append(
+                                {
+                                    "content": doc.page_content,
+                                    "metadata": doc.metadata,
+                                    "score": getattr(doc, "score", None),
+                                }
+                            )
                         return json.dumps(results, indent=2)
 
                     # Create filtered search tool
                     @tool
-                    def search_with_filter(query: str, metadata_filter: Dict[str, Any], k: int = 5) -> str:
+                    def search_with_filter(
+                        query: str, metadata_filter: Dict[str, Any], k: int = 5
+                    ) -> str:
                         """Search with metadata filtering."""
-                        docs = vectorstore.similarity_search(query, filter=metadata_filter, k=k)
+                        docs = vectorstore.similarity_search(
+                            query, filter=metadata_filter, k=k
+                        )
                         results = []
                         for doc in docs:
-                            results.append({
-                                'content': doc.page_content,
-                                'metadata': doc.metadata
-                            })
+                            results.append(
+                                {"content": doc.page_content, "metadata": doc.metadata}
+                            )
                         return json.dumps(results, indent=2)
 
-                    tools[f'search_{store_name}'] = search_vector_store
-                    tools[f'search_{store_name}_filtered'] = search_with_filter
+                    tools[f"search_{store_name}"] = search_vector_store
+                    tools[f"search_{store_name}_filtered"] = search_with_filter
 
                 except Exception as e:
                     print(f"❌ Error loading {store_name} vector store: {e}")
@@ -511,7 +581,7 @@ class PolymarketDataOrganizer:
             try:
                 with sqlite3.connect(str(markets_db)) as conn:
                     result = pd.read_sql_query(sql_query, conn)
-                    return result.to_json(orient='records', indent=2)
+                    return result.to_json(orient="records", indent=2)
             except Exception as e:
                 return f"Query error: {e}"
 
@@ -525,7 +595,7 @@ class PolymarketDataOrganizer:
             try:
                 with sqlite3.connect(str(ml_db)) as conn:
                     result = pd.read_sql_query(sql_query, conn)
-                    return result.to_json(orient='records', indent=2)
+                    return result.to_json(orient="records", indent=2)
             except Exception as e:
                 return f"Query error: {e}"
 
@@ -535,11 +605,13 @@ class PolymarketDataOrganizer:
             inventory = self.get_data_inventory()
             return json.dumps(inventory, indent=2)
 
-        tools.update({
-            'query_markets_db': query_markets_db,
-            'query_ml_db': query_ml_db,
-            'get_data_inventory': get_data_inventory
-        })
+        tools.update(
+            {
+                "query_markets_db": query_markets_db,
+                "query_ml_db": query_ml_db,
+                "get_data_inventory": get_data_inventory,
+            }
+        )
 
         return tools
 
@@ -557,7 +629,7 @@ class PolymarketDataOrganizer:
 ### Databases
 """
 
-        for db_name, db_info in inventory['databases'].items():
+        for db_name, db_info in inventory["databases"].items():
             guide += f"""
 **{db_name}** ({db_info['size_mb']:.1f} MB)
 - Tables: {', '.join(db_info['tables'])}
@@ -568,7 +640,7 @@ class PolymarketDataOrganizer:
 ### Data Breakdown
 """
 
-        for data_type, info in inventory['data_breakdown'].items():
+        for data_type, info in inventory["data_breakdown"].items():
             guide += f"- **{data_type.replace('_', ' ').title()}**: {info['count']} {info['description']}\n"
 
         guide += """
@@ -676,8 +748,8 @@ def main():
     print(f"JSON files: {len(inventory['json_files'])}")
 
     print("\\n📋 Data Breakdown:")
-    for data_type, info in inventory['data_breakdown'].items():
-        if info['count'] > 0:
+    for data_type, info in inventory["data_breakdown"].items():
+        if info["count"] > 0:
             print(f"   • {data_type.replace('_', ' ').title()}: {info['count']}")
 
     # Note: Vector store creation requires OpenAI API key
@@ -687,7 +759,10 @@ def main():
     # Show integration guide
     print("\\n📖 LangChain Integration Guide:")
     guide = organizer.get_langchain_integration_guide()
-    print(guide[:1000] + "...\\n\\n[Guide truncated - full guide available via get_langchain_integration_guide()]")
+    print(
+        guide[:1000]
+        + "...\\n\\n[Guide truncated - full guide available via get_langchain_integration_guide()]"
+    )
 
     print("\\n✅ Data organization analysis complete!")
     print(f"Run with OPENAI_API_KEY to create vector stores for semantic search.")

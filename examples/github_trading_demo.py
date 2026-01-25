@@ -28,7 +28,7 @@ def demonstrate_github_trading_integration():
     markets_to_analyze = [
         "Russia x Ukraine ceasefire in 2025?",
         "Will the Tennessee Titans win Super Bowl 2026?",
-        "Xi Jinping out in 2025?"
+        "Xi Jinping out in 2025?",
     ]
 
     print("📊 Analyzing markets and preparing GitHub reports...")
@@ -42,14 +42,14 @@ def demonstrate_github_trading_integration():
         # Perform analysis
         analysis = analyzer.analyze_market_opportunity(market)
 
-        if 'error' in analysis:
+        if "error" in analysis:
             print(f"   ❌ Analysis failed: {analysis['error']}")
             continue
 
         # Display key results
-        action = analysis.get('action', 'UNKNOWN')
-        edge = analysis.get('edge', 0)
-        confidence = analysis.get('confidence', 'N/A')
+        action = analysis.get("action", "UNKNOWN")
+        edge = analysis.get("edge", 0)
+        confidence = analysis.get("confidence", "N/A")
 
         print(".2f")
         print(f"   📈 Action: {action}")
@@ -76,8 +76,12 @@ def demonstrate_github_trading_integration():
         if "error" in result:
             print(f"   ❌ Failed to create issue: {result['error']}")
         else:
-            print(f"   ✅ Would create issue #{result.get('issue_number', '?')}: {result.get('url', 'N/A')}")
-            print("   📊 Issue includes market analysis, trading recommendations, and performance metrics")
+            print(
+                f"   ✅ Would create issue #{result.get('issue_number', '?')}: {result.get('url', 'N/A')}"
+            )
+            print(
+                "   📊 Issue includes market analysis, trading recommendations, and performance metrics"
+            )
     print()
     print("🎯 GitHub Automation Benefits:")
     print("• 📊 Automated documentation of trading decisions")
@@ -96,32 +100,32 @@ def show_github_subagent_capabilities():
         "Repository Management": [
             "Check repository status and activity",
             "Monitor contributor statistics",
-            "Track repository metrics"
+            "Track repository metrics",
         ],
         "Issue Management": [
             "Search and filter existing issues",
             "Create structured analysis reports",
             "Update issue status and labels",
-            "Add comments and updates"
+            "Add comments and updates",
         ],
         "Pull Request Handling": [
             "Review PR contents and changes",
             "Create PRs for code updates",
             "Manage review requests",
-            "Track merge status"
+            "Track merge status",
         ],
         "File Operations": [
             "Read repository files",
             "Create new documentation",
             "Update existing files",
-            "Search code and content"
+            "Search code and content",
         ],
         "Trading Integration": [
             "Automated market analysis reports",
             "Performance tracking issues",
             "Strategy documentation",
-            "Risk management alerts"
-        ]
+            "Risk management alerts",
+        ],
     }
 
     for category, features in capabilities.items():
@@ -144,8 +148,8 @@ def demonstrate_workflow_automation():
                 "Analyze top 10 markets by volume",
                 "Generate performance reports",
                 "Create/update GitHub issues",
-                "Notify team of opportunities"
-            ]
+                "Notify team of opportunities",
+            ],
         },
         {
             "name": "Performance Alert System",
@@ -154,8 +158,8 @@ def demonstrate_workflow_automation():
                 "Analyze recent trading performance",
                 "Create detailed performance issue",
                 "Tag team members for review",
-                "Track resolution progress"
-            ]
+                "Track resolution progress",
+            ],
         },
         {
             "name": "Strategy Deployment",
@@ -164,8 +168,8 @@ def demonstrate_workflow_automation():
                 "Create PR with strategy implementation",
                 "Add performance backtest results",
                 "Request team review",
-                "Merge and deploy on approval"
-            ]
+                "Merge and deploy on approval",
+            ],
         },
         {
             "name": "Risk Management Alerts",
@@ -174,16 +178,16 @@ def demonstrate_workflow_automation():
                 "Analyze current portfolio exposure",
                 "Create risk management issue",
                 "Recommend rebalancing actions",
-                "Track implementation status"
-            ]
-        }
+                "Track implementation status",
+            ],
+        },
     ]
 
     for workflow in workflows:
         print(f"⚡ {workflow['name']}")
         print(f"   Trigger: {workflow['trigger']}")
         print("   Steps:")
-        for step in workflow['steps']:
+        for step in workflow["steps"]:
             print(f"   • {step}")
         print()
 

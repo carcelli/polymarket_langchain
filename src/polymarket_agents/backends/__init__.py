@@ -10,7 +10,7 @@ from .filesystem import PolymarketFilesystemBackend
 from .store import PolymarketStoreBackend
 
 __all__ = [
-    'create_composite_backend',
-    'PolymarketFilesystemBackend',
-    'PolymarketStoreBackend'
+    "create_composite_backend",
+    "PolymarketFilesystemBackend",
+    "PolymarketStoreBackend",
 ]

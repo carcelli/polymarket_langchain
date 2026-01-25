@@ -104,7 +104,9 @@ class MemoryManager:
 
         # Create indexes for efficient querying (only if columns exist)
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON markets(category)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_category ON markets(category)"
+            )
         except sqlite3.OperationalError:
             pass
 
@@ -119,12 +121,16 @@ class MemoryManager:
             pass
 
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)"
+            )
         except sqlite3.OperationalError:
             pass
 
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category_volume ON markets(category, volume DESC)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_category_volume ON markets(category, volume DESC)"
+            )
         except sqlite3.OperationalError:
             pass
 
@@ -539,7 +545,9 @@ class MemoryManager:
 
         return [self._parse_market_row(r) for r in rows]
 
-    def search_markets(self, query: str, limit: int = 20, category: str = None) -> List[Dict]:
+    def search_markets(
+        self, query: str, limit: int = 20, category: str = None
+    ) -> List[Dict]:
         """Search markets by question text, optionally filtered by category."""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row

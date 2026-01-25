@@ -20,16 +20,16 @@ from .utils import (
     sigmoid,
     softmax,
     cross_entropy_loss,
-    binary_cross_entropy_loss
+    binary_cross_entropy_loss,
 )
 
 __all__ = [
-    'NeuralNetwork',
-    'truncated_normal',
-    'scale_to_01',
-    'one_hot',
-    'confusion_matrix',
-    'precision_recall',
-    'sigmoid',
-    'softmax'
+    "NeuralNetwork",
+    "truncated_normal",
+    "scale_to_01",
+    "one_hot",
+    "confusion_matrix",
+    "precision_recall",
+    "sigmoid",
+    "softmax",
 ]

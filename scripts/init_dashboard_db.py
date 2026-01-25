@@ -22,27 +22,30 @@ def main():
     """Initialize database tables."""
     print("🔧 Initializing dashboard database tables...")
     print("=" * 60)
-    
+
     try:
         # MemoryManager.__init__ calls _init_db which creates all tables
         memory = MemoryManager()
-        
+
         # Verify tables exist
         stats = memory.get_database_stats()
-        
+
         print("✅ Database initialized successfully!")
         print(f"   Database: {memory.db_path}")
         print(f"   Total markets: {stats.get('total_markets', 0):,}")
         print(f"   Database size: {stats.get('database_size_mb', 0):.2f} MB")
         print("\n💡 Next steps:")
         print("   1. Run an agent to generate tracking data:")
-        print("      python scripts/python/cli.py run-memory-agent 'Find crypto markets'")
+        print(
+            "      python scripts/python/cli.py run-memory-agent 'Find crypto markets'"
+        )
         print("   2. Launch the dashboard:")
         print("      python scripts/python/cli.py dashboard")
-        
+
     except Exception as e:
         print(f"❌ Error initializing database: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

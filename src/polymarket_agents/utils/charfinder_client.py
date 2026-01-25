@@ -29,7 +29,7 @@ class CharacterFinderClient:
     Synchronous client for the Unicode character finder server.
     """
 
-    def __init__(self, host: str = '127.0.0.1', port: int = 2323, timeout: float = 5.0):
+    def __init__(self, host: str = "127.0.0.1", port: int = 2323, timeout: float = 5.0):
         self.host = host
         self.port = port
         self.timeout = timeout
@@ -56,15 +56,15 @@ class CharacterFinderClient:
 
             # Read the prompt
             prompt = sock.recv(1024)
-            if not prompt.endswith(b'?> '):
+            if not prompt.endswith(b"?> "):
                 sock.close()
                 raise ConnectionError("Did not receive expected prompt")
 
             # Send the query
-            sock.sendall(search_term.encode('utf-8') + b'\n')
+            sock.sendall(search_term.encode("utf-8") + b"\n")
 
             # Read response
-            response = b''
+            response = b""
             sock.settimeout(1.0)  # Shorter timeout for reading
 
             while True:
@@ -73,7 +73,7 @@ class CharacterFinderClient:
                     if not chunk:
                         break
                     response += chunk
-                    if response.endswith(b'?> '):
+                    if response.endswith(b"?> "):
                         # Found next prompt, extract response
                         response = response[:-3]  # Remove prompt
                         break
@@ -84,10 +84,10 @@ class CharacterFinderClient:
 
             # Parse response into lines
             if response:
-                text = response.decode('utf-8', errors='replace')
-                lines = [line.strip() for line in text.split('\n') if line.strip()]
+                text = response.decode("utf-8", errors="replace")
+                lines = [line.strip() for line in text.split("\n") if line.strip()]
                 # Filter out status messages, keep only result lines
-                results = [line for line in lines if line.startswith('U+')]
+                results = [line for line in lines if line.startswith("U+")]
                 return results
             else:
                 return []
@@ -95,13 +95,14 @@ class CharacterFinderClient:
         except socket.timeout as e:
             raise TimeoutError(f"Query timed out: {e}") from e
         except (ConnectionRefusedError, socket.gaierror) as e:
-            raise ConnectionError(f"Cannot connect to server {self.host}:{self.port}: {e}") from e
+            raise ConnectionError(
+                f"Cannot connect to server {self.host}:{self.port}: {e}"
+            ) from e
 
 
-async def async_query_unicode_names(search_term: str,
-                                  host: str = '127.0.0.1',
-                                  port: int = 2323,
-                                  timeout: float = 5.0) -> List[str]:
+async def async_query_unicode_names(
+    search_term: str, host: str = "127.0.0.1", port: int = 2323, timeout: float = 5.0
+) -> List[str]:
     """
     Asynchronous query of the Unicode character finder server.
 
@@ -116,37 +117,36 @@ async def async_query_unicode_names(search_term: str,
     """
     try:
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port),
-            timeout=timeout
+            asyncio.open_connection(host, port), timeout=timeout
         )
 
         # Read prompt
-        prompt = await asyncio.wait_for(reader.readuntil(b'?> '), timeout=timeout)
-        if not prompt.endswith(b'?> '):
+        prompt = await asyncio.wait_for(reader.readuntil(b"?> "), timeout=timeout)
+        if not prompt.endswith(b"?> "):
             writer.close()
             await writer.wait_closed()
             raise ConnectionError("Did not receive expected prompt")
 
         # Send query
-        writer.write(search_term.encode('utf-8') + b'\n')
+        writer.write(search_term.encode("utf-8") + b"\n")
         await writer.drain()
 
         # Read response
-        response = await asyncio.wait_for(reader.readuntil(b'?> '), timeout=timeout)
+        response = await asyncio.wait_for(reader.readuntil(b"?> "), timeout=timeout)
 
         writer.close()
         await writer.wait_closed()
 
         # Parse response
         if response:
-            text = response.decode('utf-8', errors='replace')
+            text = response.decode("utf-8", errors="replace")
             # Remove the final prompt
-            if text.endswith('?> '):
+            if text.endswith("?> "):
                 text = text[:-3]
 
-            lines = [line.strip() for line in text.split('\n') if line.strip()]
+            lines = [line.strip() for line in text.split("\n") if line.strip()]
             # Filter out status messages, keep only result lines
-            results = [line for line in lines if line.startswith('U+')]
+            results = [line for line in lines if line.startswith("U+")]
             return results
 
         return []
@@ -158,10 +158,9 @@ async def async_query_unicode_names(search_term: str,
 
 
 # Synchronous convenience function
-def query_unicode_names(search_term: str,
-                       host: str = '127.0.0.1',
-                       port: int = 2323,
-                       timeout: float = 5.0) -> List[str]:
+def query_unicode_names(
+    search_term: str, host: str = "127.0.0.1", port: int = 2323, timeout: float = 5.0
+) -> List[str]:
     """
     Synchronous convenience function for Unicode name queries.
 
@@ -212,7 +211,7 @@ async def demo_async_client():
             print(f"Error: {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run sync demo
     demo_sync_client()
 

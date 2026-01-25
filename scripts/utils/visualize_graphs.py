@@ -42,7 +42,7 @@ def analyze_graph_details():
 
     graphs = {
         "Memory Agent": create_memory_agent(),
-        "Planning Agent": create_planning_agent()
+        "Planning Agent": create_planning_agent(),
     }
 
     for name, graph in graphs.items():
@@ -64,35 +64,35 @@ def generate_graphviz():
 
     graphs = {
         "memory_agent": create_memory_agent(),
-        "planning_agent": create_planning_agent()
+        "planning_agent": create_planning_agent(),
     }
 
     for name, graph in graphs.items():
         graph_data = graph.get_graph()
 
         # Generate DOT format
-        dot_content = f'digraph {name} {{\n'
-        dot_content += '  rankdir=TB;\n'
-        dot_content += '  node [shape=box, style=rounded];\n\n'
+        dot_content = f"digraph {name} {{\n"
+        dot_content += "  rankdir=TB;\n"
+        dot_content += "  node [shape=box, style=rounded];\n\n"
 
         # Add nodes
         for node_id, node in graph_data.nodes.items():
-            if node_id in ['__start__', '__end__']:
+            if node_id in ["__start__", "__end__"]:
                 dot_content += f'  {node_id} [shape=circle, label="{node.name}"];\n'
             else:
                 dot_content += f'  {node_id} [label="{node.name}"];\n'
 
-        dot_content += '\n'
+        dot_content += "\n"
 
         # Add edges
         for edge in graph_data.edges:
-            dot_content += f'  {edge.source} -> {edge.target};\n'
+            dot_content += f"  {edge.source} -> {edge.target};\n"
 
-        dot_content += '}\n'
+        dot_content += "}\n"
 
         # Save to file
         filename = f"{name}_graph.dot"
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(dot_content)
 
         print(f"  ✅ Saved {filename}")
@@ -100,11 +100,14 @@ def generate_graphviz():
         # Try to generate PNG if graphviz is available
         try:
             import subprocess
+
             png_file = f"{name}_graph.png"
-            subprocess.run(['dot', '-Tpng', filename, '-o', png_file], check=True)
+            subprocess.run(["dot", "-Tpng", filename, "-o", png_file], check=True)
             print(f"  🖼️  Generated {png_file}")
         except (subprocess.CalledProcessError, FileNotFoundError):
-            print("  ℹ️  Install graphviz system package for PNG generation: sudo apt-get install graphviz")
+            print(
+                "  ℹ️  Install graphviz system package for PNG generation: sudo apt-get install graphviz"
+            )
 
 
 def generate_mermaid():
@@ -113,7 +116,7 @@ def generate_mermaid():
 
     graphs = {
         "Memory Agent": create_memory_agent(),
-        "Planning Agent": create_planning_agent()
+        "Planning Agent": create_planning_agent(),
     }
 
     for name, graph in graphs.items():
@@ -123,7 +126,7 @@ def generate_mermaid():
 
         # Add nodes
         for node_id, node in graph_data.nodes.items():
-            if node_id in ['__start__', '__end__']:
+            if node_id in ["__start__", "__end__"]:
                 mermaid_content += f"    {node_id}([{node.name}])\n"
             else:
                 mermaid_content += f"    {node_id}[{node.name}]\n"
@@ -137,7 +140,7 @@ def generate_mermaid():
         # Save to file
         safe_name = name.lower().replace(" ", "_")
         filename = f"{safe_name}_mermaid.md"
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(f"# {name} Graph\n\n```mermaid\n{mermaid_content}```\n")
 
         print(f"  ✅ Saved {filename}")

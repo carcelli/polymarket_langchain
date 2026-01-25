@@ -30,8 +30,8 @@ class Vector2d:
     - Memory-efficient with __slots__
     """
 
-    __slots__ = ('__x', '__y')  # Memory optimization (Chapter 9)
-    typecode = 'd'
+    __slots__ = ("__x", "__y")  # Memory optimization (Chapter 9)
+    typecode = "d"
 
     def __init__(self, x, y):
         """Initialize with float conversion for type safety."""
@@ -55,7 +55,7 @@ class Vector2d:
     def __repr__(self):
         """Developer-friendly representation (Chapter 9)."""
         class_name = type(self).__name__
-        return '{}({!r}, {!r})'.format(class_name, *self)
+        return "{}({!r}, {!r})".format(class_name, *self)
 
     def __str__(self):
         """User-friendly string representation (Chapter 9)."""
@@ -63,8 +63,7 @@ class Vector2d:
 
     def __bytes__(self):
         """Binary representation with typecode prefix (Chapter 9)."""
-        return (bytes([ord(self.typecode)]) +
-                bytes(array(self.typecode, self)))
+        return bytes([ord(self.typecode)]) + bytes(array(self.typecode, self))
 
     def __eq__(self, other):
         """Equality comparison for hashing support (Chapter 9)."""
@@ -82,17 +81,17 @@ class Vector2d:
         """Non-zero vectors are truthy."""
         return bool(abs(self))
 
-    def __format__(self, fmt_spec=''):
+    def __format__(self, fmt_spec=""):
         """Custom format specification with polar coordinates (Chapter 9)."""
-        if fmt_spec.endswith('p'):
+        if fmt_spec.endswith("p"):
             # Polar coordinates: <magnitude, angle>
             fmt_spec = fmt_spec[:-1]
             coords = (abs(self), math.atan2(self.y, self.x))
-            outer_fmt = '<{}, {}>'
+            outer_fmt = "<{}, {}>"
         else:
             # Cartesian coordinates: (x, y)
             coords = self
-            outer_fmt = '({}, {})'
+            outer_fmt = "({}, {})"
 
         components = (format(c, fmt_spec) for c in coords)
         return outer_fmt.format(*components)

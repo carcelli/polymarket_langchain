@@ -59,12 +59,24 @@ def demonstrate_memory_persistence():
 
         # In real usage, this would be done through the agent's filesystem tools
         backend = backend_factory(runtime)
-        if hasattr(backend, 'store_memory'):
+        if hasattr(backend, "store_memory"):
             # Store different types of memories
             memories = [
-                ("successful_analysis", "Bitcoin price predictions show 15% edge when volume > $50M", ["crypto", "edge"]),
-                ("market_pattern", "Geopolitical markets resolve within 6 months 80% of time", ["geopolitics", "timing"]),
-                ("risk_reminder", "Never allocate more than 2% portfolio to single market", ["risk", "portfolio"]),
+                (
+                    "successful_analysis",
+                    "Bitcoin price predictions show 15% edge when volume > $50M",
+                    ["crypto", "edge"],
+                ),
+                (
+                    "market_pattern",
+                    "Geopolitical markets resolve within 6 months 80% of time",
+                    ["geopolitics", "timing"],
+                ),
+                (
+                    "risk_reminder",
+                    "Never allocate more than 2% portfolio to single market",
+                    ["risk", "portfolio"],
+                ),
             ]
 
             for mem_type, content, tags in memories:
@@ -72,7 +84,7 @@ def demonstrate_memory_persistence():
                 print(f"  ✅ Stored: {path}")
 
         print("\\n🔍 Retrieving memories...")
-        if hasattr(backend, 'get_memories_by_type'):
+        if hasattr(backend, "get_memories_by_type"):
             successful = backend.get_memories_by_type("successful_analysis", limit=5)
             print(f"  Found {len(successful)} successful analysis memories")
 
@@ -95,7 +107,7 @@ def demonstrate_analysis_storage():
 
     analysis = analyzer.analyze_market_opportunity(market)
 
-    if 'error' not in analysis:
+    if "error" not in analysis:
         print("✅ Analysis complete")
         print(f"   Action: {analysis.get('action', 'UNKNOWN')}")
         print(f"   Edge: {analysis.get('edge', 0):.2f}%")
@@ -145,18 +157,18 @@ def show_backend_configuration():
         "Development": {
             "backend": "get_quickstart_backend('./dev_data')",
             "description": "Local filesystem only, good for development",
-            "persistence": "Single machine, survives restarts"
+            "persistence": "Single machine, survives restarts",
         },
         "Production": {
             "backend": "create_composite_backend(runtime)",
             "description": "Memories in store, workspace on disk",
-            "persistence": "Cross-session, cloud-ready"
+            "persistence": "Cross-session, cloud-ready",
         },
         "Enterprise": {
             "backend": "create_enterprise_backend(runtime)",
             "description": "Policy-controlled with audit trails",
-            "persistence": "Secure, compliant, multi-tenant"
-        }
+            "persistence": "Secure, compliant, multi-tenant",
+        },
     }
 
     for name, config in configs.items():

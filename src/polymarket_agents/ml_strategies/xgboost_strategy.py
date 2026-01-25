@@ -13,18 +13,23 @@ from pathlib import Path
 import logging
 import json
 
-from polymarket_agents.ml_strategies.base_strategy import MLBettingStrategy, StrategyResult
+from polymarket_agents.ml_strategies.base_strategy import (
+    MLBettingStrategy,
+    StrategyResult,
+)
 from polymarket_agents.ml_strategies.registry import register_strategy
 from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 
 # Try to import XGBoost, fall back to sklearn if not available
 try:
     import xgboost as xgb
+
     XGBOOST_AVAILABLE = True
 except ImportError:
     XGBOOST_AVAILABLE = False
     try:
         from sklearn.ensemble import GradientBoostingClassifier
+
         SKLEARN_AVAILABLE = True
     except ImportError:
         SKLEARN_AVAILABLE = False
@@ -43,7 +48,11 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
     to identify edges and betting opportunities.
     """
 
-    def __init__(self, name: str = "gradient_boosting_probability", model_path: str = "data/models/gradient_boosting_model.pkl"):
+    def __init__(
+        self,
+        name: str = "gradient_boosting_probability",
+        model_path: str = "data/models/gradient_boosting_model.pkl",
+    ):
         super().__init__(name)
         self.model_path = Path(model_path)
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,9 +62,13 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         self.data_ingestor = PolymarketDataIngestion()
 
         if not (XGBOOST_AVAILABLE or SKLEARN_AVAILABLE):
-            raise ImportError("Neither XGBoost nor scikit-learn available. Install with: pip install xgboost or pip install scikit-learn")
+            raise ImportError(
+                "Neither XGBoost nor scikit-learn available. Install with: pip install xgboost or pip install scikit-learn"
+            )
 
-    def _prepare_features_for_training(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+    def _prepare_features_for_training(
+        self, df: pd.DataFrame
+    ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
         """
         Prepare features and target for model training.
 
@@ -67,20 +80,32 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         """
         # Define feature columns (exclude target, metadata, and leaky features)
         exclude_cols = [
-            'market_id', 'question', 'description', 'outcomes', 'created_at',
-            'end_date', 'resolved_at', 'actual_outcome', 'will_resolve_yes', 'target',
-            'resolved', 'active', 'category',  # Keep category for one-hot encoding
+            "market_id",
+            "question",
+            "description",
+            "outcomes",
+            "created_at",
+            "end_date",
+            "resolved_at",
+            "actual_outcome",
+            "will_resolve_yes",
+            "target",
+            "resolved",
+            "active",
+            "category",  # Keep category for one-hot encoding
             # Exclude leaky features that wouldn't be available during prediction
-            'true_prob', 'edge', 'abs_edge'
+            "true_prob",
+            "edge",
+            "abs_edge",
         ]
 
         # Get numeric and boolean columns
         feature_cols = []
         for col in df.columns:
             if col not in exclude_cols:
-                if df[col].dtype in ['int64', 'float64', 'bool']:
+                if df[col].dtype in ["int64", "float64", "bool"]:
                     feature_cols.append(col)
-                elif df[col].dtype == 'object' and col == 'volume_category':
+                elif df[col].dtype == "object" and col == "volume_category":
                     # Handle categorical volume
                     feature_cols.append(col)
 
@@ -90,23 +115,25 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         X = df[feature_cols].copy()
 
         # Handle categorical variables
-        if 'volume_category' in X.columns:
+        if "volume_category" in X.columns:
             # One-hot encode volume categories
-            volume_dummies = pd.get_dummies(X['volume_category'], prefix='volume_cat')
-            X = pd.concat([X.drop('volume_category', axis=1), volume_dummies], axis=1)
+            volume_dummies = pd.get_dummies(X["volume_category"], prefix="volume_cat")
+            X = pd.concat([X.drop("volume_category", axis=1), volume_dummies], axis=1)
 
         # Handle any remaining NaN values
         X = X.fillna(0)
 
         # Prepare target - try different column names
         target_col = None
-        for col in ['will_resolve_yes', 'target', 'actual_outcome']:
+        for col in ["will_resolve_yes", "target", "actual_outcome"]:
             if col in df.columns:
                 target_col = col
                 break
 
         if target_col is None:
-            raise ValueError("No target column found. Expected 'will_resolve_yes', 'target', or 'actual_outcome'")
+            raise ValueError(
+                "No target column found. Expected 'will_resolve_yes', 'target', or 'actual_outcome'"
+            )
 
         y = df[target_col].astype(int).values
         logger.info(f"Using target column: {target_col}")
@@ -116,7 +143,9 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         return X.values, y, feature_names
 
-    def _prepare_features_for_prediction(self, market_data: Dict[str, Any]) -> Tuple[np.ndarray, List[str]]:
+    def _prepare_features_for_prediction(
+        self, market_data: Dict[str, Any]
+    ) -> Tuple[np.ndarray, List[str]]:
         """
         Prepare features for prediction (without target variable).
 
@@ -131,18 +160,27 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         # Define feature columns (same as training, exclude target and metadata)
         exclude_cols = [
-            'market_id', 'question', 'description', 'outcomes', 'created_at',
-            'end_date', 'resolved_at', 'actual_outcome', 'will_resolve_yes',
-            'resolved', 'active', 'category'  # Keep category for one-hot encoding
+            "market_id",
+            "question",
+            "description",
+            "outcomes",
+            "created_at",
+            "end_date",
+            "resolved_at",
+            "actual_outcome",
+            "will_resolve_yes",
+            "resolved",
+            "active",
+            "category",  # Keep category for one-hot encoding
         ]
 
         # Get numeric and boolean columns
         feature_cols = []
         for col in df.columns:
             if col not in exclude_cols:
-                if df[col].dtype in ['int64', 'float64', 'bool']:
+                if df[col].dtype in ["int64", "float64", "bool"]:
                     feature_cols.append(col)
-                elif df[col].dtype == 'object' and col == 'volume_category':
+                elif df[col].dtype == "object" and col == "volume_category":
                     # Handle categorical volume
                     feature_cols.append(col)
 
@@ -150,10 +188,10 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         X = df[feature_cols].copy()
 
         # Handle categorical variables
-        if 'volume_category' in X.columns:
+        if "volume_category" in X.columns:
             # One-hot encode volume categories
-            volume_dummies = pd.get_dummies(X['volume_category'], prefix='volume_cat')
-            X = pd.concat([X.drop('volume_category', axis=1), volume_dummies], axis=1)
+            volume_dummies = pd.get_dummies(X["volume_category"], prefix="volume_cat")
+            X = pd.concat([X.drop("volume_category", axis=1), volume_dummies], axis=1)
 
         # Handle any remaining NaN values
         X = X.fillna(0)
@@ -168,11 +206,11 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         if not self.model:
             return {}
 
-        if self.use_xgboost and hasattr(self.model, 'get_score'):
+        if self.use_xgboost and hasattr(self.model, "get_score"):
             # XGBoost feature importance
-            importance_scores = self.model.get_score(importance_type='gain')
+            importance_scores = self.model.get_score(importance_type="gain")
             return {k: float(v) for k, v in importance_scores.items()}
-        elif hasattr(self.model, 'feature_importances_'):
+        elif hasattr(self.model, "feature_importances_"):
             # sklearn feature importance
             importance_scores = self.model.feature_importances_
             importance_dict = {}
@@ -183,7 +221,9 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         else:
             return {}
 
-    def train(self, training_data: pd.DataFrame, hyperparams: Optional[Dict[str, Any]] = None) -> None:
+    def train(
+        self, training_data: pd.DataFrame, hyperparams: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
         Train the XGBoost model on historical market data.
 
@@ -195,22 +235,24 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         # Default hyperparameters
         default_params = {
-            'objective': 'binary:logistic',
-            'eval_metric': 'logloss',
-            'max_depth': 6,
-            'learning_rate': 0.1,
-            'n_estimators': 100,
-            'subsample': 0.8,
-            'colsample_bytree': 0.8,
-            'random_state': 42,
-            'early_stopping_rounds': 10
+            "objective": "binary:logistic",
+            "eval_metric": "logloss",
+            "max_depth": 6,
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "subsample": 0.8,
+            "colsample_bytree": 0.8,
+            "random_state": 42,
+            "early_stopping_rounds": 10,
         }
 
         if hyperparams:
             default_params.update(hyperparams)
 
         # Prepare features and target
-        X_train, y_train, feature_names = self._prepare_features_for_training(training_data)
+        X_train, y_train, feature_names = self._prepare_features_for_training(
+            training_data
+        )
 
         # Store feature names for prediction
         self.feature_names = feature_names
@@ -223,9 +265,9 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             self.model = xgb.train(
                 default_params,
                 dtrain,
-                num_boost_round=default_params['n_estimators'],
-                early_stopping_rounds=default_params.get('early_stopping_rounds'),
-                verbose_eval=False
+                num_boost_round=default_params["n_estimators"],
+                early_stopping_rounds=default_params.get("early_stopping_rounds"),
+                verbose_eval=False,
             )
 
             # Save the model
@@ -236,19 +278,22 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             from sklearn.ensemble import GradientBoostingClassifier
 
             self.model = GradientBoostingClassifier(
-                n_estimators=default_params.get('n_estimators', 100),
-                learning_rate=default_params.get('learning_rate', 0.1),
-                max_depth=default_params.get('max_depth', 6),
-                subsample=default_params.get('subsample', 0.8),
-                random_state=default_params.get('random_state', 42)
+                n_estimators=default_params.get("n_estimators", 100),
+                learning_rate=default_params.get("learning_rate", 0.1),
+                max_depth=default_params.get("max_depth", 6),
+                subsample=default_params.get("subsample", 0.8),
+                random_state=default_params.get("random_state", 42),
             )
 
             self.model.fit(X_train, y_train)
 
             # Save using joblib
             import joblib
+
             joblib.dump(self.model, self.model_path)
-            logger.info(f"✅ Sklearn GradientBoosting model trained and saved to {self.model_path}")
+            logger.info(
+                f"✅ Sklearn GradientBoosting model trained and saved to {self.model_path}"
+            )
 
         # Mark as trained
         self.trained = True
@@ -280,16 +325,20 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             predicted_prob = float(self.model.predict(dpred)[0])
         else:
             # sklearn prediction
-            predicted_prob = float(self.model.predict_proba(X_pred)[0][1])  # Probability of positive class
+            predicted_prob = float(
+                self.model.predict_proba(X_pred)[0][1]
+            )  # Probability of positive class
 
         # Get current market-implied probability (try different field names)
         market_prob = 0.5  # default
-        if 'outcome_prices' in market_data and isinstance(market_data['outcome_prices'], list):
-            market_prob = float(market_data['outcome_prices'][0])
-        elif 'yes_price' in market_data:
-            market_prob = float(market_data['yes_price'])
-        elif 'market_prob' in market_data:
-            market_prob = float(market_data['market_prob'])
+        if "outcome_prices" in market_data and isinstance(
+            market_data["outcome_prices"], list
+        ):
+            market_prob = float(market_data["outcome_prices"][0])
+        elif "yes_price" in market_data:
+            market_prob = float(market_data["yes_price"])
+        elif "market_prob" in market_data:
+            market_prob = float(market_data["market_prob"])
 
         # Calculate edge (expected value per dollar bet)
         edge = self.calculate_edge(predicted_prob, market_prob)
@@ -310,8 +359,8 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         # Create result
         result = StrategyResult(
-            market_id=market_data.get('market_id', market_data.get('id', 'unknown')),
-            market_question=market_data.get('question', 'Unknown market'),
+            market_id=market_data.get("market_id", market_data.get("id", "unknown")),
+            market_question=market_data.get("question", "Unknown market"),
             predicted_probability=predicted_prob,
             confidence=confidence,
             edge=edge,
@@ -321,7 +370,7 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             reasoning=f"XGBoost predicts {predicted_prob:.3f} probability, market shows {market_prob:.3f}. Edge: {edge:.1%}",
             features_used=feature_names,
             model_name=self.name,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         return result
@@ -339,6 +388,7 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             self.model.save_model(filepath)
         else:
             import joblib
+
             joblib.dump(self.model, filepath)
         logger.info(f"Model saved to {filepath}")
 
@@ -349,11 +399,14 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             self.model.load_model(filepath)
         else:
             import joblib
+
             self.model = joblib.load(filepath)
         self.trained = True
         logger.info(f"Model loaded from {filepath}")
 
-    def create_training_dataset(self, days_back: int = 365, min_volume: float = 1000) -> pd.DataFrame:
+    def create_training_dataset(
+        self, days_back: int = 365, min_volume: float = 1000
+    ) -> pd.DataFrame:
         """
         Create a training dataset using the data ingestion pipeline.
 
@@ -370,7 +423,7 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         training_data = self.data_ingestor.create_training_dataset(
             days_back=days_back,
             min_volume=min_volume,
-            include_unresolved=False  # Only resolved markets for supervised learning
+            include_unresolved=False,  # Only resolved markets for supervised learning
         )
 
         logger.info(f"Created training dataset with {len(training_data)} samples")
@@ -400,60 +453,72 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             y_pred_prob = self.model.predict(dtest)
         else:
             # sklearn prediction
-            y_pred_prob = self.model.predict_proba(X_test)[:, 1]  # Probability of positive class
+            y_pred_prob = self.model.predict_proba(X_test)[
+                :, 1
+            ]  # Probability of positive class
 
         y_pred = (y_pred_prob > 0.5).astype(int)
 
         # Calculate metrics
         from sklearn.metrics import (
-            accuracy_score, precision_score, recall_score, f1_score,
-            roc_auc_score, brier_score_loss, log_loss
+            accuracy_score,
+            precision_score,
+            recall_score,
+            f1_score,
+            roc_auc_score,
+            brier_score_loss,
+            log_loss,
         )
 
         metrics = {
-            'accuracy': accuracy_score(y_test, y_pred),
-            'precision': precision_score(y_test, y_pred, zero_division=0),
-            'recall': recall_score(y_test, y_pred, zero_division=0),
-            'f1_score': f1_score(y_test, y_pred, zero_division=0),
-            'roc_auc': roc_auc_score(y_test, y_pred_prob),
-            'brier_score': brier_score_loss(y_test, y_pred_prob),
-            'log_loss': log_loss(y_test, y_pred_prob),
-            'sample_size': len(test_data)
+            "accuracy": accuracy_score(y_test, y_pred),
+            "precision": precision_score(y_test, y_pred, zero_division=0),
+            "recall": recall_score(y_test, y_pred, zero_division=0),
+            "f1_score": f1_score(y_test, y_pred, zero_division=0),
+            "roc_auc": roc_auc_score(y_test, y_pred_prob),
+            "brier_score": brier_score_loss(y_test, y_pred_prob),
+            "log_loss": log_loss(y_test, y_pred_prob),
+            "sample_size": len(test_data),
         }
 
         # Market-specific metrics
         test_data_copy = test_data.copy()
-        test_data_copy['predicted_prob'] = y_pred_prob
+        test_data_copy["predicted_prob"] = y_pred_prob
         # Get market probability (try different column names)
-        if 'yes_price' in test_data_copy.columns:
-            test_data_copy['market_prob'] = test_data_copy['yes_price']
-        elif 'market_prob' in test_data_copy.columns:
+        if "yes_price" in test_data_copy.columns:
+            test_data_copy["market_prob"] = test_data_copy["yes_price"]
+        elif "market_prob" in test_data_copy.columns:
             pass  # already exists
         else:
-            test_data_copy['market_prob'] = 0.5  # default
+            test_data_copy["market_prob"] = 0.5  # default
 
         # Calculate edge distribution
-        test_data_copy['edge'] = test_data_copy.apply(
-            lambda row: self.calculate_edge(row['predicted_prob'], row['market_prob']),
-            axis=1
+        test_data_copy["edge"] = test_data_copy.apply(
+            lambda row: self.calculate_edge(row["predicted_prob"], row["market_prob"]),
+            axis=1,
         )
 
         edge_metrics = {
-            'mean_edge': test_data_copy['edge'].mean(),
-            'median_edge': test_data_copy['edge'].median(),
-            'positive_edge_pct': (test_data_copy['edge'] > 0).mean(),
-            'large_edge_pct': (test_data_copy['edge'] > 0.05).mean()  # >5% edge
+            "mean_edge": test_data_copy["edge"].mean(),
+            "median_edge": test_data_copy["edge"].median(),
+            "positive_edge_pct": (test_data_copy["edge"] > 0).mean(),
+            "large_edge_pct": (test_data_copy["edge"] > 0.05).mean(),  # >5% edge
         }
 
         metrics.update(edge_metrics)
 
-        logger.info(f"Evaluation complete. Accuracy: {metrics['accuracy']:.3f}, ROC-AUC: {metrics['roc_auc']:.3f}")
-        logger.info(f"Mean edge: {metrics['mean_edge']:.1%}, Positive edge %: {metrics['positive_edge_pct']:.1%}")
+        logger.info(
+            f"Evaluation complete. Accuracy: {metrics['accuracy']:.3f}, ROC-AUC: {metrics['roc_auc']:.3f}"
+        )
+        logger.info(
+            f"Mean edge: {metrics['mean_edge']:.1%}, Positive edge %: {metrics['positive_edge_pct']:.1%}"
+        )
 
         return metrics
 
-    def backtest_strategy(self, historical_data: pd.DataFrame,
-                         initial_capital: float = 10000.0) -> Dict[str, Any]:
+    def backtest_strategy(
+        self, historical_data: pd.DataFrame, initial_capital: float = 10000.0
+    ) -> Dict[str, Any]:
         """
         Backtest the strategy on historical data.
 
@@ -464,7 +529,9 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         Returns:
             Backtest results including performance metrics
         """
-        logger.info(f"Backtesting strategy on {len(historical_data)} historical markets...")
+        logger.info(
+            f"Backtesting strategy on {len(historical_data)} historical markets..."
+        )
 
         capital = initial_capital
         trades = []
@@ -481,26 +548,34 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
                 # Simulate trade if recommendation is made
                 if result.recommended_bet != "PASS" and result.position_size > 0:
                     # Calculate stake
-                    stake = min(capital * result.position_size, capital * 0.1)  # Max 10% per trade
+                    stake = min(
+                        capital * result.position_size, capital * 0.1
+                    )  # Max 10% per trade
 
                     # Get market probability for payout calculation
                     market_prob = 0.5
-                    if 'yes_price' in market_dict:
-                        market_prob = market_dict['yes_price']
-                    elif 'market_prob' in market_dict:
-                        market_prob = market_dict['market_prob']
-                    elif 'outcome_prices' in market_dict and isinstance(market_dict['outcome_prices'], list):
-                        market_prob = float(market_dict['outcome_prices'][0])
+                    if "yes_price" in market_dict:
+                        market_prob = market_dict["yes_price"]
+                    elif "market_prob" in market_dict:
+                        market_prob = market_dict["market_prob"]
+                    elif "outcome_prices" in market_dict and isinstance(
+                        market_dict["outcome_prices"], list
+                    ):
+                        market_prob = float(market_dict["outcome_prices"][0])
 
                     if result.recommended_bet == "YES":
                         # Bet on YES outcome
                         payout_ratio = 1.0 / market_prob if market_prob > 0 else 2.0
                     else:
                         # Bet on NO outcome - assume symmetric market
-                        payout_ratio = 1.0 / (1 - market_prob) if (1 - market_prob) > 0 else 2.0
+                        payout_ratio = (
+                            1.0 / (1 - market_prob) if (1 - market_prob) > 0 else 2.0
+                        )
 
                     # Determine if trade was profitable
-                    actual_outcome = market_dict.get('actual_outcome', market_dict.get('target', 0))
+                    actual_outcome = market_dict.get(
+                        "actual_outcome", market_dict.get("target", 0)
+                    )
                     expected_outcome = 1 if result.predicted_probability > 0.5 else 0
 
                     if actual_outcome == expected_outcome:
@@ -513,28 +588,32 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
                     # Record trade
                     trade = {
-                        'market_id': result.market_id,
-                        'prediction': result.predicted_probability,
-                        'market_prob': market_prob,
-                        'recommendation': result.recommended_bet,
-                        'stake': stake,
-                        'outcome': actual_outcome,
-                        'profit': profit if actual_outcome == expected_outcome else -stake,
-                        'capital_after': capital
+                        "market_id": result.market_id,
+                        "prediction": result.predicted_probability,
+                        "market_prob": market_prob,
+                        "recommendation": result.recommended_bet,
+                        "stake": stake,
+                        "outcome": actual_outcome,
+                        "profit": (
+                            profit if actual_outcome == expected_outcome else -stake
+                        ),
+                        "capital_after": capital,
                     }
                     trades.append(trade)
 
                 portfolio_value.append(capital)
 
             except Exception as e:
-                logger.warning(f"Error processing market {market.get('market_id', 'unknown')}: {e}")
+                logger.warning(
+                    f"Error processing market {market.get('market_id', 'unknown')}: {e}"
+                )
                 continue
 
         # Calculate performance metrics
         final_capital = capital
         total_return = (final_capital - initial_capital) / initial_capital
         num_trades = len(trades)
-        win_rate = sum(1 for t in trades if t['profit'] > 0) / max(num_trades, 1)
+        win_rate = sum(1 for t in trades if t["profit"] > 0) / max(num_trades, 1)
 
         # Sharpe ratio (simplified)
         returns = np.diff(portfolio_value) / portfolio_value[:-1]
@@ -544,21 +623,25 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             sharpe_ratio = 0
 
         results = {
-            'initial_capital': initial_capital,
-            'final_capital': final_capital,
-            'total_return': total_return,
-            'total_return_pct': total_return * 100,
-            'num_trades': num_trades,
-            'win_rate': win_rate,
-            'sharpe_ratio': sharpe_ratio,
-            'max_drawdown': self._calculate_max_drawdown(portfolio_value),
-            'trades': trades[:100]  # Limit trade history for storage
+            "initial_capital": initial_capital,
+            "final_capital": final_capital,
+            "total_return": total_return,
+            "total_return_pct": total_return * 100,
+            "num_trades": num_trades,
+            "win_rate": win_rate,
+            "sharpe_ratio": sharpe_ratio,
+            "max_drawdown": self._calculate_max_drawdown(portfolio_value),
+            "trades": trades[:100],  # Limit trade history for storage
         }
 
-        logger.info(f"Backtest complete: {total_return:.1%} return, {num_trades} trades, {win_rate:.1%} win rate")
+        logger.info(
+            f"Backtest complete: {total_return:.1%} return, {num_trades} trades, {win_rate:.1%} win rate"
+        )
         return results
 
-    def run_full_pipeline_from_data(self, training_data: pd.DataFrame, test_size: float = 0.2) -> Dict[str, Any]:
+    def run_full_pipeline_from_data(
+        self, training_data: pd.DataFrame, test_size: float = 0.2
+    ) -> Dict[str, Any]:
         """
         Run the complete ML pipeline using pre-loaded training data.
 
@@ -575,10 +658,12 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             raise ValueError("No training data provided")
 
         # 2. Split train/test
-        train_data = training_data.sample(frac=1-test_size, random_state=42)
+        train_data = training_data.sample(frac=1 - test_size, random_state=42)
         test_data = training_data.drop(train_data.index)
 
-        logger.info(f"Step 2: Split into {len(train_data)} train, {len(test_data)} test samples")
+        logger.info(
+            f"Step 2: Split into {len(train_data)} train, {len(test_data)} test samples"
+        )
 
         # 3. Train model
         logger.info("Step 3: Training XGBoost model...")
@@ -600,13 +685,13 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         feature_importance = self.get_feature_importance()
 
         results = {
-            'training_samples': len(train_data),
-            'test_samples': len(test_data),
-            'evaluation_metrics': eval_metrics,
-            'backtest_results': backtest_results,
-            'feature_importance': feature_importance,
-            'model_path': str(self.model_path),
-            'timestamp': datetime.now().isoformat()
+            "training_samples": len(train_data),
+            "test_samples": len(test_data),
+            "evaluation_metrics": eval_metrics,
+            "backtest_results": backtest_results,
+            "feature_importance": feature_importance,
+            "model_path": str(self.model_path),
+            "timestamp": datetime.now().isoformat(),
         }
 
         logger.info("✅ XGBoost pipeline completed successfully")
@@ -630,8 +715,9 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         return max_drawdown
 
-    def run_full_pipeline(self, days_back: int = 365, min_volume: float = 1000,
-                         test_size: float = 0.2) -> Dict[str, Any]:
+    def run_full_pipeline(
+        self, days_back: int = 365, min_volume: float = 1000, test_size: float = 0.2
+    ) -> Dict[str, Any]:
         """
         Run the complete ML pipeline: data ingestion, training, evaluation, and backtesting.
 
@@ -647,16 +733,20 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
 
         # 1. Create training dataset
         logger.info("Step 1: Creating training dataset...")
-        training_data = self.create_training_dataset(days_back=days_back, min_volume=min_volume)
+        training_data = self.create_training_dataset(
+            days_back=days_back, min_volume=min_volume
+        )
 
         if len(training_data) == 0:
             raise ValueError("No training data available")
 
         # 2. Split train/test
-        train_data = training_data.sample(frac=1-test_size, random_state=42)
+        train_data = training_data.sample(frac=1 - test_size, random_state=42)
         test_data = training_data.drop(train_data.index)
 
-        logger.info(f"Step 2: Split into {len(train_data)} train, {len(test_data)} test samples")
+        logger.info(
+            f"Step 2: Split into {len(train_data)} train, {len(test_data)} test samples"
+        )
 
         # 3. Train model
         logger.info("Step 3: Training XGBoost model...")
@@ -674,17 +764,21 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         feature_importance = self.get_feature_importance()
 
         results = {
-            'training_samples': len(train_data),
-            'test_samples': len(test_data),
-            'evaluation_metrics': eval_metrics,
-            'backtest_results': backtest_results,
-            'feature_importance': feature_importance,
-            'model_path': str(self.model_path),
-            'timestamp': datetime.now().isoformat()
+            "training_samples": len(train_data),
+            "test_samples": len(test_data),
+            "evaluation_metrics": eval_metrics,
+            "backtest_results": backtest_results,
+            "feature_importance": feature_importance,
+            "model_path": str(self.model_path),
+            "timestamp": datetime.now().isoformat(),
         }
 
         logger.info("✅ XGBoost pipeline completed successfully")
-        logger.info(f"Model performance: ROC-AUC = {eval_metrics.get('roc_auc', 0):.3f}")
-        logger.info(f"Backtest return: {backtest_results.get('total_return_pct', 0):.1f}%")
+        logger.info(
+            f"Model performance: ROC-AUC = {eval_metrics.get('roc_auc', 0):.3f}"
+        )
+        logger.info(
+            f"Backtest return: {backtest_results.get('total_return_pct', 0):.1f}%"
+        )
 
         return results

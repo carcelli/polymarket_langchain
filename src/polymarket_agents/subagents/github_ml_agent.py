@@ -24,8 +24,9 @@ class MLTestGenerator:
         self.analyzer = MarketAnalyzer()
         self.base_dir = Path("./tests/ml_strategies")
 
-    def generate_strategy_test(self, strategy_name: str, strategy_class: str,
-                             description: str) -> str:
+    def generate_strategy_test(
+        self, strategy_name: str, strategy_class: str, description: str
+    ) -> str:
         """Generate a pytest file for a betting strategy."""
 
         # Create test file content
@@ -353,7 +354,12 @@ if __name__ == "__main__":
     def generate_strategy_comparison_test(self, strategy_names: List[str]) -> str:
         """Generate a test that compares multiple strategies."""
 
-        strategy_imports = "\n".join([f"from polymarket_agents.ml_strategies.{name.lower()} import {name}" for name in strategy_names])
+        strategy_imports = "\n".join(
+            [
+                f"from polymarket_agents.ml_strategies.{name.lower()} import {name}"
+                for name in strategy_names
+            ]
+        )
 
         test_content = f'''"""
 ML Strategy Comparison Tests
@@ -912,7 +918,6 @@ def create_ml_test_generator_subagent():
     return {
         "name": "github-ml-agent",
         "description": "Specializes in generating machine learning tests for betting strategies, creating pytest files, and committing them to GitHub for automated testing and validation.",
-
         "system_prompt": """You are a specialized ML test generation agent for betting strategies.
 
 Your expertise includes:
@@ -954,16 +959,16 @@ GITHUB INTEGRATION
             check_github_repo_status,
             search_github_issues,
             create_github_issue,
-            create_market_analysis_report
+            create_market_analysis_report,
         ],
-
         # Use a model good at code generation and testing
         "model": "gpt-4o",  # Could be specialized for code generation
     }
 
 
-def generate_ml_strategy_test(strategy_name: str, strategy_type: str = "predictor",
-                             description: str = "") -> str:
+def generate_ml_strategy_test(
+    strategy_name: str, strategy_type: str = "predictor", description: str = ""
+) -> str:
     """
     Generate a complete ML strategy test file.
 
@@ -978,16 +983,22 @@ def generate_ml_strategy_test(strategy_name: str, strategy_type: str = "predicto
     generator = MLTestGenerator()
 
     if strategy_type == "predictor":
-        return generator.generate_strategy_test(strategy_name, strategy_name, description)
+        return generator.generate_strategy_test(
+            strategy_name, strategy_name, description
+        )
     elif strategy_type == "comparison":
         return generator.generate_strategy_comparison_test([strategy_name])
     elif strategy_type == "validation":
         return generator.generate_model_validation_test(strategy_name)
     else:
-        return generator.generate_strategy_test(strategy_name, strategy_name, description)
+        return generator.generate_strategy_test(
+            strategy_name, strategy_name, description
+        )
 
 
-def commit_ml_tests_to_github(test_files: Dict[str, str], commit_message: str = None) -> Dict[str, Any]:
+def commit_ml_tests_to_github(
+    test_files: Dict[str, str], commit_message: str = None
+) -> Dict[str, Any]:
     """
     Commit generated ML tests to GitHub.
 
@@ -999,13 +1010,11 @@ def commit_ml_tests_to_github(test_files: Dict[str, str], commit_message: str = 
         Result of the GitHub operations
     """
     if not commit_message:
-        commit_message = f"🤖 ML Tests: Add automated tests for {len(test_files)} strategies"
+        commit_message = (
+            f"🤖 ML Tests: Add automated tests for {len(test_files)} strategies"
+        )
 
-    results = {
-        "files_created": [],
-        "commit_status": "pending",
-        "errors": []
-    }
+    results = {"files_created": [], "commit_status": "pending", "errors": []}
 
     # This would use the GitHub toolkit to create files and commits
     # For now, we'll just simulate and provide the structure
@@ -1016,7 +1025,7 @@ def commit_ml_tests_to_github(test_files: Dict[str, str], commit_message: str = 
             "filename": filename,
             "size": len(content),
             "path": f"tests/ml_strategies/{filename}",
-            "status": "created"
+            "status": "created",
         }
         results["files_created"].append(simulated_result)
 

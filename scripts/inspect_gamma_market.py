@@ -1,33 +1,34 @@
 import httpx
 import json
 
+
 def inspect_gamma():
     print("Fetching markets from Gamma...")
     url = "https://gamma-api.polymarket.com/markets"
     params = {"limit": 1, "active": "true", "closed": "false"}
-    
+
     try:
         res = httpx.get(url, params=params)
         if res.status_code != 200:
             print(f"Failed to fetch markets: {res.status_code}")
             return
-            
+
         markets = res.json()
         if not markets:
             print("No markets found.")
             return
-            
+
         market = markets[0]
         market_id = market.get("id")
         print(f"Inspecting Market ID: {market_id}")
         print("Market Keys:", list(market.keys()))
-        
+
         # Check for history or prices in the market object
         if "history" in market:
             print("Found 'history' key in market object.")
         if "prices" in market:
             print("Found 'prices' key in market object.")
-            
+
         # Try fetching specific history endpoint
         # Common patterns: /markets/{id}/history, /history?market_id={id}
         history_url = f"https://gamma-api.polymarket.com/markets/{market_id}/history"
@@ -38,7 +39,7 @@ def inspect_gamma():
             print("History data sample:", str(hist_res.json())[:200])
         else:
             print(f"History endpoint failed: {hist_res.status_code}")
-            
+
             # Try CLOB history URL pattern just in case
             # The clob_token_ids are needed for CLOB API usually
             clob_token_ids = json.loads(market.get("clobTokenIds", "[]"))
@@ -56,6 +57,7 @@ def inspect_gamma():
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     inspect_gamma()

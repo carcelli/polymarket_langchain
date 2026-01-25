@@ -13,8 +13,12 @@ import json
 from market_analysis_workflow import MarketAnalyzer
 
 
-def collect_market_data(query: str, categories: List[str] = None, min_volume: float = 100000,
-                       max_results: int = 50) -> Dict[str, Any]:
+def collect_market_data(
+    query: str,
+    categories: List[str] = None,
+    min_volume: float = 100000,
+    max_results: int = 50,
+) -> Dict[str, Any]:
     """
     Collect comprehensive market data based on search criteria.
 
@@ -30,7 +34,7 @@ def collect_market_data(query: str, categories: List[str] = None, min_volume: fl
     markets = analyzer.get_high_volume_markets(
         category=categories[0] if categories else None,
         limit=max_results * 2,  # Get more to filter
-        min_volume=min_volume
+        min_volume=min_volume,
     )
 
     # Filter by query relevance if provided
@@ -39,8 +43,8 @@ def collect_market_data(query: str, categories: List[str] = None, min_volume: fl
         filtered_markets = []
 
         for market in markets:
-            question = market['question'].lower()
-            category = market.get('category', '').lower()
+            question = market["question"].lower()
+            category = market.get("category", "").lower()
 
             # Check relevance
             relevance_score = 0
@@ -62,11 +66,14 @@ def collect_market_data(query: str, categories: List[str] = None, min_volume: fl
                 relevance_score += 2
 
             if relevance_score > 0:
-                market['relevance_score'] = relevance_score
+                market["relevance_score"] = relevance_score
                 filtered_markets.append(market)
 
         # Sort by relevance and volume
-        filtered_markets.sort(key=lambda x: (x.get('relevance_score', 0), x.get('volume', 0)), reverse=True)
+        filtered_markets.sort(
+            key=lambda x: (x.get("relevance_score", 0), x.get("volume", 0)),
+            reverse=True,
+        )
         markets = filtered_markets[:max_results]
     else:
         markets = markets[:max_results]
@@ -77,37 +84,42 @@ def collect_market_data(query: str, categories: List[str] = None, min_volume: fl
         "categories_searched": categories or ["all"],
         "total_markets_found": len(markets),
         "min_volume_threshold": min_volume,
-
         "markets": markets,
-
         "summary_stats": {
-            "total_volume": sum(m.get('volume', 0) for m in markets),
-            "avg_volume": sum(m.get('volume', 0) for m in markets) / max(1, len(markets)),
-            "categories_represented": list(set(m.get('category', 'unknown') for m in markets)),
+            "total_volume": sum(m.get("volume", 0) for m in markets),
+            "avg_volume": sum(m.get("volume", 0) for m in markets)
+            / max(1, len(markets)),
+            "categories_represented": list(
+                set(m.get("category", "unknown") for m in markets)
+            ),
             "volume_range": {
-                "min": min((m.get('volume', 0) for m in markets), default=0),
-                "max": max((m.get('volume', 0) for m in markets), default=0)
-            }
+                "min": min((m.get("volume", 0) for m in markets), default=0),
+                "max": max((m.get("volume", 0) for m in markets), default=0),
+            },
         },
-
         "data_quality": {
-            "complete_records": sum(1 for m in markets if all(k in m for k in ['id', 'question', 'volume', 'category'])),
-            "has_price_data": sum(1 for m in markets if 'outcome_prices' in m),
-            "has_volume_data": sum(1 for m in markets if m.get('volume', 0) > 0),
-            "recent_data": sum(1 for m in markets if 'last_updated' in m)
+            "complete_records": sum(
+                1
+                for m in markets
+                if all(k in m for k in ["id", "question", "volume", "category"])
+            ),
+            "has_price_data": sum(1 for m in markets if "outcome_prices" in m),
+            "has_volume_data": sum(1 for m in markets if m.get("volume", 0) > 0),
+            "recent_data": sum(1 for m in markets if "last_updated" in m),
         },
-
         "collection_metadata": {
             "timestamp": datetime.now().isoformat(),
             "data_source": "Polymarket API + Local Database",
-            "collection_method": "Filtered search with volume thresholds"
-        }
+            "collection_method": "Filtered search with volume thresholds",
+        },
     }
 
     return data_collection
 
 
-def gather_market_intelligence(market_ids: List[str], include_historical: bool = False) -> Dict[str, Any]:
+def gather_market_intelligence(
+    market_ids: List[str], include_historical: bool = False
+) -> Dict[str, Any]:
     """
     Gather detailed intelligence on specific markets.
 
@@ -121,7 +133,7 @@ def gather_market_intelligence(market_ids: List[str], include_historical: bool =
         "market_ids_requested": market_ids,
         "markets_analyzed": [],
         "intelligence_summary": {},
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
     # Get all high-volume markets for context
@@ -132,16 +144,18 @@ def gather_market_intelligence(market_ids: List[str], include_historical: bool =
 
         # Find the specific market
         for market in all_markets:
-            if str(market.get('id', '')) == str(market_id):
+            if str(market.get("id", "")) == str(market_id):
                 market_data = market
                 break
 
         if not market_data:
-            intelligence_data["markets_analyzed"].append({
-                "market_id": market_id,
-                "status": "not_found",
-                "error": f"Market {market_id} not found in database"
-            })
+            intelligence_data["markets_analyzed"].append(
+                {
+                    "market_id": market_id,
+                    "status": "not_found",
+                    "error": f"Market {market_id} not found in database",
+                }
+            )
             continue
 
         # Gather intelligence on this market
@@ -149,37 +163,39 @@ def gather_market_intelligence(market_ids: List[str], include_historical: bool =
             "market_id": market_id,
             "status": "analyzed",
             "market_data": market_data,
-
             "market_context": {
                 "category_rank": None,  # Would calculate position in category
                 "volume_percentile": None,  # Would calculate volume ranking
-                "similar_markets": []  # Would find related markets
+                "similar_markets": [],  # Would find related markets
             },
-
             "trading_signals": {
                 "volume_trend": "stable",  # Would analyze volume changes
                 "price_momentum": "neutral",  # Would analyze price movements
-                "liquidity_assessment": "good" if market_data.get('volume', 0) > 1000000 else "poor"
-            }
+                "liquidity_assessment": (
+                    "good" if market_data.get("volume", 0) > 1000000 else "poor"
+                ),
+            },
         }
 
         # Add to results
         intelligence_data["markets_analyzed"].append(market_intelligence)
 
     # Generate summary
-    successful_analyses = [m for m in intelligence_data["markets_analyzed"] if m["status"] == "analyzed"]
+    successful_analyses = [
+        m for m in intelligence_data["markets_analyzed"] if m["status"] == "analyzed"
+    ]
 
     intelligence_data["intelligence_summary"] = {
         "total_requested": len(market_ids),
         "successfully_analyzed": len(successful_analyses),
         "analysis_success_rate": len(successful_analyses) / max(1, len(market_ids)),
-
-        "market_categories": list(set(
-            m["market_data"].get("category", "unknown")
-            for m in successful_analyses
-            if "market_data" in m
-        )),
-
+        "market_categories": list(
+            set(
+                m["market_data"].get("category", "unknown")
+                for m in successful_analyses
+                if "market_data" in m
+            )
+        ),
         "volume_distribution": {
             "total_volume": sum(
                 m["market_data"].get("volume", 0)
@@ -190,14 +206,17 @@ def gather_market_intelligence(market_ids: List[str], include_historical: bool =
                 m["market_data"].get("volume", 0)
                 for m in successful_analyses
                 if "market_data" in m
-            ) / max(1, len(successful_analyses))
-        }
+            )
+            / max(1, len(successful_analyses)),
+        },
     }
 
     return intelligence_data
 
 
-def collect_category_insights(categories: List[str], time_period: str = "30d") -> Dict[str, Any]:
+def collect_category_insights(
+    categories: List[str], time_period: str = "30d"
+) -> Dict[str, Any]:
     """
     Collect insights across entire market categories.
 
@@ -212,7 +231,7 @@ def collect_category_insights(categories: List[str], time_period: str = "30d") -
         "time_period": time_period,
         "category_summaries": {},
         "cross_category_insights": {},
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
     for category in categories:
@@ -223,13 +242,15 @@ def collect_category_insights(categories: List[str], time_period: str = "30d") -
             category_insights["category_summaries"][category] = {
                 "status": "no_data",
                 "market_count": 0,
-                "total_volume": 0
+                "total_volume": 0,
             }
             continue
 
         # Calculate category metrics
-        total_volume = sum(m.get('volume', 0) for m in markets)
-        avg_probability = sum(m.get('implied_probability', 0) for m in markets) / max(1, len(markets))
+        total_volume = sum(m.get("volume", 0) for m in markets)
+        avg_probability = sum(m.get("implied_probability", 0) for m in markets) / max(
+            1, len(markets)
+        )
 
         category_summary = {
             "status": "analyzed",
@@ -237,47 +258,67 @@ def collect_category_insights(categories: List[str], time_period: str = "30d") -
             "total_volume": total_volume,
             "avg_volume_per_market": total_volume / max(1, len(markets)),
             "avg_implied_probability": avg_probability,
-
             "volume_distribution": {
-                "largest_market_volume": max((m.get('volume', 0) for m in markets), default=0),
-                "smallest_market_volume": min((m.get('volume', 0) for m in markets), default=0),
-                "volume_std_dev": 0  # Would calculate standard deviation
+                "largest_market_volume": max(
+                    (m.get("volume", 0) for m in markets), default=0
+                ),
+                "smallest_market_volume": min(
+                    (m.get("volume", 0) for m in markets), default=0
+                ),
+                "volume_std_dev": 0,  # Would calculate standard deviation
             },
-
             "probability_distribution": {
-                "high_confidence_markets": sum(1 for m in markets if m.get('implied_probability', 0) > 0.8 or m.get('implied_probability', 0) < 0.2),
-                "moderate_confidence_markets": sum(1 for m in markets if 0.3 <= m.get('implied_probability', 0) <= 0.7)
+                "high_confidence_markets": sum(
+                    1
+                    for m in markets
+                    if m.get("implied_probability", 0) > 0.8
+                    or m.get("implied_probability", 0) < 0.2
+                ),
+                "moderate_confidence_markets": sum(
+                    1 for m in markets if 0.3 <= m.get("implied_probability", 0) <= 0.7
+                ),
             },
-
-            "top_markets": sorted(markets, key=lambda x: x.get('volume', 0), reverse=True)[:5]
+            "top_markets": sorted(
+                markets, key=lambda x: x.get("volume", 0), reverse=True
+            )[:5],
         }
 
         category_insights["category_summaries"][category] = category_summary
 
     # Cross-category insights
     all_summaries = category_insights["category_summaries"]
-    successful_categories = [cat for cat, summary in all_summaries.items() if summary["status"] == "analyzed"]
+    successful_categories = [
+        cat for cat, summary in all_summaries.items() if summary["status"] == "analyzed"
+    ]
 
     if len(successful_categories) > 1:
-        total_volume_all = sum(all_summaries[cat]["total_volume"] for cat in successful_categories)
-        avg_markets_per_category = sum(all_summaries[cat]["market_count"] for cat in successful_categories) / len(successful_categories)
+        total_volume_all = sum(
+            all_summaries[cat]["total_volume"] for cat in successful_categories
+        )
+        avg_markets_per_category = sum(
+            all_summaries[cat]["market_count"] for cat in successful_categories
+        ) / len(successful_categories)
 
         category_insights["cross_category_insights"] = {
             "total_volume_across_categories": total_volume_all,
             "categories_with_data": len(successful_categories),
             "avg_markets_per_category": avg_markets_per_category,
-
             "volume_leaders": sorted(
-                [(cat, all_summaries[cat]["total_volume"]) for cat in successful_categories],
+                [
+                    (cat, all_summaries[cat]["total_volume"])
+                    for cat in successful_categories
+                ],
                 key=lambda x: x[1],
-                reverse=True
+                reverse=True,
             )[:3],
-
             "market_count_leaders": sorted(
-                [(cat, all_summaries[cat]["market_count"]) for cat in successful_categories],
+                [
+                    (cat, all_summaries[cat]["market_count"])
+                    for cat in successful_categories
+                ],
                 key=lambda x: x[1],
-                reverse=True
-            )[:3]
+                reverse=True,
+            )[:3],
         }
 
     return category_insights
@@ -297,7 +338,6 @@ def create_data_collection_subagent():
     return {
         "name": "data-collection",
         "description": "Specializes in collecting and organizing market data from various sources. Use for gathering comprehensive market intelligence, filtering data by criteria, and preparing datasets for analysis.",
-
         "system_prompt": """You are a specialized data collection expert for prediction markets.
 
 Your expertise includes:
@@ -340,9 +380,8 @@ COLLECTION RECOMMENDATIONS
         "tools": [
             collect_market_data,
             gather_market_intelligence,
-            collect_category_insights
+            collect_category_insights,
         ],
-
         # Use a model good at data analysis and organization
         "model": "gpt-4o",  # Could be specialized for data work
     }

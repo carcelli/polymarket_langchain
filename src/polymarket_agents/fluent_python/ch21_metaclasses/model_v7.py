@@ -22,13 +22,14 @@ class AutoStorage:
 
     The EntityMeta metaclass will assign __name to each instance.
     """
+
     __counter = 0
 
     def __init__(self):
         cls = self.__class__
         prefix = cls.__name__
         index = cls.__counter
-        self.storage_name = '_{}#{}'.format(prefix, index)
+        self.storage_name = "_{}#{}".format(prefix, index)
         cls.__counter += 1
 
     def __get__(self, instance, owner):
@@ -57,7 +58,7 @@ class Quantity(Validated):
 
     def validate(self, instance, value):
         if value <= 0:
-            raise ValueError('value must be > 0')
+            raise ValueError("value must be > 0")
         return float(value)
 
 
@@ -67,7 +68,7 @@ class NonBlank(Validated):
     def validate(self, instance, value):
         value = value.strip()
         if len(value) == 0:
-            raise ValueError('value cannot be empty or blank')
+            raise ValueError("value cannot be empty or blank")
         return value
 
 
@@ -82,7 +83,7 @@ class EntityMeta(type):
     def __new__(meta_cls, name, bases, namespace, **kwargs):
         for key, attr in namespace.items():
             if isinstance(attr, Validated):
-                attr.storage_name = f'_{attr.__class__.__name__}#{key}'
+                attr.storage_name = f"_{attr.__class__.__name__}#{key}"
         return super().__new__(meta_cls, name, bases, namespace, **kwargs)
 
 
@@ -92,8 +93,10 @@ class Entity(metaclass=EntityMeta):
 
 # ===== EXAMPLE USAGE =====
 
+
 class LineItem(Entity):
     """Line item with validated fields."""
+
     description = NonBlank()
     weight = Quantity()
     price = Quantity()
@@ -108,6 +111,7 @@ class LineItem(Entity):
 
 
 # ===== DEMONSTRATION =====
+
 
 def demo_v7():
     """Demonstrate the v7 metaclass approach."""

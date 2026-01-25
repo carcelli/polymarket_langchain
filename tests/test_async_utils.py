@@ -18,7 +18,7 @@ from polymarket_agents.core.async_utils import (
     TaskSupervisor,
     managed_resource,
     example_market_monitor,
-    example_data_ingestion_worker
+    example_data_ingestion_worker,
 )
 
 
@@ -28,6 +28,7 @@ class TestRobustTask:
     @pytest.mark.asyncio
     async def test_normal_completion(self):
         """Test task that completes normally."""
+
         async def normal_task():
             await asyncio.sleep(0.01)
             return "completed"
@@ -72,6 +73,7 @@ class TestRobustTask:
     @pytest.mark.asyncio
     async def test_cancellation_propagation(self):
         """Test that cancellation is properly propagated."""
+
         async def cancellable_task():
             await asyncio.sleep(10)  # Long running
 
@@ -192,6 +194,7 @@ class TestManagedResource:
     @pytest.mark.asyncio
     async def test_cleanup_error_handling(self):
         """Test that cleanup errors are logged but don't prevent context manager exit."""
+
         async def initialize():
             return "resource"
 
@@ -229,9 +232,7 @@ class TestExamplePatterns:
         queue = asyncio.Queue()
 
         # Create a task that will timeout waiting for queue items
-        task = asyncio.create_task(
-            example_data_ingestion_worker(queue)
-        )
+        task = asyncio.create_task(example_data_ingestion_worker(queue))
 
         # Wait for it to timeout and exit
         await asyncio.sleep(35)  # Longer than the 30s timeout
@@ -259,7 +260,9 @@ class TestIntegration:
         # Start multiple tasks
         await supervisor.start_task("quick1", quick_task("quick1"))
         await supervisor.start_task("quick2", quick_task("quick2"))
-        await supervisor.start_task("failing", failing_task("failing"), restart_on_failure=False)
+        await supervisor.start_task(
+            "failing", failing_task("failing"), restart_on_failure=False
+        )
 
         # Wait for all to complete
         await asyncio.sleep(0.1)

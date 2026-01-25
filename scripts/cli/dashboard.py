@@ -45,23 +45,19 @@ class PolymarketDashboard:
         self.layout.split_column(
             Layout(name="header", size=3),
             Layout(name="main"),
-            Layout(name="footer", size=3)
+            Layout(name="footer", size=3),
         )
 
-        self.layout["main"].split_row(
-            Layout(name="left"),
-            Layout(name="right")
-        )
+        self.layout["main"].split_row(Layout(name="left"), Layout(name="right"))
 
         self.layout["left"].split_column(
-            Layout(name="agent_flow", ratio=2),
-            Layout(name="executions", ratio=3)
+            Layout(name="agent_flow", ratio=2), Layout(name="executions", ratio=3)
         )
 
         self.layout["right"].split_column(
             Layout(name="metrics", ratio=2),
             Layout(name="system_health", ratio=2),
-            Layout(name="markets", ratio=2)
+            Layout(name="markets", ratio=2),
         )
 
     def render_header(self) -> Panel:
@@ -69,7 +65,7 @@ class PolymarketDashboard:
         return Panel(
             "[bold cyan]⚡ Polymarket Agents - Live Dashboard[/bold cyan]\n"
             f"[dim]Last updated: {datetime.now().strftime('%H:%M:%S')}[/dim]",
-            box=box.ROUNDED
+            box=box.ROUNDED,
         )
 
     def render_agent_flow(self) -> Panel:
@@ -77,20 +73,20 @@ class PolymarketDashboard:
         try:
             executions = self.memory_manager.get_recent_executions(limit=1)
 
-            if not executions or executions[0]['status'] != 'running':
+            if not executions or executions[0]["status"] != "running":
                 content = "[dim]No active agent execution[/dim]"
             else:
                 exec_data = executions[0]
-                agent_name = exec_data['agent_name']
-                current_node = exec_data.get('current_node', 'unknown') or 'starting'
-                completed_nodes_str = exec_data.get('completed_nodes', '[]') or '[]'
+                agent_name = exec_data["agent_name"]
+                current_node = exec_data.get("current_node", "unknown") or "starting"
+                completed_nodes_str = exec_data.get("completed_nodes", "[]") or "[]"
                 completed_nodes = json.loads(completed_nodes_str)
 
                 # Show flow with completed vs current vs pending
-                if agent_name == 'memory_agent':
-                    nodes = ['Memory', 'Enrichment', 'Reasoning', 'Decision']
+                if agent_name == "memory_agent":
+                    nodes = ["Memory", "Enrichment", "Reasoning", "Decision"]
                 else:  # planning_agent
-                    nodes = ['Research', 'Stats', 'Probability', 'Decision']
+                    nodes = ["Research", "Stats", "Probability", "Decision"]
 
                 flow = []
                 for node in nodes:
@@ -103,9 +99,15 @@ class PolymarketDashboard:
 
                 content = f"**{agent_name}**\n\n" + " → ".join(flow)
 
-            return Panel(content, title="[bold]Agent Execution Flow[/bold]", box=box.ROUNDED)
+            return Panel(
+                content, title="[bold]Agent Execution Flow[/bold]", box=box.ROUNDED
+            )
         except Exception as e:
-            return Panel(f"[red]Error: {str(e)}[/red]", title="[bold]Agent Execution Flow[/bold]", box=box.ROUNDED)
+            return Panel(
+                f"[red]Error: {str(e)}[/red]",
+                title="[bold]Agent Execution Flow[/bold]",
+                box=box.ROUNDED,
+            )
 
     def render_executions(self) -> Panel:
         """Render recent agent executions."""
@@ -120,40 +122,56 @@ class PolymarketDashboard:
             table.add_column("Query", overflow="fold")
 
             for exec_data in executions:
-                started = datetime.fromisoformat(exec_data['started_at'])
+                started = datetime.fromisoformat(exec_data["started_at"])
                 time_str = started.strftime("%H:%M:%S")
 
-                status = exec_data['status']
-                if status == 'completed':
+                status = exec_data["status"]
+                if status == "completed":
                     status_str = "[green]✓ Done[/green]"
-                elif status == 'failed':
+                elif status == "failed":
                     status_str = "[red]✗ Failed[/red]"
                 else:
                     status_str = "[yellow]⚡ Running[/yellow]"
 
-                duration = exec_data.get('duration_ms', 0)
+                duration = exec_data.get("duration_ms", 0)
                 duration_str = f"{duration}ms" if duration else "-"
 
-                query = exec_data.get('query', '') or ''
+                query = exec_data.get("query", "") or ""
                 query_display = query[:50] + "..." if len(query) > 50 else query
 
-                table.add_row(time_str, exec_data['agent_name'], status_str, duration_str, query_display)
+                table.add_row(
+                    time_str,
+                    exec_data["agent_name"],
+                    status_str,
+                    duration_str,
+                    query_display,
+                )
 
             return Panel(table, title="[bold]Recent Executions[/bold]", box=box.ROUNDED)
         except Exception as e:
-            return Panel(f"[red]Error: {str(e)}[/red]", title="[bold]Recent Executions[/bold]", box=box.ROUNDED)
+            return Panel(
+                f"[red]Error: {str(e)}[/red]",
+                title="[bold]Recent Executions[/bold]",
+                box=box.ROUNDED,
+            )
 
     def render_metrics(self) -> Panel:
         """Render performance metrics."""
         try:
-            metrics_24h = self.memory_manager.get_execution_metrics(time_period='24h')
+            metrics_24h = self.memory_manager.get_execution_metrics(time_period="24h")
 
             if not metrics_24h:
-                content = "[dim]No metrics available - run some agents to see stats[/dim]"
+                content = (
+                    "[dim]No metrics available - run some agents to see stats[/dim]"
+                )
             else:
                 success_rate = 0
-                if metrics_24h.get('total_runs', 0) > 0:
-                    success_rate = metrics_24h.get('successful_runs', 0) / metrics_24h.get('total_runs', 1) * 100
+                if metrics_24h.get("total_runs", 0) > 0:
+                    success_rate = (
+                        metrics_24h.get("successful_runs", 0)
+                        / metrics_24h.get("total_runs", 1)
+                        * 100
+                    )
 
                 content = (
                     f"**Last 24 Hours**\n\n"
@@ -167,16 +185,22 @@ class PolymarketDashboard:
                     f"Sharpe Ratio: {metrics_24h.get('sharpe_ratio', 0):.2f}"
                 )
 
-            return Panel(content, title="[bold]Performance Metrics[/bold]", box=box.ROUNDED)
+            return Panel(
+                content, title="[bold]Performance Metrics[/bold]", box=box.ROUNDED
+            )
         except Exception as e:
-            return Panel(f"[red]Error: {str(e)}[/red]", title="[bold]Performance Metrics[/bold]", box=box.ROUNDED)
+            return Panel(
+                f"[red]Error: {str(e)}[/red]",
+                title="[bold]Performance Metrics[/bold]",
+                box=box.ROUNDED,
+            )
 
     def render_system_health(self) -> Panel:
         """Render system health status."""
         try:
             db_stats = self.memory_manager.get_database_stats()
-            market_count = db_stats.get('total_markets', 0)
-            db_size_mb = db_stats.get('database_size_mb', 0)
+            market_count = db_stats.get("total_markets", 0)
+            db_size_mb = db_stats.get("database_size_mb", 0)
 
             # Check database connectivity
             api_status = "[green]✓ Connected[/green]"
@@ -195,7 +219,11 @@ class PolymarketDashboard:
 
             return Panel(content, title="[bold]System Health[/bold]", box=box.ROUNDED)
         except Exception as e:
-            return Panel(f"[red]Error: {str(e)}[/red]", title="[bold]System Health[/bold]", box=box.ROUNDED)
+            return Panel(
+                f"[red]Error: {str(e)}[/red]",
+                title="[bold]System Health[/bold]",
+                box=box.ROUNDED,
+            )
 
     def render_markets(self) -> Panel:
         """Render market data overview."""
@@ -208,22 +236,25 @@ class PolymarketDashboard:
             table.add_column("Volume", width=12, justify="right")
 
             for market in top_markets:
-                volume = float(market.get('volume', 0))
-                question = market.get('question', '')[:30]
-                table.add_row(
-                    question,
-                    f"${volume:,.0f}"
-                )
+                volume = float(market.get("volume", 0))
+                question = market.get("question", "")[:30]
+                table.add_row(question, f"${volume:,.0f}")
 
-            return Panel(table, title="[bold]Top Markets (24h Volume)[/bold]", box=box.ROUNDED)
+            return Panel(
+                table, title="[bold]Top Markets (24h Volume)[/bold]", box=box.ROUNDED
+            )
         except Exception as e:
-            return Panel(f"[red]Error: {str(e)}[/red]", title="[bold]Markets[/bold]", box=box.ROUNDED)
+            return Panel(
+                f"[red]Error: {str(e)}[/red]",
+                title="[bold]Markets[/bold]",
+                box=box.ROUNDED,
+            )
 
     def render_footer(self) -> Panel:
         """Render dashboard footer."""
         return Panel(
             "[dim]Press Ctrl+C to exit | Dashboard updates every 2 seconds[/dim]",
-            box=box.ROUNDED
+            box=box.ROUNDED,
         )
 
     def render(self):
@@ -240,7 +271,12 @@ class PolymarketDashboard:
 
     def run(self, refresh_rate: float = 2.0):
         """Run the live dashboard."""
-        with Live(self.render(), refresh_per_second=1/refresh_rate, console=self.console, screen=True) as live:
+        with Live(
+            self.render(),
+            refresh_per_second=1 / refresh_rate,
+            console=self.console,
+            screen=True,
+        ) as live:
             try:
                 while True:
                     time.sleep(refresh_rate)
@@ -252,8 +288,11 @@ class PolymarketDashboard:
 def main():
     """Main entry point for dashboard."""
     import argparse
+
     parser = argparse.ArgumentParser(description="Polymarket Agents Dashboard")
-    parser.add_argument('--refresh', type=float, default=2.0, help='Refresh rate in seconds')
+    parser.add_argument(
+        "--refresh", type=float, default=2.0, help="Refresh rate in seconds"
+    )
     args = parser.parse_args()
 
     print("🚀 Launching Polymarket Agents Dashboard...")

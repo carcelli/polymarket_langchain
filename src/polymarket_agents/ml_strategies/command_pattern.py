@@ -35,17 +35,19 @@ def analyze_market_command(market_data: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "action": "analyze",
         "market_id": market_data.get("id"),
-        "analysis": f"Analyzed market {market_data.get('question', 'Unknown')}"
+        "analysis": f"Analyzed market {market_data.get('question', 'Unknown')}",
     }
 
 
-def place_bet_command(market_data: Dict[str, Any], amount: float = 100) -> Dict[str, Any]:
+def place_bet_command(
+    market_data: Dict[str, Any], amount: float = 100
+) -> Dict[str, Any]:
     """Command to place a bet."""
     return {
         "action": "bet",
         "market_id": market_data.get("id"),
         "amount": amount,
-        "message": f"Placed ${amount} bet on market {market_data.get('question', 'Unknown')}"
+        "message": f"Placed ${amount} bet on market {market_data.get('question', 'Unknown')}",
     }
 
 
@@ -54,7 +56,7 @@ def monitor_market_command(market_data: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "action": "monitor",
         "market_id": market_data.get("id"),
-        "message": f"Started monitoring market {market_data.get('question', 'Unknown')}"
+        "message": f"Started monitoring market {market_data.get('question', 'Unknown')}",
     }
 
 
@@ -69,6 +71,7 @@ class MacroCommand:
     This is simpler than the traditional Command pattern with separate classes
     for each command type.
     """
+
     def __init__(self, commands: List[Callable]):
         self.commands = list(commands)  # Store copies
 
@@ -94,11 +97,13 @@ def market_operations_suite(market_data: Dict[str, Any]) -> Dict[str, Any]:
     that can be used in multiple contexts simultaneously (page 196).
     """
     # Create macro command with function-based commands
-    macro = MacroCommand([
-        analyze_market_command,
-        lambda data: place_bet_command(data, 50),  # Partial application
-        monitor_market_command
-    ])
+    macro = MacroCommand(
+        [
+            analyze_market_command,
+            lambda data: place_bet_command(data, 50),  # Partial application
+            monitor_market_command,
+        ]
+    )
 
     # Execute the command suite
     results = macro(market_data)
@@ -106,16 +111,13 @@ def market_operations_suite(market_data: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "strategy": "market_operations_suite",
         "results": results,
-        "summary": f"Executed {len(results)} operations on market {market_data.get('id')}"
+        "summary": f"Executed {len(results)} operations on market {market_data.get('id')}",
     }
 
 
 # Example usage demonstrating function-based commands
 if __name__ == "__main__":
-    market_data = {
-        "id": "test_market_123",
-        "question": "Will it rain tomorrow?"
-    }
+    market_data = {"id": "test_market_123", "question": "Will it rain tomorrow?"}
 
     # Direct command usage
     print("🔧 Direct command execution:")
@@ -132,5 +134,6 @@ if __name__ == "__main__":
     # Strategy-based command suite
     print("\n🎯 Strategy-based command suite:")
     from .registry import best_strategy
+
     result = best_strategy(market_data)
     print(f"Strategy result: {result.get('summary', 'No summary')}")

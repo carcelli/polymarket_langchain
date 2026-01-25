@@ -227,8 +227,3 @@ fetch_documentation = wrap_tool(
     name="fetch_documentation",
     description="Fetch and convert documentation from a URL to Markdown",
 )
-
-
-
-
-

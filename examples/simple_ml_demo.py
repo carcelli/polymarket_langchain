@@ -26,17 +26,15 @@ def main():
 
     # Generate a simple strategy test
     test_content = generator.generate_strategy_test(
-        "MarketPredictor",
-        "MarketPredictor",
-        "Random Forest-based market prediction"
+        "MarketPredictor", "MarketPredictor", "Random Forest-based market prediction"
     )
 
     print(f"✅ Generated test file with {len(test_content.split(chr(10)))} lines")
 
     # Show key sections
-    lines = test_content.split('\n')
-    test_classes = sum(1 for line in lines if 'class Test' in line)
-    test_methods = sum(1 for line in lines if 'def test_' in line)
+    lines = test_content.split("\n")
+    test_classes = sum(1 for line in lines if "class Test" in line)
+    test_methods = sum(1 for line in lines if "def test_" in line)
 
     print(f"   📊 Test classes: {test_classes}")
     print(f"   🧪 Test methods: {test_methods}")

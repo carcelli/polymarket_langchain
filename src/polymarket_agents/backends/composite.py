@@ -15,9 +15,7 @@ from .store import PolymarketStoreBackend
 
 
 def create_composite_backend(
-    runtime,
-    root_dir: str = "./agent_data",
-    store_namespace: str = "polymarket_agent"
+    runtime, root_dir: str = "./agent_data", store_namespace: str = "polymarket_agent"
 ) -> Callable:
     """
     Create a composite backend optimized for Polymarket agents.
@@ -41,27 +39,28 @@ def create_composite_backend(
 
     def backend_factory(rt):
         # Create individual backends
-        filesystem_backend = PolymarketFilesystemBackend(root_dir=root_dir, virtual_mode=True)
+        filesystem_backend = PolymarketFilesystemBackend(
+            root_dir=root_dir, virtual_mode=True
+        )
         store_backend = PolymarketStoreBackend(rt, namespace=store_namespace)
 
         # Define routing rules
         routes = {
-            "/memories/": store_backend,      # Long-term memories
-            "/analyses/": store_backend,      # Analysis results
-            "/strategies/": store_backend,    # Trading strategies
-            "/patterns/": store_backend,      # Learned patterns
+            "/memories/": store_backend,  # Long-term memories
+            "/analyses/": store_backend,  # Analysis results
+            "/strategies/": store_backend,  # Trading strategies
+            "/patterns/": store_backend,  # Learned patterns
         }
 
         # Default to filesystem for everything else
-        return BaseCompositeBackend(
-            default=filesystem_backend,
-            routes=routes
-        )
+        return BaseCompositeBackend(default=filesystem_backend, routes=routes)
 
     return backend_factory
 
 
-def create_memory_focused_backend(runtime, memory_dir: str = "./agent_memories") -> Callable:
+def create_memory_focused_backend(
+    runtime, memory_dir: str = "./agent_memories"
+) -> Callable:
     """
     Create a backend focused on memory persistence.
 
@@ -72,15 +71,14 @@ def create_memory_focused_backend(runtime, memory_dir: str = "./agent_memories")
 
     def backend_factory(rt):
         memory_backend = PolymarketFilesystemBackend(
-            root_dir=memory_dir,
-            virtual_mode=True
+            root_dir=memory_dir, virtual_mode=True
         )
 
         return BaseCompositeBackend(
             default=StateBackend(rt),
             routes={
                 "/memories/": memory_backend,
-            }
+            },
         )
 
     return backend_factory
@@ -90,7 +88,7 @@ def create_enterprise_backend(
     runtime,
     root_dir: str = "./agent_data",
     store_namespace: str = "polymarket_agent",
-    deny_writes: list = None
+    deny_writes: list = None,
 ) -> Callable:
     """
     Create an enterprise-grade backend with policy controls.
@@ -109,10 +107,7 @@ def create_enterprise_backend(
         base_backend = create_composite_backend(rt, root_dir, store_namespace)(rt)
 
         # Add policy wrapper for security
-        return PolicyWrapper(
-            inner=base_backend,
-            deny_prefixes=deny_writes
-        )
+        return PolicyWrapper(inner=base_backend, deny_prefixes=deny_writes)
 
     return backend_factory
 
@@ -120,15 +115,21 @@ def create_enterprise_backend(
 # Convenience functions for common configurations
 def get_quickstart_backend(root_dir: str = "./agent_data") -> Callable:
     """Quick filesystem-only backend for development."""
+
     def backend_factory(rt):
         return PolymarketFilesystemBackend(root_dir=root_dir, virtual_mode=True)
+
     return backend_factory
 
 
-def get_persistent_backend(runtime, store_namespace: str = "polymarket_agent") -> Callable:
+def get_persistent_backend(
+    runtime, store_namespace: str = "polymarket_agent"
+) -> Callable:
     """Store-only backend for cloud deployments."""
+
     def backend_factory(rt):
         return PolymarketStoreBackend(rt, namespace=store_namespace)
+
     return backend_factory
 
 

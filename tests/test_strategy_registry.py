@@ -7,7 +7,11 @@ Tests the Fluent Python Chapter 6 style strategy registration and discovery.
 import pytest
 from typing import Dict, Any
 from polymarket_agents.ml_strategies.registry import (
-    register_strategy, get_available_strategies, get_strategy, best_strategy, STRATEGIES
+    register_strategy,
+    get_available_strategies,
+    get_strategy,
+    best_strategy,
+    STRATEGIES,
 )
 
 
@@ -19,7 +23,7 @@ def high_edge_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "edge": 0.08,
         "recommendation": "BUY_YES",
         "confidence": 0.9,
-        "reasoning": "Test strategy with high edge"
+        "reasoning": "Test strategy with high edge",
     }
 
 
@@ -30,7 +34,7 @@ def low_edge_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "edge": 0.01,
         "recommendation": "HOLD",
         "confidence": 0.5,
-        "reasoning": "Test strategy with low edge"
+        "reasoning": "Test strategy with low edge",
     }
 
 
@@ -41,7 +45,7 @@ def negative_edge_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "edge": -0.02,
         "recommendation": "AVOID",
         "confidence": 0.3,
-        "reasoning": "Test strategy with negative edge"
+        "reasoning": "Test strategy with negative edge",
     }
 
 

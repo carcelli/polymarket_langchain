@@ -26,7 +26,7 @@ from polymarket_agents.langchain.agent import (
     create_crypto_agent,
     create_sports_agent,
     analyze_business_risks,
-    run_agent
+    run_agent,
 )
 
 
@@ -72,8 +72,7 @@ def test_ml_comparison():
         print(f"Your ML Forecast: {ml_forecast:.1%} probability of {event}")
 
         comparison = compare_ml_vs_market_forecast(
-            ml_forecast=ml_forecast,
-            event_description=event
+            ml_forecast=ml_forecast, event_description=event
         )
 
         print("\nComparison Analysis:")
@@ -126,10 +125,7 @@ def test_business_risks():
         print(f"Business Type: {business_type}")
         print(f"Risk Domain: {domain}")
 
-        analysis = analyze_business_risks(
-            business_type=business_type,
-            domain=domain
-        )
+        analysis = analyze_business_risks(business_type=business_type, domain=domain)
 
         print("\nRisk Analysis:")
         print(analysis[:500] + "..." if len(analysis) > 500 else analysis)

@@ -13,13 +13,13 @@ from .data_collection import create_data_collection_subagent
 from .github_agent import create_github_subagent
 
 __all__ = [
-    'create_market_research_subagent',
-    'create_risk_analysis_subagent',
-    'create_strategy_dev_subagent',
-    'create_performance_monitor_subagent',
-    'create_data_collection_subagent',
-    'create_github_subagent',
-    'get_all_subagents'
+    "create_market_research_subagent",
+    "create_risk_analysis_subagent",
+    "create_strategy_dev_subagent",
+    "create_performance_monitor_subagent",
+    "create_data_collection_subagent",
+    "create_github_subagent",
+    "get_all_subagents",
 ]
 
 
@@ -36,5 +36,5 @@ def get_all_subagents():
         create_strategy_dev_subagent(),
         create_performance_monitor_subagent(),
         create_data_collection_subagent(),
-        create_github_subagent()
+        create_github_subagent(),
     ]

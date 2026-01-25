@@ -67,32 +67,32 @@ class AutomatedMLWorkflow:
             # Phase 1: Data Collection
             self.current_phase = "data_collection"
             data_results = self._phase_data_collection(config)
-            self.results['data_collection'] = data_results
+            self.results["data_collection"] = data_results
 
             # Phase 2: Data Assessment
             self.current_phase = "data_assessment"
             assessment_results = self._phase_data_assessment(data_results)
-            self.results['data_assessment'] = assessment_results
+            self.results["data_assessment"] = assessment_results
 
             # Phase 3: ML Planning
             self.current_phase = "ml_planning"
             planning_results = self._phase_ml_planning(data_results, assessment_results)
-            self.results['ml_planning'] = planning_results
+            self.results["ml_planning"] = planning_results
 
             # Phase 4: Model Training
             self.current_phase = "model_training"
             training_results = self._phase_model_training(planning_results)
-            self.results['model_training'] = training_results
+            self.results["model_training"] = training_results
 
             # Phase 5: Evaluation & Deployment
             self.current_phase = "evaluation_deployment"
             deployment_results = self._phase_evaluation_deployment(training_results)
-            self.results['evaluation_deployment'] = deployment_results
+            self.results["evaluation_deployment"] = deployment_results
 
             # Phase 6: GitHub Integration
             self.current_phase = "github_integration"
             github_results = self._phase_github_integration(self.results)
-            self.results['github_integration'] = github_results
+            self.results["github_integration"] = github_results
 
             # Final summary
             self.current_phase = "completed"
@@ -108,23 +108,23 @@ class AutomatedMLWorkflow:
             print(f"GitHub Commits: {summary.get('github_commits', 0)}")
 
             return {
-                'workflow_id': self.workflow_id,
-                'status': 'completed',
-                'success': True,
-                'results': self.results,
-                'summary': summary,
-                'timestamp': datetime.now().isoformat()
+                "workflow_id": self.workflow_id,
+                "status": "completed",
+                "success": True,
+                "results": self.results,
+                "summary": summary,
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             self.current_phase = "failed"
             error_info = {
-                'workflow_id': self.workflow_id,
-                'status': 'failed',
-                'error': str(e),
-                'failed_at_phase': self.current_phase,
-                'partial_results': self.results,
-                'timestamp': datetime.now().isoformat()
+                "workflow_id": self.workflow_id,
+                "status": "failed",
+                "error": str(e),
+                "failed_at_phase": self.current_phase,
+                "partial_results": self.results,
+                "timestamp": datetime.now().isoformat(),
             }
 
             print(f"\\n❌ Workflow Failed at Phase: {self.current_phase}")
@@ -140,15 +140,17 @@ class AutomatedMLWorkflow:
 
         # Default configuration
         config = config or {}
-        days_back = config.get('days_back', 180)
-        min_volume = config.get('min_volume', 1000)
+        days_back = config.get("days_back", 180)
+        min_volume = config.get("min_volume", 1000)
 
-        print(f"Collecting {days_back} days of market data (min volume: ${min_volume:,})...")
+        print(
+            f"Collecting {days_back} days of market data (min volume: ${min_volume:,})..."
+        )
 
         # Create experiment for tracking
         experiment_id = self.database.create_experiment(
             name=f"Data Collection - {self.workflow_id}",
-            description=f"Automated workflow data collection phase"
+            description=f"Automated workflow data collection phase",
         )
 
         # Execute data collection
@@ -167,23 +169,23 @@ class AutomatedMLWorkflow:
         dataset_size = 0
         quality_score = 0
 
-        if agent_result.get('status') == 'success':
+        if agent_result.get("status") == "success":
             # Extract metrics from agent response
-            parsed_info = agent_result.get('parsed_info', {})
-            dataset_size = parsed_info.get('samples_ingested', 0)
-            quality_score = parsed_info.get('quality_score', 0)
+            parsed_info = agent_result.get("parsed_info", {})
+            dataset_size = parsed_info.get("samples_ingested", 0)
+            quality_score = parsed_info.get("quality_score", 0)
 
         # Store phase results
         self.database.update_experiment_status(experiment_id, "completed", success=True)
 
         results = {
-            'experiment_id': experiment_id,
-            'days_back': days_back,
-            'min_volume': min_volume,
-            'dataset_size': dataset_size,
-            'quality_score': quality_score,
-            'agent_result': agent_result,
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "days_back": days_back,
+            "min_volume": min_volume,
+            "dataset_size": dataset_size,
+            "quality_score": quality_score,
+            "agent_result": agent_result,
+            "timestamp": datetime.now().isoformat(),
         }
 
         print(f"✅ Collected {dataset_size} market samples")
@@ -195,7 +197,7 @@ class AutomatedMLWorkflow:
         print("\\n🔍 Phase 2: Data Assessment")
         print("-" * 28)
 
-        experiment_id = data_results['experiment_id']
+        experiment_id = data_results["experiment_id"]
 
         print("Analyzing data quality and ML readiness...")
 
@@ -217,26 +219,24 @@ class AutomatedMLWorkflow:
         recommendations = []
         ready_for_ml = False
 
-        if agent_result.get('status') == 'success':
-            parsed_info = agent_result.get('parsed_info', {})
-            quality_score = parsed_info.get('readiness_score', 0)
-            recommendations = parsed_info.get('recommendations', [])
-            ready_for_ml = parsed_info.get('ready_for_ml', False)
+        if agent_result.get("status") == "success":
+            parsed_info = agent_result.get("parsed_info", {})
+            quality_score = parsed_info.get("readiness_score", 0)
+            recommendations = parsed_info.get("recommendations", [])
+            ready_for_ml = parsed_info.get("ready_for_ml", False)
 
         # Update experiment with assessment results
         self.database.update_experiment_status(
-            experiment_id,
-            "completed",
-            success=ready_for_ml
+            experiment_id, "completed", success=ready_for_ml
         )
 
         results = {
-            'experiment_id': experiment_id,
-            'quality_score': quality_score,
-            'ready_for_ml': ready_for_ml,
-            'recommendations': recommendations,
-            'agent_result': agent_result,
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "quality_score": quality_score,
+            "ready_for_ml": ready_for_ml,
+            "recommendations": recommendations,
+            "agent_result": agent_result,
+            "timestamp": datetime.now().isoformat(),
         }
 
         status = "✅ Ready for ML" if ready_for_ml else "⚠️ Needs improvement"
@@ -245,7 +245,9 @@ class AutomatedMLWorkflow:
 
         return results
 
-    def _phase_ml_planning(self, data_results: Dict, assessment_results: Dict) -> Dict[str, Any]:
+    def _phase_ml_planning(
+        self, data_results: Dict, assessment_results: Dict
+    ) -> Dict[str, Any]:
         """Phase 3: Plan ML strategy based on data assessment."""
         print("\\n🧠 Phase 3: ML Planning")
         print("-" * 20)
@@ -255,13 +257,13 @@ class AutomatedMLWorkflow:
         # Create planning experiment
         experiment_id = self.database.create_experiment(
             name=f"ML Planning - {self.workflow_id}",
-            description="Automated ML strategy planning phase"
+            description="Automated ML strategy planning phase",
         )
 
         # Data characteristics for planning
-        data_size = data_results.get('dataset_size', 0)
-        quality_score = assessment_results.get('quality_score', 0)
-        ready_for_ml = assessment_results.get('ready_for_ml', False)
+        data_size = data_results.get("dataset_size", 0)
+        quality_score = assessment_results.get("quality_score", 0)
+        ready_for_ml = assessment_results.get("ready_for_ml", False)
 
         # Execute ML planning
         task = f"""
@@ -288,45 +290,54 @@ class AutomatedMLWorkflow:
         planned_features = []
         evaluation_strategy = {}
 
-        if agent_result.get('status') == 'success':
+        if agent_result.get("status") == "success":
             # Parse planning decisions from agent response
-            parsed_info = agent_result.get('parsed_info', {})
+            parsed_info = agent_result.get("parsed_info", {})
             # This would be extracted from the agent's structured response
-            selected_models = ['MarketPredictor', 'EdgeDetector']  # Default fallback
-            planned_features = ['volume', 'price_features', 'category_encoding', 'text_features']
+            selected_models = ["MarketPredictor", "EdgeDetector"]  # Default fallback
+            planned_features = [
+                "volume",
+                "price_features",
+                "category_encoding",
+                "text_features",
+            ]
             evaluation_strategy = {
-                'validation_method': 'cross_validation',
-                'metrics': ['accuracy', 'f1', 'roc_auc'],
-                'backtesting_periods': 3
+                "validation_method": "cross_validation",
+                "metrics": ["accuracy", "f1", "roc_auc"],
+                "backtesting_periods": 3,
             }
 
         # Store planning results
         planning_config = {
-            'selected_models': selected_models,
-            'planned_features': planned_features,
-            'evaluation_strategy': evaluation_strategy,
-            'data_characteristics': {
-                'size': data_size,
-                'quality_score': quality_score,
-                'ready_for_ml': ready_for_ml
-            }
+            "selected_models": selected_models,
+            "planned_features": planned_features,
+            "evaluation_strategy": evaluation_strategy,
+            "data_characteristics": {
+                "size": data_size,
+                "quality_score": quality_score,
+                "ready_for_ml": ready_for_ml,
+            },
         }
 
         self.database.update_experiment_status(experiment_id, "completed", success=True)
 
         results = {
-            'experiment_id': experiment_id,
-            'selected_models': selected_models,
-            'planned_features': planned_features,
-            'evaluation_strategy': evaluation_strategy,
-            'planning_config': planning_config,
-            'agent_result': agent_result,
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "selected_models": selected_models,
+            "planned_features": planned_features,
+            "evaluation_strategy": evaluation_strategy,
+            "planning_config": planning_config,
+            "agent_result": agent_result,
+            "timestamp": datetime.now().isoformat(),
         }
 
-        print(f"✅ Selected {len(selected_models)} models: {', '.join(selected_models)}")
+        print(
+            f"✅ Selected {len(selected_models)} models: {', '.join(selected_models)}"
+        )
         print(f"📊 Planned {len(planned_features)} feature categories")
-        print(f"🎯 Evaluation: {evaluation_strategy.get('validation_method', 'unknown')}")
+        print(
+            f"🎯 Evaluation: {evaluation_strategy.get('validation_method', 'unknown')}"
+        )
 
         return results
 
@@ -335,14 +346,14 @@ class AutomatedMLWorkflow:
         print("\\n🤖 Phase 4: Model Training")
         print("-" * 25)
 
-        selected_models = planning_results.get('selected_models', ['MarketPredictor'])
+        selected_models = planning_results.get("selected_models", ["MarketPredictor"])
 
         print(f"Training {len(selected_models)} ML models...")
 
         # Create training experiment
         experiment_id = self.database.create_experiment(
             name=f"Model Training - {self.workflow_id}",
-            description="Automated model training phase"
+            description="Automated model training phase",
         )
 
         # Execute training for each model
@@ -369,16 +380,16 @@ class AutomatedMLWorkflow:
             model_id = None
             metrics = {}
 
-            if agent_result.get('status') == 'success':
-                parsed_info = agent_result.get('parsed_info', {})
-                model_id = parsed_info.get('model_id')
-                metrics = parsed_info.get('metrics', {})
+            if agent_result.get("status") == "success":
+                parsed_info = agent_result.get("parsed_info", {})
+                model_id = parsed_info.get("model_id")
+                metrics = parsed_info.get("metrics", {})
 
             training_results[model_type] = {
-                'model_id': model_id,
-                'metrics': metrics,
-                'agent_result': agent_result,
-                'success': agent_result.get('status') == 'success'
+                "model_id": model_id,
+                "metrics": metrics,
+                "agent_result": agent_result,
+                "success": agent_result.get("status") == "success",
             }
 
             if model_id:
@@ -389,20 +400,24 @@ class AutomatedMLWorkflow:
                 print(f"   ❌ Training failed for {model_type}")
 
         # Update experiment status
-        success_count = sum(1 for r in training_results.values() if r['success'])
+        success_count = sum(1 for r in training_results.values() if r["success"])
         overall_success = success_count > 0
 
-        self.database.update_experiment_status(experiment_id, "completed", success=overall_success)
+        self.database.update_experiment_status(
+            experiment_id, "completed", success=overall_success
+        )
 
         results = {
-            'experiment_id': experiment_id,
-            'training_results': training_results,
-            'models_trained': success_count,
-            'total_attempted': len(selected_models),
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "training_results": training_results,
+            "models_trained": success_count,
+            "total_attempted": len(selected_models),
+            "timestamp": datetime.now().isoformat(),
         }
 
-        print(f"\\n✅ Training completed: {success_count}/{len(selected_models)} models successful")
+        print(
+            f"\\n✅ Training completed: {success_count}/{len(selected_models)} models successful"
+        )
 
         return results
 
@@ -416,7 +431,7 @@ class AutomatedMLWorkflow:
         # Create evaluation experiment
         experiment_id = self.database.create_experiment(
             name=f"Model Evaluation - {self.workflow_id}",
-            description="Automated model evaluation and deployment phase"
+            description="Automated model evaluation and deployment phase",
         )
 
         # Evaluate each trained model
@@ -424,13 +439,13 @@ class AutomatedMLWorkflow:
         best_model = None
         best_score = 0
 
-        trained_models = training_results.get('training_results', {})
+        trained_models = training_results.get("training_results", {})
 
         for model_type, training_info in trained_models.items():
-            if not training_info.get('success'):
+            if not training_info.get("success"):
                 continue
 
-            model_id = training_info.get('model_id')
+            model_id = training_info.get("model_id")
             if not model_id:
                 continue
 
@@ -455,29 +470,29 @@ class AutomatedMLWorkflow:
             deployment_ready = False
             risk_assessment = {}
 
-            if agent_result.get('status') == 'success':
-                parsed_info = agent_result.get('parsed_info', {})
-                eval_metrics = parsed_info.get('evaluation_metrics', {})
-                deployment_ready = parsed_info.get('deployment_ready', False)
-                risk_assessment = parsed_info.get('risk_assessment', {})
+            if agent_result.get("status") == "success":
+                parsed_info = agent_result.get("parsed_info", {})
+                eval_metrics = parsed_info.get("evaluation_metrics", {})
+                deployment_ready = parsed_info.get("deployment_ready", False)
+                risk_assessment = parsed_info.get("risk_assessment", {})
 
                 # Check if this is the best model
-                primary_metric = eval_metrics.get('f1', 0)  # Use F1 as primary metric
+                primary_metric = eval_metrics.get("f1", 0)  # Use F1 as primary metric
                 if primary_metric > best_score:
                     best_score = primary_metric
                     best_model = {
-                        'model_type': model_type,
-                        'model_id': model_id,
-                        'score': primary_metric,
-                        'metrics': eval_metrics
+                        "model_type": model_type,
+                        "model_id": model_id,
+                        "score": primary_metric,
+                        "metrics": eval_metrics,
                     }
 
             evaluation_results[model_type] = {
-                'model_id': model_id,
-                'eval_metrics': eval_metrics,
-                'deployment_ready': deployment_ready,
-                'risk_assessment': risk_assessment,
-                'agent_result': agent_result
+                "model_id": model_id,
+                "eval_metrics": eval_metrics,
+                "deployment_ready": deployment_ready,
+                "risk_assessment": risk_assessment,
+                "agent_result": agent_result,
             }
 
             print(f"   📊 F1 Score: {eval_metrics.get('f1', 'N/A')}")
@@ -487,29 +502,35 @@ class AutomatedMLWorkflow:
         deployment_plan = {}
         if best_model:
             deployment_plan = {
-                'best_model': best_model,
-                'deployment_strategy': 'immediate' if best_model['score'] > 0.6 else 'conditional',
-                'monitoring_plan': {
-                    'performance_tracking': True,
-                    'drift_detection': True,
-                    'retraining_schedule': 'weekly'
+                "best_model": best_model,
+                "deployment_strategy": (
+                    "immediate" if best_model["score"] > 0.6 else "conditional"
+                ),
+                "monitoring_plan": {
+                    "performance_tracking": True,
+                    "drift_detection": True,
+                    "retraining_schedule": "weekly",
                 },
-                'fallback_strategy': 'previous_best_model'
+                "fallback_strategy": "previous_best_model",
             }
 
-        self.database.update_experiment_status(experiment_id, "completed", success=bool(best_model))
+        self.database.update_experiment_status(
+            experiment_id, "completed", success=bool(best_model)
+        )
 
         results = {
-            'experiment_id': experiment_id,
-            'evaluation_results': evaluation_results,
-            'best_model': best_model,
-            'deployment_plan': deployment_plan,
-            'models_evaluated': len(evaluation_results),
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "evaluation_results": evaluation_results,
+            "best_model": best_model,
+            "deployment_plan": deployment_plan,
+            "models_evaluated": len(evaluation_results),
+            "timestamp": datetime.now().isoformat(),
         }
 
         if best_model:
-            print(f"\\n🏆 Best Model: {best_model['model_type']} (F1: {best_model['score']:.3f})")
+            print(
+                f"\\n🏆 Best Model: {best_model['model_type']} (F1: {best_model['score']:.3f})"
+            )
             print(f"🚀 Deployment: {deployment_plan['deployment_strategy']}")
 
         return results
@@ -524,13 +545,15 @@ class AutomatedMLWorkflow:
         # Create GitHub integration experiment
         experiment_id = self.database.create_experiment(
             name=f"GitHub Integration - {self.workflow_id}",
-            description="Automated GitHub publishing phase"
+            description="Automated GitHub publishing phase",
         )
 
         # Extract key results for GitHub
-        best_model = workflow_results.get('evaluation_deployment', {}).get('best_model')
-        data_size = workflow_results.get('data_collection', {}).get('dataset_size', 0)
-        models_trained = workflow_results.get('model_training', {}).get('models_trained', 0)
+        best_model = workflow_results.get("evaluation_deployment", {}).get("best_model")
+        data_size = workflow_results.get("data_collection", {}).get("dataset_size", 0)
+        models_trained = workflow_results.get("model_training", {}).get(
+            "models_trained", 0
+        )
 
         # Generate comprehensive test suite
         task = f"""
@@ -558,21 +581,23 @@ class AutomatedMLWorkflow:
         tests_generated = 0
         issue_created = False
 
-        if agent_result.get('status') == 'success':
-            parsed_info = agent_result.get('parsed_info', {})
-            files_committed = parsed_info.get('files_committed', 0)
-            tests_generated = parsed_info.get('tests_generated', 0)
-            issue_created = parsed_info.get('issue_created', False)
+        if agent_result.get("status") == "success":
+            parsed_info = agent_result.get("parsed_info", {})
+            files_committed = parsed_info.get("files_committed", 0)
+            tests_generated = parsed_info.get("tests_generated", 0)
+            issue_created = parsed_info.get("issue_created", False)
 
-        self.database.update_experiment_status(experiment_id, "completed", success=bool(files_committed))
+        self.database.update_experiment_status(
+            experiment_id, "completed", success=bool(files_committed)
+        )
 
         results = {
-            'experiment_id': experiment_id,
-            'files_committed': files_committed,
-            'tests_generated': tests_generated,
-            'issue_created': issue_created,
-            'agent_result': agent_result,
-            'timestamp': datetime.now().isoformat()
+            "experiment_id": experiment_id,
+            "files_committed": files_committed,
+            "tests_generated": tests_generated,
+            "issue_created": issue_created,
+            "agent_result": agent_result,
+            "timestamp": datetime.now().isoformat(),
         }
 
         print(f"✅ Files committed: {files_committed}")
@@ -589,21 +614,30 @@ class AutomatedMLWorkflow:
         total_duration = 120.0  # Would calculate from actual timestamps
 
         # Extract key metrics
-        data_size = self.results.get('data_collection', {}).get('dataset_size', 0)
-        models_trained = self.results.get('model_training', {}).get('models_trained', 0)
-        best_model = self.results.get('evaluation_deployment', {}).get('best_model')
-        github_commits = self.results.get('github_integration', {}).get('files_committed', 0)
+        data_size = self.results.get("data_collection", {}).get("dataset_size", 0)
+        models_trained = self.results.get("model_training", {}).get("models_trained", 0)
+        best_model = self.results.get("evaluation_deployment", {}).get("best_model")
+        github_commits = self.results.get("github_integration", {}).get(
+            "files_committed", 0
+        )
 
         summary = {
-            'workflow_id': self.workflow_id,
-            'total_duration': total_duration,
-            'phases_completed': len(self.results),
-            'data_samples': data_size,
-            'models_trained': models_trained,
-            'best_model_score': best_model.get('score') if best_model else None,
-            'github_commits': github_commits,
-            'success_rate': len([r for r in self.results.values() if r.get('agent_result', {}).get('status') == 'success']) / len(self.results),
-            'timestamp': datetime.now().isoformat()
+            "workflow_id": self.workflow_id,
+            "total_duration": total_duration,
+            "phases_completed": len(self.results),
+            "data_samples": data_size,
+            "models_trained": models_trained,
+            "best_model_score": best_model.get("score") if best_model else None,
+            "github_commits": github_commits,
+            "success_rate": len(
+                [
+                    r
+                    for r in self.results.values()
+                    if r.get("agent_result", {}).get("status") == "success"
+                ]
+            )
+            / len(self.results),
+            "timestamp": datetime.now().isoformat(),
         }
 
         return summary
@@ -611,31 +645,40 @@ class AutomatedMLWorkflow:
     def get_workflow_status(self) -> Dict[str, Any]:
         """Get current workflow status."""
         return {
-            'workflow_id': self.workflow_id,
-            'current_phase': self.current_phase,
-            'phases_completed': list(self.results.keys()),
-            'timestamp': datetime.now().isoformat()
+            "workflow_id": self.workflow_id,
+            "current_phase": self.current_phase,
+            "phases_completed": list(self.results.keys()),
+            "timestamp": datetime.now().isoformat(),
         }
 
     def save_workflow_results(self, output_dir: str = "./workflow_results"):
         """Save complete workflow results."""
         os.makedirs(output_dir, exist_ok=True)
 
-        results_file = os.path.join(output_dir, f"workflow_{self.workflow_id}_results.json")
+        results_file = os.path.join(
+            output_dir, f"workflow_{self.workflow_id}_results.json"
+        )
 
-        with open(results_file, 'w') as f:
-            json.dump({
-                'workflow_id': self.workflow_id,
-                'results': self.results,
-                'status': self.current_phase,
-                'timestamp': datetime.now().isoformat()
-            }, f, indent=2, default=str)
+        with open(results_file, "w") as f:
+            json.dump(
+                {
+                    "workflow_id": self.workflow_id,
+                    "results": self.results,
+                    "status": self.current_phase,
+                    "timestamp": datetime.now().isoformat(),
+                },
+                f,
+                indent=2,
+                default=str,
+            )
 
         print(f"💾 Workflow results saved to: {results_file}")
         return results_file
 
 
-def run_automated_ml_workflow(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def run_automated_ml_workflow(
+    config: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """
     Run the complete automated ML workflow.
 
@@ -657,9 +700,9 @@ def run_automated_ml_workflow(config: Optional[Dict[str, Any]] = None) -> Dict[s
 if __name__ == "__main__":
     # Example usage
     config = {
-        'days_back': 180,      # 6 months of data
-        'min_volume': 5000,    # Higher volume markets
-        'models': ['MarketPredictor', 'EdgeDetector']
+        "days_back": 180,  # 6 months of data
+        "min_volume": 5000,  # Higher volume markets
+        "models": ["MarketPredictor", "EdgeDetector"],
     }
 
     print("🤖 Starting Automated ML Workflow")
@@ -674,9 +717,9 @@ if __name__ == "__main__":
 
     results = run_automated_ml_workflow(config)
 
-    if results.get('success'):
+    if results.get("success"):
         print("\\n🎉 Workflow completed successfully!")
-        summary = results.get('summary', {})
+        summary = results.get("summary", {})
         print(f"Duration: {summary.get('total_duration', 0):.1f} seconds")
         print(f"Models trained: {summary.get('models_trained', 0)}")
         print(f"Data processed: {summary.get('data_samples', 0)} samples")

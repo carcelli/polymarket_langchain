@@ -30,14 +30,14 @@ from typing import List, Iterator, Optional
 
 
 # Index file for caching
-INDEX_FILE = 'charfinder_index.pickle'
+INDEX_FILE = "charfinder_index.pickle"
 
 # Protocol constants
-CRLF = b'\r\n'
-PROMPT = b'?> '
+CRLF = b"\r\n"
+PROMPT = b"?> "
 
 # Named tuple for search results
-Result = namedtuple('Result', 'code char name')
+Result = namedtuple("Result", "code char name")
 
 
 class UnicodeNameIndex:
@@ -52,7 +52,7 @@ class UnicodeNameIndex:
         self.pickle_file = pickle_file
         self.index = None
         if chars is None:
-            chars = ''.join(chr(i) for i in range(32, 0x10FFFF + 1))
+            chars = "".join(chr(i) for i in range(32, 0x10FFFF + 1))
         self.load(chars)
 
     def load(self, chars: str) -> None:
@@ -62,12 +62,12 @@ class UnicodeNameIndex:
         Tries to load from pickle file first, builds from scratch if needed.
         """
         try:
-            with open(self.pickle_file, 'rb') as fp:
+            with open(self.pickle_file, "rb") as fp:
                 self.index = pickle.load(fp)
         except (FileNotFoundError, EOFError, pickle.PickleError):
             # Build index from scratch
             self.index = {}
-            print(f'Building {len(chars)} character index...')
+            print(f"Building {len(chars)} character index...")
             for char in chars:
                 try:
                     name = unicodedata.name(char)
@@ -77,9 +77,9 @@ class UnicodeNameIndex:
                     pass  # Skip characters without names
 
             # Save for future use
-            with open(self.pickle_file, 'wb') as fp:
+            with open(self.pickle_file, "wb") as fp:
                 pickle.dump(self.index, fp)
-            print(f'Index saved to {self.pickle_file}')
+            print(f"Index saved to {self.pickle_file}")
 
     def __len__(self) -> int:
         return len(self.index)
@@ -99,21 +99,22 @@ class UnicodeNameIndex:
         """
         for char in self.find_similar_names(query):
             code = ord(char)
-            name = unicodedata.name(char, '')
-            yield f'U+{code:04X}\t{char}\t{name}'
+            name = unicodedata.name(char, "")
+            yield f"U+{code:04X}\t{char}\t{name}"
 
     def status(self, query: str, found: int) -> str:
         """
         Generate status message for the query results.
         """
         if found:
-            return f'{found} matches for {query!r}'
+            return f"{found} matches for {query!r}"
         else:
-            return f'no matches for {query!r}'
+            return f"no matches for {query!r}"
 
 
-async def handle_queries(reader: asyncio.StreamReader,
-                        writer: asyncio.StreamWriter) -> None:
+async def handle_queries(
+    reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+) -> None:
     """
     Coroutine to handle a single client connection.
 
@@ -134,10 +135,10 @@ async def handle_queries(reader: asyncio.StreamReader,
         try:
             query = data.decode().strip()
         except UnicodeDecodeError:
-            query = '\x00'  # Invalid UTF-8 becomes null char
+            query = "\x00"  # Invalid UTF-8 becomes null char
 
-        client = writer.get_extra_info('peername')
-        print(f'Received from {client}: {query!r}')
+        client = writer.get_extra_info("peername")
+        print(f"Received from {client}: {query!r}")
 
         # Control characters signal end of session
         if ord(query[:1]) < 32:
@@ -153,13 +154,13 @@ async def handle_queries(reader: asyncio.StreamReader,
         writer.write(status_line.encode() + CRLF)
         await writer.drain()
 
-        print(f'Sent {len(lines)} results')
+        print(f"Sent {len(lines)} results")
 
-    print('Close client socket')
+    print("Close client socket")
     writer.close()
 
 
-async def run_server(address: str = '127.0.0.1', port: int = 2323) -> None:
+async def run_server(address: str = "127.0.0.1", port: int = 2323) -> None:
     """
     Async server function.
 
@@ -170,8 +171,8 @@ async def run_server(address: str = '127.0.0.1', port: int = 2323) -> None:
 
     # Get actual host/port
     host = server.sockets[0].getsockname()
-    print(f'Serving on {host}. Hit CTRL-C to stop.')
-    print(f'Index contains {len(index)} Unicode characters.')
+    print(f"Serving on {host}. Hit CTRL-C to stop.")
+    print(f"Index contains {len(index)} Unicode characters.")
     print('Example queries: "chess", "arrow", "greek", "smiley"')
 
     try:
@@ -180,12 +181,12 @@ async def run_server(address: str = '127.0.0.1', port: int = 2323) -> None:
     except KeyboardInterrupt:
         pass
 
-    print('Server shutting down.')
+    print("Server shutting down.")
     server.close()
     await server.wait_closed()
 
 
-def main(address: str = '127.0.0.1', port: str = '2323') -> None:
+def main(address: str = "127.0.0.1", port: str = "2323") -> None:
     """
     Main server function.
 
@@ -199,5 +200,5 @@ def main(address: str = '127.0.0.1', port: str = '2323') -> None:
 index = UnicodeNameIndex()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv[1:])

@@ -19,7 +19,10 @@ from polymarket_agents.automl.ml_agent import create_ml_agent
 from polymarket_agents.automl.ml_database import MLDatabase
 from polymarket_agents.automl.data_ingestion import PolymarketDataIngestion
 from polymarket_agents.automl.data_quality import DataQualityValidator
-from polymarket_agents.subagents.github_ml_agent import generate_ml_strategy_test, commit_ml_tests_to_github
+from polymarket_agents.subagents.github_ml_agent import (
+    generate_ml_strategy_test,
+    commit_ml_tests_to_github,
+)
 
 
 def test_data_ingestion_pipeline():
@@ -32,7 +35,7 @@ def test_data_ingestion_pipeline():
         db = MLDatabase()
         experiment_id = db.create_experiment(
             name="Integration Test - Data Ingestion",
-            description="Testing complete ML pipeline integration"
+            description="Testing complete ML pipeline integration",
         )
         print(f"✅ Created experiment: {experiment_id}")
 
@@ -49,17 +52,23 @@ def test_data_ingestion_pipeline():
             np.random.seed(42)
             mock_data = []
             for i in range(100):
-                mock_data.append({
-                    'market_id': f'mock_market_{i}',
-                    'question': f'Mock question {i} about market outcome?',
-                    'category': np.random.choice(['politics', 'sports', 'crypto']),
-                    'volume': np.random.exponential(5000) + 1000,
-                    'yes_price': np.random.beta(2, 2),
-                    'no_price': 1 - np.random.beta(2, 2),
-                    'liquidity': np.random.exponential(2000),
-                    'resolved': np.random.choice([True, False]),
-                    'actual_outcome': np.random.choice([0, 1]) if np.random.random() > 0.3 else None
-                })
+                mock_data.append(
+                    {
+                        "market_id": f"mock_market_{i}",
+                        "question": f"Mock question {i} about market outcome?",
+                        "category": np.random.choice(["politics", "sports", "crypto"]),
+                        "volume": np.random.exponential(5000) + 1000,
+                        "yes_price": np.random.beta(2, 2),
+                        "no_price": 1 - np.random.beta(2, 2),
+                        "liquidity": np.random.exponential(2000),
+                        "resolved": np.random.choice([True, False]),
+                        "actual_outcome": (
+                            np.random.choice([0, 1])
+                            if np.random.random() > 0.3
+                            else None
+                        ),
+                    }
+                )
             dataset = pd.DataFrame(mock_data)
             print("📝 Using mock data for testing")
 
@@ -78,7 +87,11 @@ def test_data_ingestion_pipeline():
             dataset_type="training",
             sample_count=len(clean_dataset),
             feature_count=len(clean_dataset.columns) - 1,
-            target_distribution=clean_dataset['will_resolve_yes'].value_counts().to_dict() if 'will_resolve_yes' in clean_dataset.columns else {}
+            target_distribution=(
+                clean_dataset["will_resolve_yes"].value_counts().to_dict()
+                if "will_resolve_yes" in clean_dataset.columns
+                else {}
+            ),
         )
 
         db.update_experiment_status(experiment_id, "completed", success=True)
@@ -104,7 +117,7 @@ def test_ml_agent_workflows():
         workflows = [
             "Check the quality of available market data for ML training",
             "Train a MarketPredictor model with default settings",
-            "Evaluate the model's performance"
+            "Evaluate the model's performance",
         ]
 
         workflow_results = []
@@ -117,15 +130,15 @@ def test_ml_agent_workflows():
                 result = agent.run_ml_workflow(workflow)
                 workflow_results.append(result)
 
-                if result.get('status') == 'success':
+                if result.get("status") == "success":
                     print("✅ Completed successfully")
 
                     # Extract key information
-                    if 'parsed_info' in result:
-                        info = result['parsed_info']
-                        if 'model_id' in info:
+                    if "parsed_info" in result:
+                        info = result["parsed_info"]
+                        if "model_id" in info:
                             print(f"   🤖 Model ID: {info['model_id']}")
-                        if 'metrics' in info:
+                        if "metrics" in info:
                             print(f"   📊 Metrics: {info['metrics']}")
 
                 else:
@@ -133,9 +146,11 @@ def test_ml_agent_workflows():
 
             except Exception as e:
                 print(f"❌ Workflow error: {e}")
-                workflow_results.append({'status': 'error', 'error': str(e)})
+                workflow_results.append({"status": "error", "error": str(e)})
 
-        print(f"\\n📊 Agent Workflow Summary: {sum(1 for r in workflow_results if r.get('status') == 'success')}/{len(workflows)} successful")
+        print(
+            f"\\n📊 Agent Workflow Summary: {sum(1 for r in workflow_results if r.get('status') == 'success')}/{len(workflows)} successful"
+        )
 
         return workflow_results
 
@@ -226,13 +241,15 @@ class TestMarketPredictorIntegration:
             test_files = {}
 
             for _, model_info in best_models.iterrows():
-                model_name = model_info['name']
+                model_name = model_info["name"]
                 test_content = generate_ml_strategy_test(
-                    model_name.replace(' ', '_'),
+                    model_name.replace(" ", "_"),
                     "predictor",
-                    f"Integration test for {model_name} - generated by ML pipeline"
+                    f"Integration test for {model_name} - generated by ML pipeline",
                 )
-                test_files[f"test_{model_name.lower().replace(' ', '_')}_integration.py"] = test_content
+                test_files[
+                    f"test_{model_name.lower().replace(' ', '_')}_integration.py"
+                ] = test_content
 
         print(f"📝 Generated {len(test_files)} test files")
 
@@ -240,11 +257,11 @@ class TestMarketPredictorIntegration:
         try:
             commit_result = commit_ml_tests_to_github(
                 test_files,
-                "🤖 ML Integration Test: Automated test generation and commit"
+                "🤖 ML Integration Test: Automated test generation and commit",
             )
             print("✅ Successfully committed tests to GitHub!")
             print(f"   📁 Files: {len(test_files)}")
-            if 'github_commit' in commit_result:
+            if "github_commit" in commit_result:
                 print(f"   🔗 Commit: {commit_result['github_commit']}")
 
         except Exception as e:
@@ -257,7 +274,7 @@ class TestMarketPredictorIntegration:
 
         for filename, content in test_files.items():
             test_file = test_dir / filename
-            with open(test_file, 'w') as f:
+            with open(test_file, "w") as f:
                 f.write(content)
             print(f"💾 Saved test file: {test_file}")
 
@@ -286,8 +303,10 @@ def generate_ml_report():
         report = agent.create_ml_report()
 
         # Save report
-        report_file = f"ml_integration_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        with open(report_file, 'w') as f:
+        report_file = (
+            f"ml_integration_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+        )
+        with open(report_file, "w") as f:
             f.write(report)
 
         print("✅ ML Integration Report generated:")
@@ -317,37 +336,39 @@ def run_complete_integration_test():
     try:
         # Test 1: Data Ingestion Pipeline
         experiment_id, dataset = test_data_ingestion_pipeline()
-        results['data_ingestion'] = {
-            'experiment_id': experiment_id,
-            'dataset_size': len(dataset) if dataset is not None else 0,
-            'status': 'success' if experiment_id else 'failed'
+        results["data_ingestion"] = {
+            "experiment_id": experiment_id,
+            "dataset_size": len(dataset) if dataset is not None else 0,
+            "status": "success" if experiment_id else "failed",
         }
 
         # Test 2: ML Agent Workflows
         workflow_results = test_ml_agent_workflows()
-        results['agent_workflows'] = {
-            'workflows_executed': len(workflow_results),
-            'successful_workflows': sum(1 for r in workflow_results if r.get('status') == 'success'),
-            'status': 'success' if workflow_results else 'failed'
+        results["agent_workflows"] = {
+            "workflows_executed": len(workflow_results),
+            "successful_workflows": sum(
+                1 for r in workflow_results if r.get("status") == "success"
+            ),
+            "status": "success" if workflow_results else "failed",
         }
 
         # Test 3: GitHub Integration
         test_files = test_github_integration()
-        results['github_integration'] = {
-            'test_files_generated': len(test_files),
-            'status': 'success' if test_files else 'failed'
+        results["github_integration"] = {
+            "test_files_generated": len(test_files),
+            "status": "success" if test_files else "failed",
         }
 
         # Test 4: Generate Report
         report = generate_ml_report()
-        results['reporting'] = {
-            'report_generated': report is not None,
-            'status': 'success' if report else 'failed'
+        results["reporting"] = {
+            "report_generated": report is not None,
+            "status": "success" if report else "failed",
         }
 
     except Exception as e:
         print(f"\\n❌ Integration test failed: {e}")
-        results['error'] = str(e)
+        results["error"] = str(e)
 
     # Final summary
     end_time = datetime.now()
@@ -363,18 +384,26 @@ def run_complete_integration_test():
     # Component status
     print("📊 Component Status:")
     for component, status in results.items():
-        if component != 'error':
-            comp_status = status.get('status', 'unknown')
-            status_icon = "✅" if comp_status == 'success' else "❌" if comp_status == 'failed' else "⚠️"
+        if component != "error":
+            comp_status = status.get("status", "unknown")
+            status_icon = (
+                "✅"
+                if comp_status == "success"
+                else "❌" if comp_status == "failed" else "⚠️"
+            )
             print(f"   {status_icon} {component}: {comp_status}")
 
             # Show key metrics
-            if component == 'data_ingestion' and 'dataset_size' in status:
+            if component == "data_ingestion" and "dataset_size" in status:
                 print(f"      📈 Dataset size: {status['dataset_size']} samples")
-            elif component == 'agent_workflows':
-                print(f"      🎯 Workflows: {status['successful_workflows']}/{status['workflows_executed']} successful")
-            elif component == 'github_integration':
-                print(f"      📝 Test files: {status['test_files_generated']} generated")
+            elif component == "agent_workflows":
+                print(
+                    f"      🎯 Workflows: {status['successful_workflows']}/{status['workflows_executed']} successful"
+                )
+            elif component == "github_integration":
+                print(
+                    f"      📝 Test files: {status['test_files_generated']} generated"
+                )
 
     print()
     print("🎯 System Capabilities Verified:")
@@ -385,7 +414,7 @@ def run_complete_integration_test():
     print("   ✅ GitHub integration and automation")
     print("   ✅ Comprehensive reporting and monitoring")
 
-    if 'error' not in results:
+    if "error" not in results:
         print("\\n🚀 ML Pipeline Integration: SUCCESS!")
         print("Your automated ML system is ready for production use.")
     else:

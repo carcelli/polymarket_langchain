@@ -26,6 +26,7 @@ load_dotenv()
 from polymarket_agents.utils.context import ContextManager
 from polymarket_agents.config import DEFAULT_MODEL
 
+
 def create_polymarket_agent(
     llm: Optional["BaseChatModel"] = None,
     model: str = DEFAULT_MODEL,
@@ -60,11 +61,12 @@ def create_polymarket_agent(
     # Initialize LLM
     if llm is None:
         from langchain_openai import ChatOpenAI
+
         llm = ChatOpenAI(
             model=model,
             temperature=temperature,
             api_key=os.getenv("OPENAI_API_KEY"),
-            **llm_kwargs
+            **llm_kwargs,
         )
     elif not isinstance(llm, BaseChatModel):
         raise ValueError("llm must be an instance of BaseChatModel")
@@ -134,7 +136,9 @@ Final Answer: the final answer to the original input question"""
     return executor
 
 
-def create_simple_analyst(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs):
+def create_simple_analyst(
+    llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs
+):
     """Create a simpler agent focused on market analysis (no trading tools).
 
     Good for research and recommendations without execution capability.
@@ -153,15 +157,13 @@ def create_simple_analyst(llm: Optional["BaseChatModel"] = None, model: str = DE
 
     analysis_tools = get_market_tools() + get_event_tools() + get_analysis_tools()
     return create_polymarket_agent(
-        llm=llm,
-        model=model,
-        tools=analysis_tools,
-        max_iterations=8,
-        **llm_kwargs
+        llm=llm, model=model, tools=analysis_tools, max_iterations=8, **llm_kwargs
     )
 
 
-def create_structured_probability_agent(llm: Optional["BaseChatModel"] = None, model: str = "gpt-4o-mini", **llm_kwargs) -> "BaseChatModel":
+def create_structured_probability_agent(
+    llm: Optional["BaseChatModel"] = None, model: str = "gpt-4o-mini", **llm_kwargs
+) -> "BaseChatModel":
     """Create a structured probability extraction agent that returns typed MarketForecast objects.
 
     This agent is designed for programmatic consumption - it returns structured data
@@ -178,10 +180,11 @@ def create_structured_probability_agent(llm: Optional["BaseChatModel"] = None, m
     """
     if llm is None:
         from langchain_openai import ChatOpenAI
+
         llm = ChatOpenAI(
             model=model,
             temperature=0,  # Deterministic for structured output
-            **llm_kwargs
+            **llm_kwargs,
         )
 
     # Bind the structured output schema to the LLM
@@ -190,7 +193,9 @@ def create_structured_probability_agent(llm: Optional["BaseChatModel"] = None, m
     return structured_llm
 
 
-def create_probability_extraction_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs):
+def create_probability_extraction_agent(
+    llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs
+):
     """Create an agent specialized for extracting implied probabilities from Polymarket data.
 
     Focuses on converting market prices to probabilities and analyzing crowd wisdom
@@ -228,11 +233,13 @@ def create_probability_extraction_agent(llm: Optional["BaseChatModel"] = None, m
         tools=probability_tools,
         temperature=0.0,  # Deterministic for probability extraction
         max_iterations=8,
-        **llm_kwargs
+        **llm_kwargs,
     )
 
 
-def create_research_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs):
+def create_research_agent(
+    llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs
+):
     """Create an agent specialized for market research with news integration.
 
     Args:
@@ -262,7 +269,7 @@ def create_research_agent(llm: Optional["BaseChatModel"] = None, model: str = DE
         model=model,
         tools=research_tools,
         temperature=0.3,  # Slightly more creative for research
-        **llm_kwargs
+        **llm_kwargs,
     )
 
 
@@ -275,9 +282,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class AgentExecutionError(Exception):
     """Custom exception for agent execution failures."""
+
     pass
+
 
 def run_agent(agent, query: str) -> str:
     """Run an agent with a query and return the result.
@@ -385,7 +395,9 @@ def find_best_trade(
     }
 
 
-def create_ml_forecast_comparison_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs):
+def create_ml_forecast_comparison_agent(
+    llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs
+):
     """Create an agent that compares Polymarket crowd wisdom against ML model forecasts.
 
     Useful for small businesses to validate their internal forecasting models
@@ -423,7 +435,7 @@ def create_ml_forecast_comparison_agent(llm: Optional["BaseChatModel"] = None, m
         tools=comparison_tools,
         temperature=0.2,  # Balanced creativity for analysis
         max_iterations=12,  # More iterations for complex comparisons
-        **llm_kwargs
+        **llm_kwargs,
     )
 
 
@@ -431,25 +443,45 @@ from pydantic import BaseModel, Field
 from typing import Optional, Union
 from langchain_core.pydantic_v1 import BaseModel as BaseModelV1, Field as FieldV1
 
+
 class ForecastComparison(BaseModel):
     """Structured output for ML vs market forecast comparison."""
+
     event_description: str = Field(description="The event being forecasted")
-    ml_forecast_probability: float = Field(description="Your ML model's probability estimate (0.0-1.0)")
-    market_consensus_probability: Optional[float] = Field(description="Polymarket crowd consensus probability")
-    difference: Optional[float] = Field(description="Difference between ML and market (ML - Market)")
-    confidence_assessment: str = Field(description="Assessment of which forecast to trust and why")
-    business_implications: str = Field(description="Business implications and recommended actions")
+    ml_forecast_probability: float = Field(
+        description="Your ML model's probability estimate (0.0-1.0)"
+    )
+    market_consensus_probability: Optional[float] = Field(
+        description="Polymarket crowd consensus probability"
+    )
+    difference: Optional[float] = Field(
+        description="Difference between ML and market (ML - Market)"
+    )
+    confidence_assessment: str = Field(
+        description="Assessment of which forecast to trust and why"
+    )
+    business_implications: str = Field(
+        description="Business implications and recommended actions"
+    )
     key_risks: str = Field(description="Key risks and uncertainties to consider")
 
 
 class MarketForecast(BaseModelV1):
     """Structured output for market probability analysis."""
+
     market_question: str = FieldV1(description="The market question being analyzed")
-    implied_probability: float = FieldV1(description="0.0 to 1.0 probability implied by market prices")
-    confidence_score: float = FieldV1(description="0.0 to 1.0 confidence in the analysis")
+    implied_probability: float = FieldV1(
+        description="0.0 to 1.0 probability implied by market prices"
+    )
+    confidence_score: float = FieldV1(
+        description="0.0 to 1.0 confidence in the analysis"
+    )
     reasoning_summary: str = FieldV1(description="Brief summary of the reasoning")
     recommended_action: str = FieldV1(description="BUY, SELL, or HOLD recommendation")
-    key_factors: list[str] = FieldV1(description="Key factors influencing the probability")
+    key_factors: list[str] = FieldV1(
+        description="Key factors influencing the probability"
+    )
+
 
 def compare_ml_vs_market_forecast(
     ml_forecast: float,
@@ -457,7 +489,7 @@ def compare_ml_vs_market_forecast(
     llm: Optional["BaseChatModel"] = None,
     model: str = DEFAULT_MODEL,
     structured_output: bool = True,
-    **llm_kwargs
+    **llm_kwargs,
 ) -> Union[Dict[str, Any], ForecastComparison]:
     """Compare your ML model's forecast against Polymarket crowd wisdom.
 
@@ -502,17 +534,25 @@ def compare_ml_vs_market_forecast(
             import re
 
             # Look for JSON-like content in the result
-            json_match = re.search(r'\{.*\}', result, re.DOTALL)
+            json_match = re.search(r"\{.*\}", result, re.DOTALL)
             if json_match:
                 parsed_data = json.loads(json_match.group())
                 return ForecastComparison(
                     event_description=event_description,
                     ml_forecast_probability=ml_forecast,
-                    market_consensus_probability=parsed_data.get("market_consensus_probability"),
+                    market_consensus_probability=parsed_data.get(
+                        "market_consensus_probability"
+                    ),
                     difference=parsed_data.get("difference"),
-                    confidence_assessment=parsed_data.get("confidence_assessment", "Unable to assess"),
-                    business_implications=parsed_data.get("business_implications", "No specific implications identified"),
-                    key_risks=parsed_data.get("key_risks", "Standard market risks apply")
+                    confidence_assessment=parsed_data.get(
+                        "confidence_assessment", "Unable to assess"
+                    ),
+                    business_implications=parsed_data.get(
+                        "business_implications", "No specific implications identified"
+                    ),
+                    key_risks=parsed_data.get(
+                        "key_risks", "Standard market risks apply"
+                    ),
                 )
         except (json.JSONDecodeError, KeyError, TypeError):
             # Fall back to dict format
@@ -552,7 +592,7 @@ def compare_ml_vs_market_forecast(
             difference=None,
             confidence_assessment="Analysis completed but structured parsing failed",
             business_implications=result,
-            key_risks="See full analysis for risk details"
+            key_risks="See full analysis for risk details",
         )
 
     return {
@@ -563,7 +603,12 @@ def compare_ml_vs_market_forecast(
     }
 
 
-def extract_market_probability(market_question: str, llm: Optional["BaseChatModel"] = None, model: str = "gpt-4o-2024-08-06", **llm_kwargs) -> MarketForecast:
+def extract_market_probability(
+    market_question: str,
+    llm: Optional["BaseChatModel"] = None,
+    model: str = "gpt-4o-2024-08-06",
+    **llm_kwargs,
+) -> MarketForecast:
     """Extract structured probability analysis for a specific market question.
 
     Returns typed MarketForecast object instead of prose, suitable for:
@@ -585,7 +630,9 @@ def extract_market_probability(market_question: str, llm: Optional["BaseChatMode
         AgentExecutionError: If analysis fails
     """
     try:
-        structured_llm = create_structured_probability_agent(llm=llm, model=model, **llm_kwargs)
+        structured_llm = create_structured_probability_agent(
+            llm=llm, model=model, **llm_kwargs
+        )
 
         prompt = f"""
         Analyze this prediction market and provide a structured probability assessment.
@@ -609,7 +656,12 @@ def extract_market_probability(market_question: str, llm: Optional["BaseChatMode
         raise AgentExecutionError(f"Failed to extract market probability: {e}") from e
 
 
-def analyze_specific_market(market_question: str, llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, **llm_kwargs) -> str:
+def analyze_specific_market(
+    market_question: str,
+    llm: Optional["BaseChatModel"] = None,
+    model: str = DEFAULT_MODEL,
+    **llm_kwargs,
+) -> str:
     """Deep dive analysis on a specific market.
 
     Args:
@@ -643,7 +695,12 @@ def analyze_specific_market(market_question: str, llm: Optional["BaseChatModel"]
 # =============================================================================
 
 
-def create_crypto_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, risk_tolerance: str = "medium", **llm_kwargs):
+def create_crypto_agent(
+    llm: Optional["BaseChatModel"] = None,
+    model: str = DEFAULT_MODEL,
+    risk_tolerance: str = "medium",
+    **llm_kwargs,
+):
     """Create a crypto-focused agent for cryptocurrency markets and predictions.
 
     Specialized for analyzing Bitcoin, Ethereum, and crypto market events.
@@ -663,11 +720,16 @@ def create_crypto_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFA
         llm=llm,
         model=model,
         risk_tolerance=risk_tolerance,
-        **llm_kwargs
+        **llm_kwargs,
     )
 
 
-def create_sports_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFAULT_MODEL, risk_tolerance: str = "medium", **llm_kwargs):
+def create_sports_agent(
+    llm: Optional["BaseChatModel"] = None,
+    model: str = DEFAULT_MODEL,
+    risk_tolerance: str = "medium",
+    **llm_kwargs,
+):
     """Create a sports-focused agent for sports betting and outcomes.
 
     Specialized for major sports events, championships, and tournament predictions.
@@ -687,7 +749,7 @@ def create_sports_agent(llm: Optional["BaseChatModel"] = None, model: str = DEFA
         llm=llm,
         model=model,
         risk_tolerance=risk_tolerance,
-        **llm_kwargs
+        **llm_kwargs,
     )
 
 
@@ -696,7 +758,7 @@ def create_business_domain_agent(
     llm: Optional["BaseChatModel"] = None,
     model: str = DEFAULT_MODEL,
     risk_tolerance: str = "medium",
-    **llm_kwargs
+    **llm_kwargs,
 ):
     """Create a domain-specialized agent for business-relevant market analysis.
 
@@ -722,30 +784,56 @@ def create_business_domain_agent(
         "crypto": {
             "categories": ["crypto"],
             "focus": "cryptocurrency prices, adoption, regulation, market predictions",
-            "keywords": ["bitcoin", "ethereum", "crypto", "blockchain", "regulation", "defi", "nft"]
+            "keywords": [
+                "bitcoin",
+                "ethereum",
+                "crypto",
+                "blockchain",
+                "regulation",
+                "defi",
+                "nft",
+            ],
         },
         "sports": {
             "categories": ["sports"],
             "focus": "sports outcomes, championships, player performance, tournament results",
-            "keywords": ["championship", "season", "playoffs", "tournament", "super bowl", "world series", "finals"]
+            "keywords": [
+                "championship",
+                "season",
+                "playoffs",
+                "tournament",
+                "super bowl",
+                "world series",
+                "finals",
+            ],
         },
         "economy": {
             "categories": ["economy", "finance"],
             "focus": "economic indicators, recessions, inflation, GDP growth",
-            "keywords": ["recession", "inflation", "GDP", "Fed", "economy", "unemployment"]
+            "keywords": [
+                "recession",
+                "inflation",
+                "GDP",
+                "Fed",
+                "economy",
+                "unemployment",
+            ],
         },
         "politics": {
             "categories": ["politics"],
             "focus": "elections, policy changes, political events",
-            "keywords": ["election", "president", "congress", "policy", "political"]
-        }
+            "keywords": ["election", "president", "congress", "policy", "political"],
+        },
     }
 
-    config = domain_configs.get(domain, {
-        "categories": None,
-        "focus": f"{domain} events and outcomes",
-        "keywords": [domain]
-    })
+    config = domain_configs.get(
+        domain,
+        {
+            "categories": None,
+            "focus": f"{domain} events and outcomes",
+            "keywords": [domain],
+        },
+    )
 
     domain_tools = [
         get_markets_by_category,
@@ -757,11 +845,7 @@ def create_business_domain_agent(
     ]
 
     agent = create_polymarket_agent(
-        llm=llm,
-        model=model,
-        tools=domain_tools,
-        temperature=0.1,
-        **llm_kwargs
+        llm=llm, model=model, tools=domain_tools, temperature=0.1, **llm_kwargs
     )
 
     return agent
@@ -772,7 +856,7 @@ def analyze_business_risks(
     domain: str = "crypto",
     llm: Optional["BaseChatModel"] = None,
     model: str = DEFAULT_MODEL,
-    **llm_kwargs
+    **llm_kwargs,
 ) -> str:
     """Analyze business risks using Polymarket data for a specific business type.
 
@@ -805,7 +889,9 @@ def analyze_business_risks(
     return run_agent(agent, query)
 
 
-def create_langgraph_trader(llm: Optional["BaseChatModel"] = None, tools: Optional[List] = None):
+def create_langgraph_trader(
+    llm: Optional["BaseChatModel"] = None, tools: Optional[List] = None
+):
     """Create a LangGraph-based multi-step trading agent.
 
     LangGraph provides more control over multi-step workflows
@@ -835,6 +921,7 @@ def create_langgraph_trader(llm: Optional["BaseChatModel"] = None, tools: Option
         # Use passed LLM and tools, or defaults
         if llm is None:
             from langchain_openai import ChatOpenAI
+
             llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
 
         if tools is None:
@@ -878,11 +965,12 @@ def create_langgraph_trader(llm: Optional["BaseChatModel"] = None, tools: Option
 # EXAMPLE USAGE
 # =============================================================================
 
+
 def demo_probability_extraction():
     """Demo the probability extraction agent."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PROBABILITY EXTRACTION AGENT DEMO")
-    print("="*60)
+    print("=" * 60)
 
     agent = create_probability_extraction_agent()
 
@@ -901,9 +989,9 @@ def demo_probability_extraction():
 
 def demo_ml_comparison():
     """Demo comparing ML forecast against market consensus."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ML FORECAST COMPARISON DEMO")
-    print("="*60)
+    print("=" * 60)
 
     # Example: Your ML model predicts 35% recession probability
     ml_forecast = 0.35
@@ -912,8 +1000,7 @@ def demo_ml_comparison():
     print(f"Your ML Forecast: {ml_forecast:.1%} probability of {event}")
 
     comparison = compare_ml_vs_market_forecast(
-        ml_forecast=ml_forecast,
-        event_description=event
+        ml_forecast=ml_forecast, event_description=event
     )
 
     print("\nComparison Analysis:")
@@ -923,9 +1010,9 @@ def demo_ml_comparison():
 
 def demo_business_risks():
     """Demo business risk analysis using domain-specific agents."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("BUSINESS RISK ANALYSIS DEMO")
-    print("="*60)
+    print("=" * 60)
 
     business_type = "small retail business with physical locations"
     domain = "economy"
@@ -933,10 +1020,7 @@ def demo_business_risks():
     print(f"Business Type: {business_type}")
     print(f"Risk Domain: {domain}")
 
-    analysis = analyze_business_risks(
-        business_type=business_type,
-        domain=domain
-    )
+    analysis = analyze_business_risks(business_type=business_type, domain=domain)
 
     print("\nRisk Analysis:")
     print(analysis)
@@ -958,9 +1042,9 @@ if __name__ == "__main__":
         # Demo 3: Business risk analysis
         demo_business_risks()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TARGET EVENTS FOR TESTING:")
-        print("="*60)
+        print("=" * 60)
         print("• US 2026 Midterm Elections")
         print("• Federal Reserve Interest Rate Decisions")
         print("• Q4 2026 GDP Growth Forecasts")
@@ -971,4 +1055,6 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Demo error: {e}")
-        print("Make sure you have OPENAI_API_KEY set and required dependencies installed.")
+        print(
+            "Make sure you have OPENAI_API_KEY set and required dependencies installed."
+        )

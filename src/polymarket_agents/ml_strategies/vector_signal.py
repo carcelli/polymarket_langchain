@@ -36,20 +36,20 @@ def vector_signal_similarity_strategy(market_data: Dict[str, Any]) -> Dict[str, 
             "edge": 0.0,
             "recommendation": "HOLD",
             "confidence": 0.0,
-            "reasoning": "Insufficient market data for vector analysis"
+            "reasoning": "Insufficient market data for vector analysis",
         }
 
     # Create market signal vector
     market_vector = Vector2d(
         volume / avg_volume,  # Normalized volume
-        price_trend          # Price momentum (-1 to 1)
+        price_trend,  # Price momentum (-1 to 1)
     )
 
     # Define profitable signal patterns (learned from historical data)
     profitable_patterns = [
-        Vector2d(2.5, 0.8),   # High volume + upward trend
+        Vector2d(2.5, 0.8),  # High volume + upward trend
         Vector2d(1.8, -0.6),  # Moderate volume + downward trend
-        Vector2d(3.2, 0.3),   # Very high volume + slight upward
+        Vector2d(3.2, 0.3),  # Very high volume + slight upward
     ]
 
     # Calculate similarity to each profitable pattern using dot product
@@ -65,7 +65,9 @@ def vector_signal_similarity_strategy(market_data: Dict[str, Any]) -> Dict[str, 
 
     # Convert similarity to edge signal
     # Normalize similarity and scale to reasonable edge range
-    normalized_similarity = max_similarity / math.sqrt(abs(market_vector) * abs(profitable_patterns[best_pattern_idx]))
+    normalized_similarity = max_similarity / math.sqrt(
+        abs(market_vector) * abs(profitable_patterns[best_pattern_idx])
+    )
     edge = max(0, min(normalized_similarity * 0.05, 0.08))  # Cap at 8% edge
 
     # Confidence based on similarity strength
@@ -75,15 +77,19 @@ def vector_signal_similarity_strategy(market_data: Dict[str, Any]) -> Dict[str, 
     pattern_descriptions = [
         "high volume upward trend",
         "moderate volume downward trend",
-        "very high volume slight upward"
+        "very high volume slight upward",
     ]
 
     if edge > 0.03:
-        recommendation = "BUY_YES" if profitable_patterns[best_pattern_idx].y > 0 else "BUY_NO"
+        recommendation = (
+            "BUY_YES" if profitable_patterns[best_pattern_idx].y > 0 else "BUY_NO"
+        )
         reasoning = f"Strong similarity to profitable {pattern_descriptions[best_pattern_idx]} pattern"
     elif edge > 0.015:
         recommendation = "MODERATE_POSITION"
-        reasoning = f"Moderate similarity to {pattern_descriptions[best_pattern_idx]} pattern"
+        reasoning = (
+            f"Moderate similarity to {pattern_descriptions[best_pattern_idx]} pattern"
+        )
     else:
         recommendation = "HOLD"
         reasoning = f"Weak signal similarity, monitoring for better alignment"
@@ -96,7 +102,7 @@ def vector_signal_similarity_strategy(market_data: Dict[str, Any]) -> Dict[str, 
         "vector_similarity": max_similarity,
         "best_pattern": pattern_descriptions[best_pattern_idx],
         "market_vector": market_vector,
-        "data_points": len(market_data.get("price_history", []))
+        "data_points": len(market_data.get("price_history", [])),
     }
 
 
@@ -115,7 +121,7 @@ def signal_combination_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Create individual signal vectors
     momentum_vec = Vector2d(momentum_signal, 0.0)  # Pure momentum
-    volume_vec = Vector2d(0.0, volume_signal)       # Pure volume
+    volume_vec = Vector2d(0.0, volume_signal)  # Pure volume
     sentiment_vec = Vector2d(sentiment_signal, sentiment_signal)  # Diagonal sentiment
 
     # Combine signals using vector addition
@@ -127,12 +133,16 @@ def signal_combination_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
     confidence_sentiment = market_data.get("sentiment_confidence", 0.5)
 
     # Scale combined signal by average confidence
-    avg_confidence = (confidence_momentum + confidence_volume + confidence_sentiment) / 3.0
+    avg_confidence = (
+        confidence_momentum + confidence_volume + confidence_sentiment
+    ) / 3.0
     final_signal = combined_signal * avg_confidence
 
     # Calculate edge from signal magnitude and direction
     signal_magnitude = abs(final_signal)
-    signal_direction = math.atan2(final_signal.y, final_signal.x)  # Direction in radians
+    signal_direction = math.atan2(
+        final_signal.y, final_signal.x
+    )  # Direction in radians
 
     # Edge based on magnitude, with directional bias
     edge = min(signal_magnitude * 0.03, 0.06)  # Max 6% edge
@@ -165,8 +175,8 @@ def signal_combination_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
         "signal_components": {
             "momentum": momentum_vec,
             "volume": volume_vec,
-            "sentiment": sentiment_vec
+            "sentiment": sentiment_vec,
         },
         "signal_magnitude": signal_magnitude,
-        "signal_direction": signal_direction
+        "signal_direction": signal_direction,
     }

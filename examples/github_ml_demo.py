@@ -17,7 +17,7 @@ sys.path.append(str(Path(__file__).parents[1] / "src"))
 from polymarket_agents.subagents.github_ml_agent import (
     generate_ml_strategy_test,
     commit_ml_tests_to_github,
-    MLTestGenerator
+    MLTestGenerator,
 )
 
 
@@ -34,13 +34,13 @@ def demonstrate_ml_test_generation():
         {
             "name": "MarketPredictor",
             "type": "predictor",
-            "description": "Random Forest-based market outcome prediction"
+            "description": "Random Forest-based market outcome prediction",
         },
         {
             "name": "EdgeDetector",
             "type": "predictor",
-            "description": "Neural network-based edge detection"
-        }
+            "description": "Neural network-based edge detection",
+        },
     ]
 
     generated_tests = {}
@@ -53,18 +53,16 @@ def demonstrate_ml_test_generation():
 
         # Generate individual strategy test
         test_content = generate_ml_strategy_test(
-            strategy["name"],
-            strategy["type"],
-            strategy["description"]
+            strategy["name"], strategy["type"], strategy["description"]
         )
 
         filename = f"test_{strategy['name'].lower()}.py"
         generated_tests[filename] = test_content
 
         # Analyze the generated test
-        lines = len(test_content.split('\n'))
-        classes = test_content.count('class Test')
-        methods = test_content.count('def test_')
+        lines = len(test_content.split("\n"))
+        classes = test_content.count("class Test")
+        methods = test_content.count("def test_")
 
         print(f"   ✅ Generated {filename}")
         print(f"      📏 {lines} lines, {classes} test classes, {methods} test methods")
@@ -86,11 +84,15 @@ def demonstrate_ml_test_generation():
 
     print("\n📋 Test Generation Summary:")
     print(f"   • Total files: {len(generated_tests)}")
-    total_lines = sum(len(content.split('\n')) for content in generated_tests.values())
+    total_lines = sum(len(content.split("\n")) for content in generated_tests.values())
     print(f"   • Total lines: {total_lines}")
-    test_classes = sum(content.count('class Test') for content in generated_tests.values())
+    test_classes = sum(
+        content.count("class Test") for content in generated_tests.values()
+    )
     print(f"   • Test classes: {test_classes}")
-    test_methods = sum(content.count('def test_') for content in generated_tests.values())
+    test_methods = sum(
+        content.count("def test_") for content in generated_tests.values()
+    )
     print(f"   • Test methods: {test_methods}")
 
     return generated_tests
@@ -109,13 +111,13 @@ def demonstrate_ml_test_generation():
         {
             "name": "MarketPredictor",
             "type": "predictor",
-            "description": "Random Forest-based market outcome prediction"
+            "description": "Random Forest-based market outcome prediction",
         },
         {
             "name": "EdgeDetector",
             "type": "predictor",
-            "description": "Neural network-based edge detection"
-        }
+            "description": "Neural network-based edge detection",
+        },
     ]
 
     generated_tests = {}
@@ -128,18 +130,16 @@ def demonstrate_ml_test_generation():
 
         # Generate individual strategy test
         test_content = generate_ml_strategy_test(
-            strategy["name"],
-            strategy["type"],
-            strategy["description"]
+            strategy["name"], strategy["type"], strategy["description"]
         )
 
         filename = f"test_{strategy['name'].lower()}.py"
         generated_tests[filename] = test_content
 
         # Analyze the generated test
-        lines = len(test_content.split('\n'))
-        classes = test_content.count('class Test')
-        methods = test_content.count('def test_')
+        lines = len(test_content.split("\n"))
+        classes = test_content.count("class Test")
+        methods = test_content.count("def test_")
 
         print(f"   ✅ Generated {filename}")
         print(f"      📏 {lines} lines, {classes} test classes, {methods} test methods")
@@ -158,11 +158,17 @@ def demonstrate_ml_test_generation():
     generated_tests["test_model_validation.py"] = validation_test
     print("   ✅ Generated statistical validation tests")
 
-    print("
-📋 Test Generation Summary:"    print(f"   • Total files: {len(generated_tests)}")
-    print(f"   • Total lines: {sum(len(content.split(chr(10))) for content in generated_tests.values())}")
-    print(f"   • Test classes: {sum(content.count('class Test') for content in generated_tests.values())}")
-    print(f"   • Test methods: {sum(content.count('def test_') for content in generated_tests.values())}")
+    print("\n📋 Test Generation Summary:")
+    print(f"   • Total files: {len(generated_tests)}")
+    print(
+        f"   • Total lines: {sum(len(content.split(chr(10))) for content in generated_tests.values())}"
+    )
+    print(
+        f"   • Test classes: {sum(content.count('class Test') for content in generated_tests.values())}"
+    )
+    print(
+        f"   • Test methods: {sum(content.count('def test_') for content in generated_tests.values())}"
+    )
 
     return generated_tests
 
@@ -186,7 +192,7 @@ def demonstrate_github_integration(generated_tests):
     print(f"   🌿 Branch: {commit_result['branch']}")
 
     print("\\n📄 Files that would be created:")
-    for file_info in commit_result['files_created']:
+    for file_info in commit_result["files_created"]:
         print(f"   • {file_info['path']} ({file_info['size']} bytes)")
 
     return commit_result
@@ -201,26 +207,10 @@ def show_test_execution():
 
     # Simulate test execution (in reality, this would run pytest)
     test_results = {
-        "test_marketpredictor.py": {
-            "passed": 12,
-            "failed": 0,
-            "duration": 2.3
-        },
-        "test_edgedetector.py": {
-            "passed": 8,
-            "failed": 1,
-            "duration": 3.1
-        },
-        "test_strategy_comparison.py": {
-            "passed": 6,
-            "failed": 0,
-            "duration": 4.2
-        },
-        "test_model_validation.py": {
-            "passed": 5,
-            "failed": 0,
-            "duration": 5.8
-        }
+        "test_marketpredictor.py": {"passed": 12, "failed": 0, "duration": 2.3},
+        "test_edgedetector.py": {"passed": 8, "failed": 1, "duration": 3.1},
+        "test_strategy_comparison.py": {"passed": 6, "failed": 0, "duration": 4.2},
+        "test_model_validation.py": {"passed": 5, "failed": 0, "duration": 5.8},
     }
 
     total_passed = sum(results["passed"] for results in test_results.values())
@@ -230,13 +220,17 @@ def show_test_execution():
     print("\\n📊 Test Results:")
     print(f"   ✅ Passed: {total_passed}")
     print(f"   ❌ Failed: {total_failed}")
-    print(".1f"    print(f"   📋 Files: {len(test_results)}")
+    print(f"   ⏱️ Duration: {total_duration:.1f}s")
+    print(f"   📋 Files: {len(test_results)}")
 
     print("\\n📈 Detailed Results:")
     for test_file, results in test_results.items():
         status = "✅" if results["failed"] == 0 else "❌"
-        print(".1f"    if results["failed"] > 0:
-        print(f"      ⚠️  {results['failed']} tests failed")
+        print(
+            f"   {status} {test_file}: {results['passed']} passed, duration: {results['duration']:.1f}s"
+        )
+        if results["failed"] > 0:
+            print(f"      ⚠️  {results['failed']} tests failed")
 
 
 def demonstrate_continuous_integration():
@@ -248,33 +242,33 @@ def demonstrate_continuous_integration():
         {
             "step": "Code Changes",
             "action": "Developer pushes ML strategy updates",
-            "automation": "GitHub webhook triggers"
+            "automation": "GitHub webhook triggers",
         },
         {
             "step": "Test Generation",
             "action": "GitHub ML Agent generates fresh tests",
-            "automation": "Automated via GitHub Actions"
+            "automation": "Automated via GitHub Actions",
         },
         {
             "step": "Test Execution",
             "action": "Run pytest on generated tests",
-            "automation": "CI pipeline executes tests"
+            "automation": "CI pipeline executes tests",
         },
         {
             "step": "Performance Validation",
             "action": "Validate ML model performance metrics",
-            "automation": "Automated statistical checks"
+            "automation": "Automated statistical checks",
         },
         {
             "step": "Report Generation",
             "action": "Create performance and coverage reports",
-            "automation": "Automated report generation"
+            "automation": "Automated report generation",
         },
         {
             "step": "Alert System",
             "action": "Notify team of failures or performance drops",
-            "automation": "Automated alerts via GitHub Issues"
-        }
+            "automation": "Automated alerts via GitHub Issues",
+        },
     ]
 
     print("🚀 Automated ML Testing Pipeline:")
@@ -304,26 +298,26 @@ def show_ml_strategy_examples():
             "name": "MarketPredictor (Random Forest)",
             "features": ["volume", "price_distance", "category", "sentiment"],
             "output": "Predicted true probability",
-            "use_case": "Find mispriced markets"
+            "use_case": "Find mispriced markets",
         },
         {
             "name": "EdgeDetector (Neural Network)",
             "features": ["volume_per_prob", "entropy", "clustering", "momentum"],
             "output": "Edge confidence score",
-            "use_case": "Identify market inefficiencies"
+            "use_case": "Identify market inefficiencies",
         },
         {
             "name": "PortfolioOptimizer (Reinforcement Learning)",
             "features": ["current_positions", "correlations", "risk_metrics"],
             "output": "Optimal position sizes",
-            "use_case": "Maximize risk-adjusted returns"
+            "use_case": "Maximize risk-adjusted returns",
         },
         {
             "name": "SentimentAnalyzer (NLP)",
             "features": ["news_sentiment", "social_mentions", "market_text"],
             "output": "Sentiment score",
-            "use_case": "Incorporate market sentiment"
-        }
+            "use_case": "Incorporate market sentiment",
+        },
     ]
 
     for strategy in strategies:
@@ -366,11 +360,14 @@ def main():
         print("• 📊 Statistical validation of ML betting strategies")
         print("• 🔄 Continuous testing pipeline for ML models")
         print("• 📈 Performance monitoring and alerting")
-        print("\\n💡 Next: Integrate with your CI/CD pipeline for automated ML testing!")
+        print(
+            "\\n💡 Next: Integrate with your CI/CD pipeline for automated ML testing!"
+        )
 
     except Exception as e:
         print(f"\\n❌ Demo failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

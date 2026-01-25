@@ -334,7 +334,9 @@ def probability_node(state: PlanningState) -> Dict:
         xgboost_reasoning = None
 
         try:
-            from polymarket_agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
+            from polymarket_agents.ml_strategies.xgboost_strategy import (
+                XGBoostProbabilityStrategy,
+            )
 
             # Check if model exists and is trained
             model_path = "data/models/xgboost_probability_model.json"

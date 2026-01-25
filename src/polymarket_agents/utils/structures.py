@@ -1,6 +1,7 @@
 import collections
 from typing import Any, Mapping, MutableMapping
 
+
 class StrKeyDict(collections.UserDict):
     """
     A dictionary that coerces all keys to strings on access and insertion.
@@ -41,10 +42,10 @@ class StrKeyDict(collections.UserDict):
         if isinstance(other, Mapping):
             for k, v in other.items():
                 self[k] = v
-        elif hasattr(other, 'keys'): # Mapping-like
-             for k in other.keys():
-                 self[k] = other[k]
-        else: # Iterable of pairs
+        elif hasattr(other, "keys"):  # Mapping-like
+            for k in other.keys():
+                self[k] = other[k]
+        else:  # Iterable of pairs
             for k, v in other:
                 self[k] = v
         for k, v in kwds.items():

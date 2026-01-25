@@ -46,13 +46,15 @@ class Polymarket:
         self.private_key = os.getenv("POLYGON_WALLET_PRIVATE_KEY")
         if not self.private_key:
             raise ValueError("POLYGON_WALLET_PRIVATE_KEY missing from .env")
-            
+
         self.polygon_rpc = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
         self.w3 = Web3(Web3.HTTPProvider(self.polygon_rpc))
 
         # Validate RPC connection
         if not self.w3.is_connected():
-            raise ConnectionError(f"Failed to connect to Polygon RPC: {self.polygon_rpc}")
+            raise ConnectionError(
+                f"Failed to connect to Polygon RPC: {self.polygon_rpc}"
+            )
 
         # Derive and store account from private key
         if self._is_valid_private_key(self.private_key):

@@ -20,13 +20,15 @@ import numpy as np
 from typing import Tuple, Optional
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from polymarket_agents.ml_foundations import NeuralNetwork
 from polymarket_agents.ml_foundations.utils import scale_to_01, one_hot
 
 
-def load_mnist_data(filepath: str = "data/mnist/pickled_mnist.pkl") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def load_mnist_data(
+    filepath: str = "data/mnist/pickled_mnist.pkl",
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Load MNIST dataset from pickled file.
 
@@ -42,7 +44,14 @@ def load_mnist_data(filepath: str = "data/mnist/pickled_mnist.pkl") -> Tuple[np.
 
         # Handle different pickle formats
         if len(data) == 6:
-            train_imgs, test_imgs, train_labels, test_labels, train_one_hot, test_one_hot = data
+            (
+                train_imgs,
+                test_imgs,
+                train_labels,
+                test_labels,
+                train_one_hot,
+                test_one_hot,
+            ) = data
         else:
             # Fallback for different pickle structure
             train_imgs, train_labels, test_imgs, test_labels = data
@@ -75,7 +84,7 @@ def preprocess_mnist_data(
     train_labels: np.ndarray,
     test_imgs: np.ndarray,
     test_labels: np.ndarray,
-    subset_size: Optional[int] = None
+    subset_size: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Preprocess MNIST data: scaling and one-hot encoding.
@@ -96,7 +105,9 @@ def preprocess_mnist_data(
         train_imgs = train_imgs[indices]
         train_labels = train_labels[indices]
 
-        test_indices = np.random.choice(len(test_imgs), min(subset_size // 5, len(test_imgs)), replace=False)
+        test_indices = np.random.choice(
+            len(test_imgs), min(subset_size // 5, len(test_imgs)), replace=False
+        )
         test_imgs = test_imgs[test_indices]
         test_labels = test_labels[test_indices]
 
@@ -122,7 +133,7 @@ def train_mnist_network(
     train_y: np.ndarray,
     epochs: int = 5,
     lr: float = 0.1,
-    evaluate_every: int = 1
+    evaluate_every: int = 1,
 ) -> Tuple[NeuralNetwork, list]:
     """
     Train a neural network on MNIST data.
@@ -159,18 +170,28 @@ def train_mnist_network(
 
         if (epoch + 1) % evaluate_every == 0:
             # Evaluate on training set (for monitoring)
-            results = nn.evaluate_dataset(train_X[:1000], train_y[:1000])  # Subset for speed
-            print("3d"
+            results = nn.evaluate_dataset(
+                train_X[:1000], train_y[:1000]
+            )  # Subset for speed
+            print(
+                f"   Epoch {epoch + 1:3d} - Accuracy: {results['accuracy']:.3f}, Loss: {results['avg_loss']:.4f}"
+            )
     return nn, losses
 
 
-def evaluate_mnist_performance(nn: NeuralNetwork, test_X: np.ndarray, test_y: np.ndarray) -> dict:
+def evaluate_mnist_performance(
+    nn: NeuralNetwork, test_X: np.ndarray, test_y: np.ndarray
+) -> dict:
     """Evaluate trained network on test set."""
     print(f"\n📊 Evaluating on {len(test_X)} test examples...")
 
     results = nn.evaluate_dataset(test_X, test_y)
 
-    print("🎯 Final Results:"    print(".1%"    print(".3f"    print(".3f"    print(".3f"
+    print("🎯 Final Results:")
+    print(f"   Accuracy: {results.get('accuracy', 0):.1%}")
+    print(f"   Precision: {results.get('precision', 0):.3f}")
+    print(f"   Recall: {results.get('recall', 0):.3f}")
+    print(f"   F1 Score: {results.get('f1', 0):.3f}")
     return results
 
 
@@ -183,15 +204,18 @@ def demonstrate_architectures():
     # Load and preprocess data
     train_imgs, train_labels, test_imgs, test_labels = load_mnist_data()
     train_X, train_y, test_X, test_y = preprocess_mnist_data(
-        train_imgs, train_labels, test_imgs, test_labels,
-        subset_size=5000  # Use subset for faster demo
+        train_imgs,
+        train_labels,
+        test_imgs,
+        test_labels,
+        subset_size=5000,  # Use subset for faster demo
     )
 
     # Test different architectures
     architectures = [
-        [784, 100, 10],      # Single hidden layer (tutorial baseline)
-        [784, 200, 100, 10], # Two hidden layers (deeper)
-        [784, 300, 200, 100, 10], # Three hidden layers (deepest)
+        [784, 100, 10],  # Single hidden layer (tutorial baseline)
+        [784, 200, 100, 10],  # Two hidden layers (deeper)
+        [784, 300, 200, 100, 10],  # Three hidden layers (deepest)
     ]
 
     results = {}
@@ -203,9 +227,7 @@ def demonstrate_architectures():
 
         # Train network
         nn, losses = train_mnist_network(
-            arch, train_X, train_y,
-            epochs=3,  # Fewer epochs for demo
-            lr=0.1
+            arch, train_X, train_y, epochs=3, lr=0.1  # Fewer epochs for demo
         )
 
         # Evaluate
@@ -219,13 +241,18 @@ def demonstrate_architectures():
     print("📊 Architecture Comparison")
     print(f"{'='*60}")
 
-    print("<15"    print("-" * 60)
+    print(f"{'Architecture':<15} {'Accuracy':<10} {'Avg Loss':<10}")
+    print("-" * 60)
 
     for arch_str, result in results.items():
         arch = eval(arch_str)  # Convert string back to list
-        print("<15"
+        print(
+            f"{str(arch):<15} {result['accuracy']:<10.3f} {result['avg_loss']:<10.4f}"
+        )
     print(f"\n🎯 Deepest network ({architectures[-1]}) shows best performance!")
-    print("   Multi-layer networks can learn complex patterns that single layers cannot.")
+    print(
+        "   Multi-layer networks can learn complex patterns that single layers cannot."
+    )
 
 
 def demonstrate_polymarket_integration():
@@ -235,14 +262,18 @@ def demonstrate_polymarket_integration():
     print(f"{'='*60}")
 
     # Create a simple network for market prediction
-    market_nn = NeuralNetwork.from_layers([5, 10, 2], random_seed=42)  # 5 features -> 2 classes
+    market_nn = NeuralNetwork.from_layers(
+        [5, 10, 2], random_seed=42
+    )  # 5 features -> 2 classes
 
     # Example market features: [yes_prob, volume_norm, spread, days_to_end, liquidity]
-    market_features = np.array([
-        [0.65, 0.8, 0.02, 0.3, 0.9],  # Strong bullish market
-        [0.45, 0.2, 0.08, 0.7, 0.3],  # Weak bearish market
-        [0.52, 0.5, 0.05, 0.5, 0.6],  # Neutral market
-    ])
+    market_features = np.array(
+        [
+            [0.65, 0.8, 0.02, 0.3, 0.9],  # Strong bullish market
+            [0.45, 0.2, 0.08, 0.7, 0.3],  # Weak bearish market
+            [0.52, 0.5, 0.05, 0.5, 0.6],  # Neutral market
+        ]
+    )
 
     # Target: Will probability increase? (1=yes, 0=no)
     targets = np.array([[1], [0], [1]])  # Expect first and third to rise
@@ -250,15 +281,23 @@ def demonstrate_polymarket_integration():
     print("📊 Training market predictor on sample data...")
     losses = market_nn.batch_train(market_features, targets, epochs=100, verbose=False)
 
-    print(".4f"
+    print(f"✅ Training complete. Final loss: {losses[-1]:.4f}")
     # Test predictions
     print("\n🎯 Market Predictions:")
     for i, features in enumerate(market_features):
         prediction = market_nn.predict(features)
-        prob_up = market_nn.forward(features)[0][1] if market_nn.use_softmax else prediction[0]
+        prob_up = (
+            market_nn.forward(features)[0][1]
+            if market_nn.use_softmax
+            else prediction[0]
+        )
         expected = "UP 📈" if targets[i][0] > 0.5 else "DOWN 📉"
-        print("2d"
-    print("\n🔮 Networks trained on historical market data can predict future movements!")
+        print(
+            f"   Market {i+1:2d}: Predicted {prob_up:.1%} chance of UP (Expected: {expected})"
+        )
+    print(
+        "\n🔮 Networks trained on historical market data can predict future movements!"
+    )
 
 
 if __name__ == "__main__":

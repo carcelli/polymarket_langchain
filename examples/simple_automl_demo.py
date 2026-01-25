@@ -24,10 +24,14 @@ def demo_data_ingestion():
     print("🔄 Creating training dataset...")
     dataset = ingestion.create_training_dataset(days_back=90, min_volume=1000)
 
-    print(f"✅ Dataset created: {len(dataset)} samples, {len(dataset.columns)} features")
+    print(
+        f"✅ Dataset created: {len(dataset)} samples, {len(dataset.columns)} features"
+    )
 
     if not dataset.empty:
-        print(f"🎯 Target distribution: {dataset['will_resolve_yes'].value_counts().to_dict()}")
+        print(
+            f"🎯 Target distribution: {dataset['will_resolve_yes'].value_counts().to_dict()}"
+        )
 
         # Show sample
         sample = dataset.iloc[0]
@@ -49,18 +53,18 @@ def demo_data_quality(dataset):
     print(f"✅ Ready for ML: {'Yes' if quality_report['ready_for_ml'] else 'No'}")
 
     # Show issues
-    issues = quality_report['quality_check']['issues']
+    issues = quality_report["quality_check"]["issues"]
     if issues:
         print(f"⚠️ Found {len(issues)} issues")
         for issue in issues[:2]:
             print(f"   • {issue}")
 
     # Class balance
-    balance = quality_report.get('class_balance', {})
+    balance = quality_report.get("class_balance", {})
     if balance:
         print("⚖️ Class Balance:")
         print(f"   • Distribution: {balance.get('class_distribution', {})}")
-        minority_pct = balance.get('minority_class_pct', 0)
+        minority_pct = balance.get("minority_class_pct", 0)
         print(f"   • Minority class: {minority_pct:.1f}%")
         print(f"   • Balanced: {'Yes' if balance.get('balanced', False) else 'No'}")
 
@@ -103,13 +107,17 @@ def show_cli_usage():
     print("=" * 25)
 
     print("Run full AutoML pipeline:")
-    print("  python automl_cli.py run --days-back 365 --models MarketPredictor EdgeDetector")
+    print(
+        "  python automl_cli.py run --days-back 365 --models MarketPredictor EdgeDetector"
+    )
 
     print("\nCheck data quality:")
     print("  python automl_cli.py quality --days-back 180")
 
     print("\nMake predictions:")
-    print("  python automl_cli.py predict --question 'Will BTC reach $100k?' --price 0.6")
+    print(
+        "  python automl_cli.py predict --question 'Will BTC reach $100k?' --price 0.6"
+    )
 
     print("\nView pipeline history:")
     print("  python automl_cli.py history")
@@ -146,6 +154,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Demo failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

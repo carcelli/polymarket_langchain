@@ -863,7 +863,9 @@ def _get_top_volume_markets_impl(limit: int = 10, category: str = None) -> str:
         memory = _get_memory()
         # Use MARKET_FOCUS as default if no category specified
         effective_category = category or MARKET_FOCUS
-        markets = memory.list_top_volume_markets(limit=limit, category=effective_category)
+        markets = memory.list_top_volume_markets(
+            limit=limit, category=effective_category
+        )
 
         result = []
         for m in markets:
@@ -1158,6 +1160,7 @@ _TOOL_FUNCTIONS: Dict[str, Callable] = {
 }
 
 from polymarket_agents.tools.research_tools import _fetch_documentation_impl
+
 _TOOL_FUNCTIONS["fetch_documentation"] = _fetch_documentation_impl
 
 fetch_documentation = wrap_tool(_fetch_documentation_impl, name="fetch_documentation")
@@ -1248,9 +1251,51 @@ def get_database_tools() -> List:
     ]
 
 
-def get_all_tools() -> List:
-    """Get all available Polymarket tools for LangChain agents."""
-    return (
+# Domain Tools (crypto, nba, etc.)
+
+
+def get_domain_tools(domain: str = None) -> List:
+    """
+    Get domain-specific tools (crypto, nba, etc).
+
+    Args:
+        domain: Specific domain ("crypto", "nba") or None for all.
+
+    These tools wrap specialized domain agents that scan Polymarket
+    for opportunities with edge calculation.
+    """
+    try:
+        from polymarket_agents.langchain.domain_tools import (
+            get_crypto_tools,
+            get_nba_tools,
+            get_all_domain_tools,
+        )
+
+        if domain == "crypto":
+            return get_crypto_tools()
+        elif domain == "nba":
+            return get_nba_tools()
+        elif domain is None:
+            return get_all_domain_tools()
+        else:
+            # Try to get tools for unknown domain
+            from polymarket_agents.langchain.domain_tools import (
+                get_domain_tools as _get,
+            )
+
+            return _get(domain)
+    except ImportError:
+        return []
+
+
+def get_all_tools(include_domains: bool = True) -> List:
+    """
+    Get all available Polymarket tools for LangChain agents.
+
+    Args:
+        include_domains: Include domain-specific tools (crypto, nba).
+    """
+    tools = (
         get_market_tools()
         + get_event_tools()
         + get_tag_tools()
@@ -1258,6 +1303,11 @@ def get_all_tools() -> List:
         + get_analysis_tools()
         + get_database_tools()
     )
+
+    if include_domains:
+        tools = tools + get_domain_tools()
+
+    return tools
 
 
 # =============================================================================

@@ -26,16 +26,10 @@ class MarketPredictor(MLBettingStrategy):
     def __init__(self, analyzer=None, n_estimators=100, max_depth=10):
         super().__init__("RandomForest_MarketPredictor", analyzer)
         self.regressor = RandomForestRegressor(
-            n_estimators=n_estimators,
-            max_depth=max_depth,
-            random_state=42,
-            n_jobs=-1
+            n_estimators=n_estimators, max_depth=max_depth, random_state=42, n_jobs=-1
         )
         self.classifier = RandomForestClassifier(
-            n_estimators=n_estimators,
-            max_depth=max_depth,
-            random_state=42,
-            n_jobs=-1
+            n_estimators=n_estimators, max_depth=max_depth, random_state=42, n_jobs=-1
         )
         self.is_trained = False
 
@@ -65,8 +59,14 @@ class MarketPredictor(MLBettingStrategy):
 
             # For regression: predict the "true" probability (we'll simulate this)
             # In reality, this would be based on historical resolution data
-            market_prob = float(row['outcome_prices'][0]) if isinstance(row['outcome_prices'], list) else 0.5
-            true_prob = row.get('actual_outcome', market_prob)  # Use actual if available
+            market_prob = (
+                float(row["outcome_prices"][0])
+                if isinstance(row["outcome_prices"], list)
+                else 0.5
+            )
+            true_prob = row.get(
+                "actual_outcome", market_prob
+            )  # Use actual if available
             y_regression.append(true_prob)
 
             # For classification: predict binary outcome
@@ -77,8 +77,10 @@ class MarketPredictor(MLBettingStrategy):
         y_classification = np.array(y_classification)
 
         # Split data
-        X_train, X_test, y_reg_train, y_reg_test, y_clf_train, y_clf_test = train_test_split(
-            X, y_regression, y_classification, test_size=0.2, random_state=42
+        X_train, X_test, y_reg_train, y_reg_test, y_clf_train, y_clf_test = (
+            train_test_split(
+                X, y_regression, y_classification, test_size=0.2, random_state=42
+            )
         )
 
         # Train models
@@ -100,8 +102,8 @@ class MarketPredictor(MLBettingStrategy):
         """Make a prediction for a market."""
         if not self.is_trained:
             return StrategyResult(
-                market_id=market_data.get('id', 'unknown'),
-                market_question=market_data.get('question', 'Unknown market'),
+                market_id=market_data.get("id", "unknown"),
+                market_question=market_data.get("question", "Unknown market"),
                 predicted_probability=0.5,
                 confidence=0.0,
                 edge=0.0,
@@ -111,7 +113,7 @@ class MarketPredictor(MLBettingStrategy):
                 reasoning="Model not trained yet",
                 features_used=[],
                 model_name=self.name,
-                timestamp=pd.Timestamp.now()
+                timestamp=pd.Timestamp.now(),
             )
 
         # Prepare features
@@ -122,8 +124,10 @@ class MarketPredictor(MLBettingStrategy):
         predicted_outcome = self.classifier.predict(features)[0]
 
         # Current market probability
-        prices = market_data.get('outcome_prices', ['0.5', '0.5'])
-        market_prob = float(prices[0]) if isinstance(prices, list) and len(prices) > 0 else 0.5
+        prices = market_data.get("outcome_prices", ["0.5", "0.5"])
+        market_prob = (
+            float(prices[0]) if isinstance(prices, list) and len(prices) > 0 else 0.5
+        )
 
         # Calculate edge
         edge = self.calculate_edge(predicted_true_prob, market_prob)
@@ -154,8 +158,8 @@ class MarketPredictor(MLBettingStrategy):
         """.strip()
 
         return StrategyResult(
-            market_id=market_data.get('id', 'unknown'),
-            market_question=market_data.get('question', 'Unknown market'),
+            market_id=market_data.get("id", "unknown"),
+            market_question=market_data.get("question", "Unknown market"),
             predicted_probability=predicted_true_prob,
             confidence=confidence,
             edge=edge,
@@ -165,7 +169,7 @@ class MarketPredictor(MLBettingStrategy):
             reasoning=reasoning,
             features_used=self.feature_columns,
             model_name=self.name,
-            timestamp=pd.Timestamp.now()
+            timestamp=pd.Timestamp.now(),
         )
 
     def get_feature_importance(self) -> Dict[str, float]:
@@ -185,9 +189,15 @@ class EnsemblePredictor(MarketPredictor):
     def __init__(self, analyzer=None):
         super().__init__(analyzer)
         self.models = {
-            'rf_small': RandomForestRegressor(n_estimators=50, max_depth=5, random_state=42),
-            'rf_medium': RandomForestRegressor(n_estimators=100, max_depth=10, random_state=43),
-            'rf_large': RandomForestRegressor(n_estimators=200, max_depth=15, random_state=44),
+            "rf_small": RandomForestRegressor(
+                n_estimators=50, max_depth=5, random_state=42
+            ),
+            "rf_medium": RandomForestRegressor(
+                n_estimators=100, max_depth=10, random_state=43
+            ),
+            "rf_large": RandomForestRegressor(
+                n_estimators=200, max_depth=15, random_state=44
+            ),
         }
         self.is_trained = False
 
@@ -202,8 +212,12 @@ class EnsemblePredictor(MarketPredictor):
             features = self.prepare_features(row.to_dict())
             X.append(features.flatten())
 
-            market_prob = float(row['outcome_prices'][0]) if isinstance(row['outcome_prices'], list) else 0.5
-            true_prob = row.get('actual_outcome', market_prob)
+            market_prob = (
+                float(row["outcome_prices"][0])
+                if isinstance(row["outcome_prices"], list)
+                else 0.5
+            )
+            true_prob = row.get("actual_outcome", market_prob)
             y.append(true_prob)
 
         X = np.vstack(X)

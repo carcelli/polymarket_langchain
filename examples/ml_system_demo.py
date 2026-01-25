@@ -29,21 +29,20 @@ def demonstrate_database_operations():
 
     # Create a sample experiment
     experiment_id = db.create_experiment(
-        name="Demo Experiment",
-        description="Demonstrating ML database capabilities"
+        name="Demo Experiment", description="Demonstrating ML database capabilities"
     )
     print(f"✅ Created experiment: {experiment_id}")
 
     # Save a sample model
     model_info = {
-        'name': 'Demo MarketPredictor',
-        'model_type': 'MarketPredictor',
-        'algorithm': 'RandomForest',
-        'hyperparameters': {'n_estimators': 100, 'max_depth': 10},
-        'feature_columns': ['volume', 'yes_price', 'category'],
-        'training_samples': 1000,
-        'training_start_time': datetime.now().isoformat(),
-        'training_end_time': datetime.now().isoformat()
+        "name": "Demo MarketPredictor",
+        "model_type": "MarketPredictor",
+        "algorithm": "RandomForest",
+        "hyperparameters": {"n_estimators": 100, "max_depth": 10},
+        "feature_columns": ["volume", "yes_price", "category"],
+        "training_samples": 1000,
+        "training_start_time": datetime.now().isoformat(),
+        "training_end_time": datetime.now().isoformat(),
     }
 
     model_id = db.save_model(experiment_id, model_info)
@@ -51,11 +50,11 @@ def demonstrate_database_operations():
 
     # Save sample metrics
     metrics = {
-        'accuracy': 0.75,
-        'precision': 0.72,
-        'recall': 0.78,
-        'f1': 0.75,
-        'roc_auc': 0.82
+        "accuracy": 0.75,
+        "precision": 0.72,
+        "recall": 0.78,
+        "f1": 0.75,
+        "roc_auc": 0.82,
     }
 
     db.save_model_metrics(model_id, metrics)
@@ -64,44 +63,47 @@ def demonstrate_database_operations():
     # Save sample predictions
     predictions = [
         {
-            'market_id': 'demo_market_1',
-            'predicted_probability': 0.65,
-            'actual_outcome': 1,
-            'confidence': 0.8,
-            'recommended_bet': 'YES',
-            'position_size': 0.05,
-            'expected_value': 0.025
+            "market_id": "demo_market_1",
+            "predicted_probability": 0.65,
+            "actual_outcome": 1,
+            "confidence": 0.8,
+            "recommended_bet": "YES",
+            "position_size": 0.05,
+            "expected_value": 0.025,
         },
         {
-            'market_id': 'demo_market_2',
-            'predicted_probability': 0.45,
-            'actual_outcome': 0,
-            'confidence': 0.7,
-            'recommended_bet': 'NO',
-            'position_size': 0.03,
-            'expected_value': 0.015
-        }
+            "market_id": "demo_market_2",
+            "predicted_probability": 0.45,
+            "actual_outcome": 0,
+            "confidence": 0.7,
+            "recommended_bet": "NO",
+            "position_size": 0.03,
+            "expected_value": 0.015,
+        },
     ]
 
     db.save_predictions(model_id, predictions)
     print(f"✅ Saved {len(predictions)} predictions")
 
     # Save evaluation results
-    evaluation_config = {'evaluation_type': 'backtest', 'test_period_days': 30}
+    evaluation_config = {"evaluation_type": "backtest", "test_period_days": 30}
     evaluation_results = {
-        'total_trades': 50,
-        'win_rate': 0.68,
-        'avg_return_per_trade': 0.025,
-        'sharpe_ratio': 1.8,
-        'max_drawdown': 0.15
+        "total_trades": 50,
+        "win_rate": 0.68,
+        "avg_return_per_trade": 0.025,
+        "sharpe_ratio": 1.8,
+        "max_drawdown": 0.15,
     }
 
-    db.save_evaluation(model_id, 'backtest', evaluation_config, evaluation_results, 45.2)
+    db.save_evaluation(
+        model_id, "backtest", evaluation_config, evaluation_results, 45.2
+    )
     print("✅ Saved evaluation results")
     # Get experiment results
     results = db.get_experiment_results(experiment_id)
     if results:
-        print("✅ Retrieved experiment results:"        print(f"   • Models: {len(results['models'])}")
+        print("✅ Retrieved experiment results:")
+        print(f"   • Models: {len(results['models'])}")
         print(f"   • Datasets: {len(results['datasets'])}")
 
     # Show database stats
@@ -110,7 +112,7 @@ def demonstrate_database_operations():
     print(f"   • Experiments: {stats.get('experiments_count', 0)}")
     print(f"   • Models: {stats.get('models_count', 0)}")
     print(f"   • Predictions: {stats.get('predictions_count', 0)}")
-    print(".1f"
+    print(f"   • DB Size: {stats.get('db_size_mb', 0):.1f} MB")
     return experiment_id, model_id
 
 
@@ -125,7 +127,7 @@ def demonstrate_ml_agent_workflows():
     workflows = [
         "Check the quality of available market data",
         "Train a MarketPredictor model on recent data",
-        "Evaluate the model's performance using backtesting"
+        "Evaluate the model's performance using backtesting",
     ]
 
     results = []
@@ -138,18 +140,18 @@ def demonstrate_ml_agent_workflows():
             result = agent.run_ml_workflow(workflow)
             results.append(result)
 
-            if result.get('status') == 'success':
+            if result.get("status") == "success":
                 print("✅ Completed successfully")
-                if 'parsed_info' in result and result['parsed_info']:
+                if "parsed_info" in result and result["parsed_info"]:
                     print("📋 Key results:")
-                    for key, value in result['parsed_info'].items():
+                    for key, value in result["parsed_info"].items():
                         print(f"   • {key}: {value}")
             else:
                 print(f"❌ Failed: {result.get('error', 'Unknown error')}")
 
         except Exception as e:
             print(f"❌ Error: {e}")
-            results.append({'status': 'error', 'error': str(e)})
+            results.append({"status": "error", "error": str(e)})
 
     print(f"\\n📊 Agent Workflow Summary:")
     print(f"   • Workflows executed: {len(workflows)}")
@@ -169,17 +171,21 @@ def demonstrate_ml_tools():
         data_quality_tool,
         model_training_tool,
         model_evaluation_tool,
-        prediction_tool
+        prediction_tool,
     )
 
     tools = [
         ("Data Ingestion", data_ingestion_tool, {"days_back": 30, "min_volume": 1000}),
         ("Data Quality Check", data_quality_tool, {"dataset_info": "demo dataset"}),
-        ("Model Training", model_training_tool, {
-            "model_type": "MarketPredictor",
-            "experiment_name": "Tool Demo",
-            "hyperparameters": {"n_estimators": 50}
-        })
+        (
+            "Model Training",
+            model_training_tool,
+            {
+                "model_type": "MarketPredictor",
+                "experiment_name": "Tool Demo",
+                "hyperparameters": {"n_estimators": 50},
+            },
+        ),
     ]
 
     results = []
@@ -191,13 +197,15 @@ def demonstrate_ml_tools():
             # This is just a demonstration of tool availability
             print(f"   ✅ {tool_name} tool is available")
             print(f"   📝 Description: {tool.description[:100]}...")
-            results.append({'tool': tool_name, 'status': 'available'})
+            results.append({"tool": tool_name, "status": "available"})
 
         except Exception as e:
             print(f"   ❌ {tool_name} failed: {e}")
-            results.append({'tool': tool_name, 'status': 'error', 'error': str(e)})
+            results.append({"tool": tool_name, "status": "error", "error": str(e)})
 
-    print(f"\\n🔧 Tools Status: {sum(1 for r in results if r['status'] == 'available')}/{len(tools)} available")
+    print(
+        f"\\n🔧 Tools Status: {sum(1 for r in results if r['status'] == 'available')}/{len(tools)} available"
+    )
     return results
 
 
@@ -213,7 +221,7 @@ def demonstrate_reporting():
     print("=" * 30)
 
     # Show first few lines of report
-    lines = report.split('\n')
+    lines = report.split("\n")
     for line in lines[:20]:  # Show first 20 lines
         print(line)
 
@@ -221,7 +229,7 @@ def demonstrate_reporting():
         print(f"... ({len(lines) - 20} more lines)")
 
     print("\\n📊 Report Sections:")
-    sections = [line for line in lines if line.startswith('##')]
+    sections = [line for line in lines if line.startswith("##")]
     for section in sections:
         print(f"   • {section[3:]}")
 
@@ -268,11 +276,17 @@ def show_cli_usage():
     print("=" * 25)
 
     examples = [
-        ("Run ML workflow", "python ml_agent_cli.py workflow 'Train a market predictor model'"),
+        (
+            "Run ML workflow",
+            "python ml_agent_cli.py workflow 'Train a market predictor model'",
+        ),
         ("Check database status", "python ml_agent_cli.py status"),
         ("Generate ML report", "python ml_agent_cli.py report --save-report"),
         ("Optimize hyperparameters", "python ml_agent_cli.py optimize MarketPredictor"),
-        ("Create trading strategy", "python ml_agent_cli.py strategy model_123 --risk-tolerance 0.05")
+        (
+            "Create trading strategy",
+            "python ml_agent_cli.py strategy model_123 --risk-tolerance 0.05",
+        ),
     ]
 
     for desc, command in examples:
@@ -324,6 +338,7 @@ def main():
     except Exception as e:
         print(f"\\n❌ Demo failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

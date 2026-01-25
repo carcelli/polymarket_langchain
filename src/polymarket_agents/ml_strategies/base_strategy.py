@@ -18,6 +18,7 @@ from market_analysis_workflow import MarketAnalyzer
 @dataclass
 class StrategyResult:
     """Result of a betting strategy analysis."""
+
     market_id: str
     market_question: str
     predicted_probability: float
@@ -72,64 +73,85 @@ class MLBettingStrategy(ABC):
         features = []
 
         # Volume features
-        volume = market_data.get('volume', 0)
-        features.extend([
-            volume,  # raw volume
-            np.log(volume + 1),  # log volume
-            volume > 1000000,  # high volume flag
-        ])
+        volume = market_data.get("volume", 0)
+        features.extend(
+            [
+                volume,  # raw volume
+                np.log(volume + 1),  # log volume
+                volume > 1000000,  # high volume flag
+            ]
+        )
 
         # Price features
-        prices = market_data.get('outcome_prices', ['0.5', '0.5'])
+        prices = market_data.get("outcome_prices", ["0.5", "0.5"])
         if isinstance(prices, list) and len(prices) >= 2:
             yes_price = float(prices[0])
             no_price = float(prices[1])
-            features.extend([
-                yes_price,  # implied probability
-                abs(yes_price - 0.5),  # distance from fair odds
-                yes_price > 0.5,  # bias towards yes
-            ])
+            features.extend(
+                [
+                    yes_price,  # implied probability
+                    abs(yes_price - 0.5),  # distance from fair odds
+                    yes_price > 0.5,  # bias towards yes
+                ]
+            )
 
         # Category features (one-hot encoded)
-        category = market_data.get('category', 'unknown').lower()
+        category = market_data.get("category", "unknown").lower()
         category_features = [
-            category == 'politics',
-            category == 'sports',
-            category == 'crypto',
-            category == 'geopolitics',
-            category == 'tech'
+            category == "politics",
+            category == "sports",
+            category == "crypto",
+            category == "geopolitics",
+            category == "tech",
         ]
         features.extend(category_features)
 
         # Text features (simplified - could use embeddings)
-        question = market_data.get('question', '').lower()
+        question = market_data.get("question", "").lower()
         text_features = [
             len(question.split()),  # word count
-            'trump' in question,  # political keywords
-            'bitcoin' in question or 'crypto' in question,
-            'super bowl' in question or 'nfl' in question,
-            'china' in question or 'taiwan' in question,
+            "trump" in question,  # political keywords
+            "bitcoin" in question or "crypto" in question,
+            "super bowl" in question or "nfl" in question,
+            "china" in question or "taiwan" in question,
         ]
         features.extend(text_features)
 
         # Liquidity features
-        liquidity = market_data.get('liquidity', 0)
-        features.extend([
-            liquidity,
-            liquidity / max(volume, 1),  # liquidity ratio
-        ])
+        liquidity = market_data.get("liquidity", 0)
+        features.extend(
+            [
+                liquidity,
+                liquidity / max(volume, 1),  # liquidity ratio
+            ]
+        )
 
         self.feature_columns = [
-            'volume', 'log_volume', 'high_volume',
-            'yes_price', 'price_distance', 'yes_bias',
-            'politics', 'sports', 'crypto', 'geopolitics', 'tech',
-            'word_count', 'trump_mention', 'crypto_mention', 'sports_mention', 'china_taiwan_mention',
-            'liquidity', 'liquidity_ratio'
+            "volume",
+            "log_volume",
+            "high_volume",
+            "yes_price",
+            "price_distance",
+            "yes_bias",
+            "politics",
+            "sports",
+            "crypto",
+            "geopolitics",
+            "tech",
+            "word_count",
+            "trump_mention",
+            "crypto_mention",
+            "sports_mention",
+            "china_taiwan_mention",
+            "liquidity",
+            "liquidity_ratio",
         ]
 
         return np.array(features).reshape(1, -1)
 
-    def calculate_edge(self, predicted_prob: float, market_prob: float, commission: float = 0.02) -> float:
+    def calculate_edge(
+        self, predicted_prob: float, market_prob: float, commission: float = 0.02
+    ) -> float:
         """Calculate the edge of a bet."""
         # Account for commission
         if predicted_prob > 0.5:
@@ -148,7 +170,9 @@ class MLBettingStrategy(ABC):
 
         return ev / cost  # Return as percentage edge
 
-    def kelly_criterion(self, edge: float, confidence: float, max_fraction: float = 0.25) -> float:
+    def kelly_criterion(
+        self, edge: float, confidence: float, max_fraction: float = 0.25
+    ) -> float:
         """Calculate position size using Kelly Criterion."""
         if edge <= 0:
             return 0
@@ -158,8 +182,11 @@ class MLBettingStrategy(ABC):
 
         return min(kelly, max_fraction)  # Cap at max_fraction
 
-    def evaluate_performance(self, predictions: List[StrategyResult],
-                           actual_outcomes: Optional[Dict[str, bool]] = None) -> Dict[str, Any]:
+    def evaluate_performance(
+        self,
+        predictions: List[StrategyResult],
+        actual_outcomes: Optional[Dict[str, bool]] = None,
+    ) -> Dict[str, Any]:
         """Evaluate strategy performance."""
         if not predictions:
             return {"error": "No predictions to evaluate"}
@@ -173,7 +200,9 @@ class MLBettingStrategy(ABC):
         # Sharpe-like ratio (simplified)
         edges = [p.edge for p in predictions]
         if len(edges) > 1:
-            sharpe_ratio = np.mean(edges) / (np.std(edges) + 1e-6) * np.sqrt(252)  # Annualized
+            sharpe_ratio = (
+                np.mean(edges) / (np.std(edges) + 1e-6) * np.sqrt(252)
+            )  # Annualized
         else:
             sharpe_ratio = 0
 
@@ -188,7 +217,9 @@ class MLBettingStrategy(ABC):
                     actual_outcome = actual_outcomes[market_id]
                     if predicted_outcome == actual_outcome:
                         correct_predictions += 1
-            hit_rate = correct_predictions / len([p for p in predictions if p.market_id in actual_outcomes])
+            hit_rate = correct_predictions / len(
+                [p for p in predictions if p.market_id in actual_outcomes]
+            )
 
         return {
             "total_predictions": total_predictions,
@@ -198,7 +229,7 @@ class MLBettingStrategy(ABC):
             "average_confidence": avg_confidence,
             "sharpe_ratio": sharpe_ratio,
             "hit_rate": hit_rate,
-            "model_name": self.name
+            "model_name": self.name,
         }
 
     def save_model(self, filepath: str) -> None:

@@ -36,7 +36,8 @@ class MLDatabase:
     def _ensure_database(self):
         """Create database tables if they don't exist."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS experiments (
                     experiment_id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
@@ -50,9 +51,11 @@ class MLDatabase:
                     error_message TEXT,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS models (
                     model_id TEXT PRIMARY KEY,
                     experiment_id TEXT,
@@ -69,9 +72,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS model_metrics (
                     metric_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_id TEXT,
@@ -81,9 +86,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (model_id) REFERENCES models(model_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS predictions (
                     prediction_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_id TEXT,
@@ -99,9 +106,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (model_id) REFERENCES models(model_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS evaluations (
                     evaluation_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_id TEXT,
@@ -114,9 +123,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (model_id) REFERENCES models(model_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS feature_sets (
                     feature_set_id TEXT PRIMARY KEY,
                     experiment_id TEXT,
@@ -127,9 +138,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS datasets (
                     dataset_id TEXT PRIMARY KEY,
                     experiment_id TEXT,
@@ -142,9 +155,11 @@ class MLDatabase:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
                 )
-            ''')
+            """
+            )
 
-            conn.execute('''
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS ml_alerts (
                     alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     model_id TEXT,
@@ -157,10 +172,12 @@ class MLDatabase:
                     resolved_at TEXT,
                     FOREIGN KEY (model_id) REFERENCES models(model_id)
                 )
-            ''')
+            """
+            )
 
-    def create_experiment(self, name: str, description: str = "",
-                         pipeline_config: Dict[str, Any] = None) -> str:
+    def create_experiment(
+        self, name: str, description: str = "", pipeline_config: Dict[str, Any] = None
+    ) -> str:
         """
         Create a new ML experiment.
 
@@ -175,23 +192,31 @@ class MLDatabase:
         experiment_id = f"exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name.replace(' ', '_').lower()}"
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO experiments
                 (experiment_id, name, description, pipeline_config, start_time)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (
-                experiment_id,
-                name,
-                description,
-                json.dumps(pipeline_config or {}),
-                datetime.now().isoformat()
-            ))
+            """,
+                (
+                    experiment_id,
+                    name,
+                    description,
+                    json.dumps(pipeline_config or {}),
+                    datetime.now().isoformat(),
+                ),
+            )
 
         logger.info(f"Created experiment: {experiment_id}")
         return experiment_id
 
-    def update_experiment_status(self, experiment_id: str, status: str,
-                               success: bool = None, error_message: str = None):
+    def update_experiment_status(
+        self,
+        experiment_id: str,
+        status: str,
+        success: bool = None,
+        error_message: str = None,
+    ):
         """
         Update experiment status.
 
@@ -201,13 +226,15 @@ class MLDatabase:
             success: Whether experiment succeeded
             error_message: Error message if failed
         """
-        end_time = datetime.now().isoformat() if status in ['completed', 'failed'] else None
+        end_time = (
+            datetime.now().isoformat() if status in ["completed", "failed"] else None
+        )
 
         with sqlite3.connect(self.db_path) as conn:
             # Get start time to calculate duration
             start_time = conn.execute(
                 "SELECT start_time FROM experiments WHERE experiment_id = ?",
-                (experiment_id,)
+                (experiment_id,),
             ).fetchone()
 
             duration = None
@@ -216,12 +243,15 @@ class MLDatabase:
                 end_dt = pd.to_datetime(end_time)
                 duration = (end_dt - start_dt).total_seconds()
 
-            conn.execute('''
+            conn.execute(
+                """
                 UPDATE experiments
                 SET status = ?, end_time = ?, duration_seconds = ?,
                     success = ?, error_message = ?
                 WHERE experiment_id = ?
-            ''', (status, end_time, duration, success, error_message, experiment_id))
+            """,
+                (status, end_time, duration, success, error_message, experiment_id),
+            )
 
         logger.info(f"Updated experiment {experiment_id} status to {status}")
 
@@ -239,32 +269,36 @@ class MLDatabase:
         model_id = f"model_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{model_info['name'].replace(' ', '_').lower()}"
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO models
                 (model_id, experiment_id, name, model_type, algorithm,
                  hyperparameters, feature_columns, training_samples,
                  training_start_time, training_end_time, model_path, model_size_bytes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                model_id,
-                experiment_id,
-                model_info['name'],
-                model_info.get('model_type', 'unknown'),
-                model_info.get('algorithm', 'unknown'),
-                json.dumps(model_info.get('hyperparameters', {})),
-                json.dumps(model_info.get('feature_columns', [])),
-                model_info.get('training_samples', 0),
-                model_info.get('training_start_time'),
-                model_info.get('training_end_time'),
-                model_info.get('model_path'),
-                model_info.get('model_size_bytes', 0)
-            ))
+            """,
+                (
+                    model_id,
+                    experiment_id,
+                    model_info["name"],
+                    model_info.get("model_type", "unknown"),
+                    model_info.get("algorithm", "unknown"),
+                    json.dumps(model_info.get("hyperparameters", {})),
+                    json.dumps(model_info.get("feature_columns", [])),
+                    model_info.get("training_samples", 0),
+                    model_info.get("training_start_time"),
+                    model_info.get("training_end_time"),
+                    model_info.get("model_path"),
+                    model_info.get("model_size_bytes", 0),
+                ),
+            )
 
         logger.info(f"Saved model: {model_id}")
         return model_id
 
-    def save_model_metrics(self, model_id: str, metrics: Dict[str, float],
-                          dataset_type: str = 'test'):
+    def save_model_metrics(
+        self, model_id: str, metrics: Dict[str, float], dataset_type: str = "test"
+    ):
         """
         Save model performance metrics.
 
@@ -275,11 +309,14 @@ class MLDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             for metric_name, metric_value in metrics.items():
-                conn.execute('''
+                conn.execute(
+                    """
                     INSERT INTO model_metrics
                     (model_id, metric_name, metric_value, dataset_type)
                     VALUES (?, ?, ?, ?)
-                ''', (model_id, metric_name, metric_value, dataset_type))
+                """,
+                    (model_id, metric_name, metric_value, dataset_type),
+                )
 
         logger.info(f"Saved {len(metrics)} metrics for model {model_id}")
 
@@ -293,30 +330,38 @@ class MLDatabase:
         """
         with sqlite3.connect(self.db_path) as conn:
             for pred in predictions:
-                conn.execute('''
+                conn.execute(
+                    """
                     INSERT INTO predictions
                     (model_id, market_id, predicted_probability, actual_outcome,
                      confidence, recommended_bet, position_size, expected_value,
                      prediction_time, market_data)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    model_id,
-                    pred['market_id'],
-                    pred.get('predicted_probability'),
-                    pred.get('actual_outcome'),
-                    pred.get('confidence'),
-                    pred.get('recommended_bet'),
-                    pred.get('position_size', 0),
-                    pred.get('expected_value', 0),
-                    pred.get('prediction_time', datetime.now().isoformat()),
-                    json.dumps(pred.get('market_data', {}))
-                ))
+                """,
+                    (
+                        model_id,
+                        pred["market_id"],
+                        pred.get("predicted_probability"),
+                        pred.get("actual_outcome"),
+                        pred.get("confidence"),
+                        pred.get("recommended_bet"),
+                        pred.get("position_size", 0),
+                        pred.get("expected_value", 0),
+                        pred.get("prediction_time", datetime.now().isoformat()),
+                        json.dumps(pred.get("market_data", {})),
+                    ),
+                )
 
         logger.info(f"Saved {len(predictions)} predictions for model {model_id}")
 
-    def save_evaluation(self, model_id: str, evaluation_type: str,
-                       evaluation_config: Dict[str, Any], results: Dict[str, Any],
-                       duration_seconds: float = None):
+    def save_evaluation(
+        self,
+        model_id: str,
+        evaluation_type: str,
+        evaluation_config: Dict[str, Any],
+        results: Dict[str, Any],
+        duration_seconds: float = None,
+    ):
         """
         Save model evaluation results.
 
@@ -328,26 +373,34 @@ class MLDatabase:
             duration_seconds: Evaluation duration
         """
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO evaluations
                 (model_id, evaluation_type, evaluation_config, results,
                  start_time, end_time, duration_seconds)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                model_id,
-                evaluation_type,
-                json.dumps(evaluation_config),
-                json.dumps(results),
-                datetime.now().isoformat(),  # start_time (simplified)
-                datetime.now().isoformat(),  # end_time (simplified)
-                duration_seconds
-            ))
+            """,
+                (
+                    model_id,
+                    evaluation_type,
+                    json.dumps(evaluation_config),
+                    json.dumps(results),
+                    datetime.now().isoformat(),  # start_time (simplified)
+                    datetime.now().isoformat(),  # end_time (simplified)
+                    duration_seconds,
+                ),
+            )
 
         logger.info(f"Saved {evaluation_type} evaluation for model {model_id}")
 
-    def save_feature_set(self, experiment_id: str, name: str,
-                        feature_columns: List[str], feature_stats: Dict[str, Any] = None,
-                        sample_count: int = 0) -> str:
+    def save_feature_set(
+        self,
+        experiment_id: str,
+        name: str,
+        feature_columns: List[str],
+        feature_stats: Dict[str, Any] = None,
+        sample_count: int = 0,
+    ) -> str:
         """
         Save feature set metadata.
 
@@ -364,27 +417,36 @@ class MLDatabase:
         feature_set_id = f"feat_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name.replace(' ', '_').lower()}"
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO feature_sets
                 (feature_set_id, experiment_id, name, feature_columns,
                  feature_stats, sample_count)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (
-                feature_set_id,
-                experiment_id,
-                name,
-                json.dumps(feature_columns),
-                json.dumps(feature_stats or {}),
-                sample_count
-            ))
+            """,
+                (
+                    feature_set_id,
+                    experiment_id,
+                    name,
+                    json.dumps(feature_columns),
+                    json.dumps(feature_stats or {}),
+                    sample_count,
+                ),
+            )
 
         logger.info(f"Saved feature set: {feature_set_id}")
         return feature_set_id
 
-    def save_dataset(self, experiment_id: str, name: str, dataset_type: str,
-                    sample_count: int, feature_count: int,
-                    target_distribution: Dict[str, int] = None,
-                    data_path: str = None) -> str:
+    def save_dataset(
+        self,
+        experiment_id: str,
+        name: str,
+        dataset_type: str,
+        sample_count: int,
+        feature_count: int,
+        target_distribution: Dict[str, int] = None,
+        data_path: str = None,
+    ) -> str:
         """
         Save dataset metadata.
 
@@ -403,27 +465,36 @@ class MLDatabase:
         dataset_id = f"data_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name.replace(' ', '_').lower()}"
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO datasets
                 (dataset_id, experiment_id, name, dataset_type, sample_count,
                  feature_count, target_distribution, data_path)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                dataset_id,
-                experiment_id,
-                name,
-                dataset_type,
-                sample_count,
-                feature_count,
-                json.dumps(target_distribution or {}),
-                data_path
-            ))
+            """,
+                (
+                    dataset_id,
+                    experiment_id,
+                    name,
+                    dataset_type,
+                    sample_count,
+                    feature_count,
+                    json.dumps(target_distribution or {}),
+                    data_path,
+                ),
+            )
 
         logger.info(f"Saved dataset: {dataset_id}")
         return dataset_id
 
-    def create_alert(self, model_id: str, alert_type: str, severity: str,
-                    message: str, details: Dict[str, Any] = None):
+    def create_alert(
+        self,
+        model_id: str,
+        alert_type: str,
+        severity: str,
+        message: str,
+        details: Dict[str, Any] = None,
+    ):
         """
         Create a new ML alert.
 
@@ -435,17 +506,14 @@ class MLDatabase:
             details: Additional alert details
         """
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
+            conn.execute(
+                """
                 INSERT INTO ml_alerts
                 (model_id, alert_type, severity, message, details)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (
-                model_id,
-                alert_type,
-                severity,
-                message,
-                json.dumps(details or {})
-            ))
+            """,
+                (model_id, alert_type, severity, message, json.dumps(details or {})),
+            )
 
         logger.info(f"Created {severity} alert for model {model_id}: {message}")
 
@@ -462,54 +530,54 @@ class MLDatabase:
         with sqlite3.connect(self.db_path) as conn:
             # Get experiment info
             exp_query = conn.execute(
-                "SELECT * FROM experiments WHERE experiment_id = ?",
-                (experiment_id,)
+                "SELECT * FROM experiments WHERE experiment_id = ?", (experiment_id,)
             ).fetchone()
 
             if not exp_query:
                 return None
 
-            experiment_info = dict(zip([desc[0] for desc in exp_query.description], exp_query))
+            experiment_info = dict(
+                zip([desc[0] for desc in exp_query.description], exp_query)
+            )
 
             # Get models
             models_query = conn.execute(
-                "SELECT * FROM models WHERE experiment_id = ?",
-                (experiment_id,)
+                "SELECT * FROM models WHERE experiment_id = ?", (experiment_id,)
             ).fetchall()
 
             models = []
             for model_row in models_query:
-                model_dict = dict(zip([desc[0] for desc in model_row.description], model_row))
+                model_dict = dict(
+                    zip([desc[0] for desc in model_row.description], model_row)
+                )
 
                 # Get metrics for this model
                 metrics_query = conn.execute(
                     "SELECT metric_name, metric_value, dataset_type FROM model_metrics WHERE model_id = ?",
-                    (model_dict['model_id'],)
+                    (model_dict["model_id"],),
                 ).fetchall()
 
-                model_dict['metrics'] = [
-                    {
-                        'name': row[0],
-                        'value': row[1],
-                        'dataset_type': row[2]
-                    } for row in metrics_query
+                model_dict["metrics"] = [
+                    {"name": row[0], "value": row[1], "dataset_type": row[2]}
+                    for row in metrics_query
                 ]
 
                 models.append(model_dict)
 
             # Get datasets
             datasets_query = conn.execute(
-                "SELECT * FROM datasets WHERE experiment_id = ?",
-                (experiment_id,)
+                "SELECT * FROM datasets WHERE experiment_id = ?", (experiment_id,)
             ).fetchall()
 
-            datasets = [dict(zip([desc[0] for desc in dataset.description], dataset))
-                       for dataset in datasets_query]
+            datasets = [
+                dict(zip([desc[0] for desc in dataset.description], dataset))
+                for dataset in datasets_query
+            ]
 
             return {
-                'experiment': experiment_info,
-                'models': models,
-                'datasets': datasets
+                "experiment": experiment_info,
+                "models": models,
+                "datasets": datasets,
             }
 
     def get_model_performance_history(self, model_id: str) -> pd.DataFrame:
@@ -523,12 +591,16 @@ class MLDatabase:
             DataFrame with performance metrics over time
         """
         with sqlite3.connect(self.db_path) as conn:
-            df = pd.read_sql_query('''
+            df = pd.read_sql_query(
+                """
                 SELECT metric_name, metric_value, dataset_type, created_at
                 FROM model_metrics
                 WHERE model_id = ?
                 ORDER BY created_at
-            ''', conn, params=(model_id,))
+            """,
+                conn,
+                params=(model_id,),
+            )
 
         return df
 
@@ -546,12 +618,14 @@ class MLDatabase:
 
             alerts = []
             for alert_row in alerts_query:
-                alert_dict = dict(zip([desc[0] for desc in alert_row.description], alert_row))
+                alert_dict = dict(
+                    zip([desc[0] for desc in alert_row.description], alert_row)
+                )
                 alerts.append(alert_dict)
 
             return alerts
 
-    def get_best_models(self, limit: int = 10, metric: str = 'f1') -> pd.DataFrame:
+    def get_best_models(self, limit: int = 10, metric: str = "f1") -> pd.DataFrame:
         """
         Get best performing models by a specific metric.
 
@@ -563,7 +637,8 @@ class MLDatabase:
             DataFrame with best models
         """
         with sqlite3.connect(self.db_path) as conn:
-            df = pd.read_sql_query(f'''
+            df = pd.read_sql_query(
+                f"""
                 SELECT m.model_id, m.name, m.model_type, m.algorithm,
                        m.training_samples, m.created_at,
                        mm.metric_value as {metric}_score
@@ -572,7 +647,10 @@ class MLDatabase:
                 WHERE mm.metric_name = ?
                 ORDER BY mm.metric_value DESC
                 LIMIT ?
-            ''', conn, params=(metric, limit))
+            """,
+                conn,
+                params=(metric, limit),
+            )
 
         return df
 
@@ -587,7 +665,7 @@ class MLDatabase:
         results = self.get_experiment_results(experiment_id)
 
         if results:
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             logger.info(f"Exported experiment {experiment_id} to {output_path}")
         else:
@@ -605,8 +683,7 @@ class MLDatabase:
         with sqlite3.connect(self.db_path) as conn:
             # This is a simplified cleanup - in practice, you'd want more sophisticated archiving
             deleted_count = conn.execute(
-                "DELETE FROM experiments WHERE created_at < ?",
-                (cutoff_date,)
+                "DELETE FROM experiments WHERE created_at < ?", (cutoff_date,)
             ).rowcount
 
         logger.info(f"Cleaned up {deleted_count} old experiments")
@@ -622,21 +699,31 @@ class MLDatabase:
             stats = {}
 
             # Count records in each table
-            tables = ['experiments', 'models', 'model_metrics', 'predictions',
-                     'evaluations', 'feature_sets', 'datasets', 'ml_alerts']
+            tables = [
+                "experiments",
+                "models",
+                "model_metrics",
+                "predictions",
+                "evaluations",
+                "feature_sets",
+                "datasets",
+                "ml_alerts",
+            ]
 
             for table in tables:
                 count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-                stats[f'{table}_count'] = count
+                stats[f"{table}_count"] = count
 
             # Get database file size
-            db_size = Path(self.db_path).stat().st_size if Path(self.db_path).exists() else 0
-            stats['database_size_bytes'] = db_size
+            db_size = (
+                Path(self.db_path).stat().st_size if Path(self.db_path).exists() else 0
+            )
+            stats["database_size_bytes"] = db_size
 
             # Get recent activity
             recent_experiments = conn.execute(
                 "SELECT COUNT(*) FROM experiments WHERE created_at >= datetime('now', '-7 days')"
             ).fetchone()[0]
-            stats['experiments_last_7_days'] = recent_experiments
+            stats["experiments_last_7_days"] = recent_experiments
 
             return stats

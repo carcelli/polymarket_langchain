@@ -36,6 +36,7 @@ from pathlib import Path
 # Global registry: strategy_name → strategy_callable
 STRATEGIES: Dict[str, Callable] = {}
 
+
 def register_strategy(name: str | None = None):
     """
     Decorator to register a strategy function or class.
@@ -51,12 +52,15 @@ def register_strategy(name: str | None = None):
                 # ... implementation
                 pass
     """
+
     def decorator(strategy_obj):
         strategy_name = name or strategy_obj.__name__
         STRATEGIES[strategy_name] = strategy_obj
         print(f"✅ Registered strategy: {strategy_name}")
         return strategy_obj
+
     return decorator
+
 
 def discover_strategies(module_path: str = "polymarket_agents.ml_strategies"):
     """
@@ -67,7 +71,7 @@ def discover_strategies(module_path: str = "polymarket_agents.ml_strategies"):
         package = importlib.import_module(module_path)
 
         # Get the package path
-        if hasattr(package, '__path__'):
+        if hasattr(package, "__path__"):
             for _, module_name, _ in pkgutil.iter_modules(package.__path__):
                 try:
                     module = importlib.import_module(f"{module_path}.{module_name}")
@@ -75,12 +79,13 @@ def discover_strategies(module_path: str = "polymarket_agents.ml_strategies"):
                     # Look for strategy objects
                     for name, obj in inspect.getmembers(module):
                         # Skip private items and already registered items
-                        if name.startswith('_') or name in STRATEGIES:
+                        if name.startswith("_") or name in STRATEGIES:
                             continue
 
                         # Check if it's a strategy (has predict method or is callable)
-                        if (inspect.isclass(obj) and hasattr(obj, 'predict')) or \
-                           (inspect.isfunction(obj) and 'predict' in name):
+                        if (inspect.isclass(obj) and hasattr(obj, "predict")) or (
+                            inspect.isfunction(obj) and "predict" in name
+                        ):
                             STRATEGIES[name] = obj
                             print(f"🔍 Auto-discovered strategy: {name}")
 
@@ -90,13 +95,16 @@ def discover_strategies(module_path: str = "polymarket_agents.ml_strategies"):
     except Exception as e:
         print(f"⚠️ Failed to discover strategies: {e}")
 
+
 def get_available_strategies() -> List[str]:
     """Return list of available strategy names."""
     return list(STRATEGIES.keys())
 
+
 def get_strategy(name: str) -> Optional[Callable]:
     """Get a strategy by name."""
     return STRATEGIES.get(name)
+
 
 def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[str, Any]:
     """
@@ -112,7 +120,7 @@ def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[st
             if inspect.isclass(strategy):
                 # Instantiate and call predict
                 predictor = strategy()
-                if hasattr(predictor, 'predict'):
+                if hasattr(predictor, "predict"):
                     pred = predictor.predict(market_data)
                 else:
                     continue  # Not a valid strategy
@@ -127,7 +135,7 @@ def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[st
                 edge = pred.get("edge", 0.0)
                 if edge >= min_edge:
                     results.append((edge, name, pred))
-            elif hasattr(pred, 'edge'):
+            elif hasattr(pred, "edge"):
                 # StrategyResult object
                 edge = pred.edge
                 if edge >= min_edge:
@@ -138,7 +146,10 @@ def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[st
             continue
 
     if not results:
-        return {"error": "No qualifying strategies available", "strategies_tried": len(STRATEGIES)}
+        return {
+            "error": "No qualifying strategies available",
+            "strategies_tried": len(STRATEGIES),
+        }
 
     # Sort by edge descending and pick best
     results.sort(key=lambda x: x[0], reverse=True)
@@ -146,12 +157,14 @@ def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[st
 
     # Add metadata
     if isinstance(best_pred, dict):
-        best_pred.update({
-            "selected_strategy": best_name,
-            "edge": best_edge,
-            "strategies_compared": len(results),
-            "total_strategies": len(STRATEGIES)
-        })
+        best_pred.update(
+            {
+                "selected_strategy": best_name,
+                "edge": best_edge,
+                "strategies_compared": len(results),
+                "total_strategies": len(STRATEGIES),
+            }
+        )
     else:
         # For StrategyResult objects, we can't modify directly
         result_dict = {
@@ -159,11 +172,12 @@ def best_strategy(market_data: Dict[str, Any], min_edge: float = 0.0) -> Dict[st
             "edge": best_edge,
             "strategies_compared": len(results),
             "total_strategies": len(STRATEGIES),
-            "prediction": best_pred
+            "prediction": best_pred,
         }
         return result_dict
 
     return best_pred
+
 
 # Auto-discover strategies on module import
 print("🔧 Initializing ML Strategy Registry...")

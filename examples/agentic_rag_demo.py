@@ -13,14 +13,15 @@ from polymarket_agents.langchain.agent import create_polymarket_agent
 from polymarket_agents.tools.research_tools import fetch_documentation
 
 # Constants for the demo
-LLMS_TXT = 'https://langchain-ai.github.io/langgraph/llms.txt'
+LLMS_TXT = "https://langchain-ai.github.io/langgraph/llms.txt"
 
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain_core.prompts import PromptTemplate
 
+
 def run_agentic_rag_demo():
     print("🚀 Initializing Agentic RAG Demo...")
-    
+
     # 1. Pre-fetch llms.txt content
     try:
         print(f"📥 Fetching documentation index from {LLMS_TXT}...")
@@ -72,33 +73,36 @@ def run_agentic_rag_demo():
     Question: {input}
     {agent_scratchpad}"""
 
-    prompt = PromptTemplate.from_template(template).partial(llms_txt_content=llms_txt_content)
+    prompt = PromptTemplate.from_template(template).partial(
+        llms_txt_content=llms_txt_content
+    )
 
     # 3. Create the agent
     print("🤖 Creating Agentic RAG agent...")
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     tools = [fetch_documentation]
-    
+
     agent = create_react_agent(llm, tools, prompt)
     executor = AgentExecutor(
-        agent=agent, 
-        tools=tools, 
-        verbose=True, 
+        agent=agent,
+        tools=tools,
+        verbose=True,
         handle_parsing_errors=True,
-        max_iterations=5
+        max_iterations=5,
     )
 
     # 4. Run a sample query
     query = "Write a short example of a langgraph agent using the prebuilt create_react_agent. The agent should be able to look up stock pricing information."
-    
+
     print(f"\n💬 Query: {query}\n")
-    
+
     try:
         result = executor.invoke({"input": query})
         print("\n✅ Agent Response:\n")
-        print(result['output'])
+        print(result["output"])
     except Exception as e:
         print(f"❌ Agent execution failed: {e}")
+
 
 if __name__ == "__main__":
     run_agentic_rag_demo()

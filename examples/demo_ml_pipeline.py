@@ -31,7 +31,9 @@ def demo_dataset_preparation():
     # Load synthetic dataset
     dataset_path = Path("data/sports_ml_dataset_synthetic.parquet")
     if not dataset_path.exists():
-        print("❌ Dataset not found. Run: python scripts/python/prepare_sports_dataset.py")
+        print(
+            "❌ Dataset not found. Run: python scripts/python/prepare_sports_dataset.py"
+        )
         return None
 
     df = pd.read_parquet(dataset_path)
@@ -41,11 +43,15 @@ def demo_dataset_preparation():
 
     # Show sample data
     print("\n📋 Sample Markets:")
-    sample = df[['market_id', 'question', 'sport', 'volume', 'market_prob', 'target']].head(3)
+    sample = df[
+        ["market_id", "question", "sport", "volume", "market_prob", "target"]
+    ].head(3)
     for _, row in sample.iterrows():
-        outcome = "YES" if row['target'] == 1 else "NO"
-        print(".0f"
-              f"Outcome: {outcome}")
+        outcome = "YES" if row["target"] == 1 else "NO"
+        print(
+            f"   {row['question'][:50]}... | Volume: ${row['volume']:.0f} | "
+            f"Outcome: {outcome}"
+        )
 
     return df
 
@@ -65,24 +71,24 @@ def demo_model_training():
     results = strategy.run_full_pipeline_from_data(df, test_size=0.2)
 
     # Display results
-    eval_metrics = results['evaluation_metrics']
+    eval_metrics = results["evaluation_metrics"]
 
     print("📊 Model Performance:")
-    print(".3f")
-    print(".3f")
-    print(".1%")
-    print(".1%")
+    print(f"   Precision: {eval_metrics.get('precision', 0):.3f}")
+    print(f"   Recall: {eval_metrics.get('recall', 0):.3f}")
+    print(f"   Accuracy: {eval_metrics.get('accuracy', 0):.1%}")
+    print(f"   F1 Score: {eval_metrics.get('f1', 0):.1%}")
 
     print("🎯 Edge Detection:")
-    print(".1%")
-    print(".1%")
+    print(f"   Average Edge: {eval_metrics.get('avg_edge', 0):.1%}")
+    print(f"   Edge Accuracy: {eval_metrics.get('edge_accuracy', 0):.1%}")
 
     # Show top features
     print("\n🔍 Top 5 Important Features:")
-    importance = results['feature_importance']
+    importance = results["feature_importance"]
     sorted_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[:5]
     for i, (feature, score) in enumerate(sorted_features, 1):
-        print(".1%")
+        print(f"   {i}. {feature}: {score:.1%}")
 
     return strategy
 
@@ -95,41 +101,43 @@ def demo_live_prediction(strategy):
     # Example markets (simulating live data)
     test_markets = [
         {
-            'market_id': 'demo_nfl_market',
-            'question': 'Will the Kansas City Chiefs win Super Bowl 2026?',
-            'sport': 'NFL',
-            'volume': 150000,
-            'liquidity': 25000,
-            'days_to_expiry': 60,
-            'market_prob': 0.35,  # Current market price
-            'category': 'sports'
+            "market_id": "demo_nfl_market",
+            "question": "Will the Kansas City Chiefs win Super Bowl 2026?",
+            "sport": "NFL",
+            "volume": 150000,
+            "liquidity": 25000,
+            "days_to_expiry": 60,
+            "market_prob": 0.35,  # Current market price
+            "category": "sports",
         },
         {
-            'market_id': 'demo_basketball_market',
-            'question': 'Will LeBron James score 30+ points in his next game?',
-            'sport': 'NBA',
-            'volume': 75000,
-            'liquidity': 15000,
-            'days_to_expiry': 2,
-            'market_prob': 0.65,
-            'category': 'sports'
-        }
+            "market_id": "demo_basketball_market",
+            "question": "Will LeBron James score 30+ points in his next game?",
+            "sport": "NBA",
+            "volume": 75000,
+            "liquidity": 15000,
+            "days_to_expiry": 2,
+            "market_prob": 0.65,
+            "category": "sports",
+        },
     ]
 
     for market in test_markets:
         print(f"\n🏈 Market: {market['question'][:60]}...")
-        print(".0f"
-              f"Days to expiry: {market['days_to_expiry']}")
+        print(
+            f"   Volume: ${market['volume']:.0f} | "
+            f"Days to expiry: {market['days_to_expiry']}"
+        )
 
         # Make prediction
         result = strategy.predict(market)
 
-        print(".3f")
-        print(f"Market price: {market['market_prob']:.1%}")
-        print(".1%")
-        print(f"Recommendation: {result.recommended_bet}")
-        print(".3f")
-        print(f"Confidence: {result.confidence:.1%}")
+        print(f"   Model prediction: {result.probability:.3f}")
+        print(f"   Market price: {market['market_prob']:.1%}")
+        print(f"   Edge: {result.edge:.1%}")
+        print(f"   Recommendation: {result.recommended_bet}")
+        print(f"   Position size: {result.position_size:.3f}")
+        print(f"   Confidence: {result.confidence:.1%}")
 
 
 def demo_agent_integration():
@@ -145,7 +153,9 @@ def demo_agent_integration():
 
     print("\nTo test integration:")
     print("export MARKET_FOCUS=sports")
-    print("python scripts/python/cli.py run-memory-agent 'Find NFL markets with ML edge'")
+    print(
+        "python scripts/python/cli.py run-memory-agent 'Find NFL markets with ML edge'"
+    )
 
     print("\nThe agent will show XGBoost predictions in the reasoning!")
 

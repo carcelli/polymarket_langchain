@@ -17,7 +17,7 @@ from polymarket_agents.subagents.github_agent import (
     check_github_repo_status,
     search_github_issues,
     analyze_github_activity,
-    create_market_analysis_report
+    create_market_analysis_report,
 )
 from market_analysis_workflow import MarketAnalyzer
 
@@ -54,7 +54,7 @@ def demonstrate_github_tools():
         print(f"📋 Found {issues['total_results']} matching issues")
         print(f"   Showing {len(issues['issues'])} results:")
 
-        for issue in issues['issues'][:3]:
+        for issue in issues["issues"][:3]:
             print(f"   • #{issue['number']}: {issue['title'][:50]}...")
             print(f"     Status: {issue['state']}, Author: {issue['author']}")
 
@@ -72,9 +72,11 @@ def demonstrate_github_tools():
         print(f"   PRs: {activity['activity_metrics']['pull_requests']}")
         print(f"   Activity Level: {activity['activity_metrics']['activity_level']}")
 
-        if activity['contributors']['unique_contributors'] > 0:
+        if activity["contributors"]["unique_contributors"] > 0:
             print(f"   Contributors: {activity['contributors']['unique_contributors']}")
-            print(f"   Top Contributor: {activity['contributors']['top_contributors'][0][0]} ({activity['contributors']['top_contributors'][0][1]} commits)")
+            print(
+                f"   Top Contributor: {activity['contributors']['top_contributors'][0][0]} ({activity['contributors']['top_contributors'][0][1]} commits)"
+            )
 
 
 def demonstrate_automated_reporting():
@@ -89,7 +91,7 @@ def demonstrate_automated_reporting():
 
     analysis = analyzer.analyze_market_opportunity(market)
 
-    if 'error' in analysis:
+    if "error" in analysis:
         print(f"❌ Analysis failed: {analysis['error']}")
         return
 
@@ -135,7 +137,7 @@ def demonstrate_subagent_integration():
     print(f"\\n📋 Full Subagent System: {len(all_subagents)} subagents")
 
     for subagent in all_subagents:
-        prefix = "⭐" if subagent['name'] == 'github-agent' else "  "
+        prefix = "⭐" if subagent["name"] == "github-agent" else "  "
         print(f"{prefix} {subagent['name']}: {subagent['description'][:60]}...")
 
     print("\\n🎯 Subagent Use Cases:")
@@ -154,26 +156,26 @@ def show_integration_workflow():
             "step": "Market Analysis",
             "agent": "Trading Agent",
             "action": "Analyze multiple markets for opportunities",
-            "output": "Structured analysis results"
+            "output": "Structured analysis results",
         },
         {
             "step": "Report Generation",
             "agent": "GitHub Subagent",
             "action": "Format analysis as GitHub issue with proper labels",
-            "output": "Well-formatted issue ready for creation"
+            "output": "Well-formatted issue ready for creation",
         },
         {
             "step": "Issue Creation",
             "agent": "GitHub Subagent",
             "action": "Create issue in repository with analysis details",
-            "output": "GitHub issue URL and tracking number"
+            "output": "GitHub issue URL and tracking number",
         },
         {
             "step": "Progress Tracking",
             "agent": "GitHub Subagent",
             "action": "Monitor issue status and updates",
-            "output": "Status updates and notifications"
-        }
+            "output": "Status updates and notifications",
+        },
     ]
 
     print("📋 Automated Trading Analysis → GitHub Reporting:")

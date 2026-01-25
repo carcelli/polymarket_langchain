@@ -41,7 +41,7 @@ from cache_manager import (
     CacheManager,
     SocialMediaDataFetcher,
     CryptoDataFetcher,
-    SportsDataFetcher
+    SportsDataFetcher,
 )
 
 # Import existing Polymarket tools
@@ -56,6 +56,7 @@ except ImportError:
 @dataclass
 class MarketAnalysis:
     """Result of market analysis with forecasting."""
+
     market_id: str
     question: str
     category: str
@@ -68,6 +69,7 @@ class MarketAnalysis:
 @dataclass
 class ForecastResult:
     """Forecast result with uncertainty ranges."""
+
     prediction: float
     lower_bound: float
     upper_bound: float
@@ -86,9 +88,7 @@ class MarketClassifier:
 
     def __init__(self):
         self.vectorizer = TfidfVectorizer(
-            max_features=1000,
-            stop_words='english',
-            ngram_range=(1, 2)
+            max_features=1000, stop_words="english", ngram_range=(1, 2)
         )
         self.classifier = LogisticRegression(random_state=42, max_iter=1000)
         self.is_trained = False
@@ -107,7 +107,6 @@ class MarketClassifier:
                 ("Twitter engagement for political posts", "social"),
                 ("Monthly tweet volume for social media influencers", "social"),
                 ("Social media posting frequency analysis", "social"),
-
                 # Sports (multiple examples)
                 ("Who will win the Super Bowl 2026?", "sports"),
                 ("Will the Denver Nuggets win the NBA championship?", "sports"),
@@ -118,7 +117,6 @@ class MarketClassifier:
                 ("Championship winner predictions", "sports"),
                 ("Team performance forecasts", "sports"),
                 ("Athlete career milestones", "sports"),
-
                 # Finance/Economics (multiple examples)
                 ("Will the Federal Reserve raise interest rates?", "finance"),
                 ("GDP growth forecast for Q4 2025", "finance"),
@@ -127,7 +125,6 @@ class MarketClassifier:
                 ("Bitcoin price prediction for end of 2025", "finance"),
                 ("Economic indicator forecasts", "finance"),
                 ("Market volatility predictions", "finance"),
-
                 # Politics (multiple examples)
                 ("Will Trump win the 2028 election?", "politics"),
                 ("Congressional control in 2026 midterms", "politics"),
@@ -136,7 +133,6 @@ class MarketClassifier:
                 ("Presidential approval ratings", "politics"),
                 ("Election outcome predictions", "politics"),
                 ("Political event forecasts", "politics"),
-
                 # Crypto (multiple examples)
                 ("Will Bitcoin reach $200k by end of 2025?", "crypto"),
                 ("Ethereum staking rewards in 2026", "crypto"),
@@ -145,7 +141,6 @@ class MarketClassifier:
                 ("Will Ethereum switch to proof of stake?", "crypto"),
                 ("Cryptocurrency price predictions", "crypto"),
                 ("Blockchain technology adoption", "crypto"),
-
                 # Entertainment (multiple examples)
                 ("Will Taylor Swift release new album in 2025?", "entertainment"),
                 ("Box office performance predictions", "entertainment"),
@@ -153,7 +148,6 @@ class MarketClassifier:
                 ("Streaming service subscriber growth", "entertainment"),
                 ("Movie box office forecasts", "entertainment"),
                 ("Music industry predictions", "entertainment"),
-
                 # Science/Technology (multiple examples)
                 ("Will AGI be achieved by 2030?", "science"),
                 ("SpaceX Starship orbital flight success", "science"),
@@ -161,7 +155,6 @@ class MarketClassifier:
                 ("COVID vaccine effectiveness in 2026", "science"),
                 ("Scientific breakthrough predictions", "science"),
                 ("Technology adoption forecasts", "science"),
-
                 # Other/Uncategorized (multiple examples)
                 ("Will aliens be discovered in 2025?", "other"),
                 ("Time travel invention timeline", "other"),
@@ -209,10 +202,16 @@ class MarketClassifier:
 
         # Use metadata to refine classification if available
         if metadata:
-            if any(tag in (metadata.get('tags', []) or []) for tag in ['crypto', 'bitcoin', 'ethereum']):
-                prediction = 'crypto'
-            elif any(tag in (metadata.get('tags', []) or []) for tag in ['nfl', 'nba', 'soccer', 'football']):
-                prediction = 'sports'
+            if any(
+                tag in (metadata.get("tags", []) or [])
+                for tag in ["crypto", "bitcoin", "ethereum"]
+            ):
+                prediction = "crypto"
+            elif any(
+                tag in (metadata.get("tags", []) or [])
+                for tag in ["nfl", "nba", "soccer", "football"]
+            ):
+                prediction = "sports"
 
         return prediction
 
@@ -228,26 +227,33 @@ class SocialMediaForecaster:
         self.models = {}
         self.data_cache = {}
 
-    def load_elon_tweets_data(self, csv_path: str = "./data/elon_tweets.csv") -> pd.DataFrame:
+    def load_elon_tweets_data(
+        self, csv_path: str = "./data/elon_tweets.csv"
+    ) -> pd.DataFrame:
         """Load and preprocess Elon Musk tweets data."""
         try:
-            df = pd.read_csv(csv_path, parse_dates=['date'])
+            df = pd.read_csv(csv_path, parse_dates=["date"])
             # Aggregate to monthly counts
-            monthly = df.groupby(df['date'].dt.to_period('M')).size().reset_index(name='tweet_count')
-            monthly['date'] = monthly['date'].dt.to_timestamp()
+            monthly = (
+                df.groupby(df["date"].dt.to_period("M"))
+                .size()
+                .reset_index(name="tweet_count")
+            )
+            monthly["date"] = monthly["date"].dt.to_timestamp()
             return monthly
         except FileNotFoundError:
             print(f"Elon tweets data not found at {csv_path}")
             print("Using synthetic data for demonstration...")
             # Generate synthetic data
-            dates = pd.date_range('2020-01-01', '2025-12-01', freq='M')
+            dates = pd.date_range("2020-01-01", "2025-12-01", freq="M")
             np.random.seed(42)
             counts = np.random.normal(150, 50, len(dates))  # ~150 tweets/month average
             counts = np.clip(counts, 10, 400)  # Reasonable bounds
-            return pd.DataFrame({'date': dates, 'tweet_count': counts})
+            return pd.DataFrame({"date": dates, "tweet_count": counts})
 
-    def forecast_tweet_range(self, target_month: str = "2026-01",
-                           confidence_level: float = 0.95) -> ForecastResult:
+    def forecast_tweet_range(
+        self, target_month: str = "2026-01", confidence_level: float = 0.95
+    ) -> ForecastResult:
         """
         Forecast Elon Musk tweet count range for a specific month.
         Uses cached historical data for improved performance.
@@ -263,20 +269,29 @@ class SocialMediaForecaster:
         tweets_df = None
 
         # Check if we have access to cached data fetcher
-        if hasattr(self, 'pipeline') and self.pipeline and hasattr(self.pipeline, 'social_fetcher') and self.pipeline.social_fetcher:
+        if (
+            hasattr(self, "pipeline")
+            and self.pipeline
+            and hasattr(self.pipeline, "social_fetcher")
+            and self.pipeline.social_fetcher
+        ):
             try:
                 cached_data = self.pipeline.social_fetcher.fetch_elon_tweets_monthly()
                 # Convert cached data to DataFrame format
                 tweets_data = []
                 for period, count in cached_data.items():
-                    if '(forecast)' not in period and '_lower' not in period and '_upper' not in period:
+                    if (
+                        "(forecast)" not in period
+                        and "_lower" not in period
+                        and "_upper" not in period
+                    ):
                         try:
                             # Handle different date formats
                             if len(period) == 7:  # YYYY-MM format
-                                date = pd.to_datetime(period + '-01')
+                                date = pd.to_datetime(period + "-01")
                             else:
                                 date = pd.to_datetime(period)
-                            tweets_data.append({'ds': date, 'y': count})
+                            tweets_data.append({"ds": date, "y": count})
                         except:
                             continue
 
@@ -298,7 +313,7 @@ class SocialMediaForecaster:
                 upper_bound=2000,
                 confidence_interval=0.5,
                 model_used="Default Estimate",
-                external_factors=["Limited historical data"]
+                external_factors=["Limited historical data"],
             )
 
         # Train Prophet model
@@ -307,19 +322,19 @@ class SocialMediaForecaster:
             weekly_seasonality=False,
             daily_seasonality=False,
             changepoint_prior_scale=0.05,  # Flexible trend changes
-            seasonality_prior_scale=10,    # Strong seasonal effects
-            interval_width=confidence_level
+            seasonality_prior_scale=10,  # Strong seasonal effects
+            interval_width=confidence_level,
         )
 
         model.fit(tweets_df)
 
         # Create future dataframe for target month
-        future = pd.DataFrame({'ds': [pd.to_datetime(target_month)]})
+        future = pd.DataFrame({"ds": [pd.to_datetime(target_month)]})
         forecast = model.predict(future)
 
-        prediction = forecast['yhat'].iloc[0]
-        lower_bound = forecast['yhat_lower'].iloc[0]
-        upper_bound = forecast['yhat_upper'].iloc[0]
+        prediction = forecast["yhat"].iloc[0]
+        lower_bound = forecast["yhat_lower"].iloc[0]
+        upper_bound = forecast["yhat_upper"].iloc[0]
 
         return ForecastResult(
             prediction=max(0, prediction),  # Can't have negative tweets
@@ -331,17 +346,17 @@ class SocialMediaForecaster:
                 "Cached historical tweet patterns",
                 "Seasonal effects (news, product launches)",
                 "Platform changes (Twitter/X rebrand)",
-                "External events (Tesla, SpaceX milestones)"
-            ]
+                "External events (Tesla, SpaceX milestones)",
+            ],
         )
 
     def _create_synthetic_tweets_data(self) -> pd.DataFrame:
         """Create synthetic tweets data for fallback."""
-        dates = pd.date_range('2020-01-01', '2025-12-01', freq='M')
+        dates = pd.date_range("2020-01-01", "2025-12-01", freq="M")
         np.random.seed(42)
         counts = np.random.normal(150, 50, len(dates))  # ~150 tweets/month average
         counts = np.clip(counts, 10, 400)  # Reasonable bounds
-        return pd.DataFrame({'ds': dates, 'y': counts})
+        return pd.DataFrame({"ds": dates, "y": counts})
 
 
 class SportsForecaster:
@@ -363,61 +378,96 @@ class SportsForecaster:
         # Mock data for demonstration - in production, fetch from APIs
         mock_stats = {
             "Denver Nuggets": {
-                "win_pct_last_5_years": [0.67, 0.73, 0.56, 0.48, 0.63],  # Including 2023 championship
+                "win_pct_last_5_years": [
+                    0.67,
+                    0.73,
+                    0.56,
+                    0.48,
+                    0.63,
+                ],  # Including 2023 championship
                 "avg_points_per_game": 115.2,
                 "recent_form": 0.75,  # Last season win %
                 "home_advantage": 0.65,
-                "key_players": ["Nikola Jokic", "Jamal Murray", "Aaron Gordon"]
+                "key_players": ["Nikola Jokic", "Jamal Murray", "Aaron Gordon"],
             },
             "Cleveland Cavaliers": {
                 "win_pct_last_5_years": [0.29, 0.48, 0.44, 0.51, 0.63],
                 "avg_points_per_game": 112.8,
                 "recent_form": 0.63,
                 "home_advantage": 0.58,
-                "key_players": ["Donovan Mitchell", "Darius Garland", "Evan Mobley"]
+                "key_players": ["Donovan Mitchell", "Darius Garland", "Evan Mobley"],
             },
             "Oklahoma City Thunder": {
-                "win_pct_last_5_years": [0.21, 0.22, 0.40, 0.57, 0.69],  # Young rising team
+                "win_pct_last_5_years": [
+                    0.21,
+                    0.22,
+                    0.40,
+                    0.57,
+                    0.69,
+                ],  # Young rising team
                 "avg_points_per_game": 120.1,
                 "recent_form": 0.69,
                 "home_advantage": 0.70,
-                "key_players": ["Shai Gilgeous-Alexander", "Chet Holmgren", "Luguentz Dort"]
+                "key_players": [
+                    "Shai Gilgeous-Alexander",
+                    "Chet Holmgren",
+                    "Luguentz Dort",
+                ],
             },
             "Kansas City Chiefs": {
-                "win_pct_last_5_years": [0.75, 0.81, 0.69, 0.81, 0.81],  # Super Bowl winners
+                "win_pct_last_5_years": [
+                    0.75,
+                    0.81,
+                    0.69,
+                    0.81,
+                    0.81,
+                ],  # Super Bowl winners
                 "avg_points_per_game": 28.4,
                 "recent_form": 0.81,
                 "home_advantage": 0.75,
-                "key_players": ["Patrick Mahomes", "Travis Kelce", "Chris Jones"]
+                "key_players": ["Patrick Mahomes", "Travis Kelce", "Chris Jones"],
             },
             "Philadelphia Eagles": {
-                "win_pct_last_5_years": [0.38, 0.63, 0.50, 0.63, 0.81],  # 2025 Super Bowl champs
+                "win_pct_last_5_years": [
+                    0.38,
+                    0.63,
+                    0.50,
+                    0.63,
+                    0.81,
+                ],  # 2025 Super Bowl champs
                 "avg_points_per_game": 26.8,
                 "recent_form": 0.81,
                 "home_advantage": 0.70,
-                "key_players": ["Jalen Hurts", "A.J. Brown", "Haason Reddick"]
-            }
+                "key_players": ["Jalen Hurts", "A.J. Brown", "Haason Reddick"],
+            },
         }
 
         # Use mock data or fetch real data
-        stats = mock_stats.get(team_name, {
-            "win_pct_last_5_years": [0.50] * 5,  # Average performance
-            "avg_points_per_game": 100,
-            "recent_form": 0.50,
-            "home_advantage": 0.55,
-            "key_players": ["Unknown"]
-        })
+        stats = mock_stats.get(
+            team_name,
+            {
+                "win_pct_last_5_years": [0.50] * 5,  # Average performance
+                "avg_points_per_game": 100,
+                "recent_form": 0.50,
+                "home_advantage": 0.55,
+                "key_players": ["Unknown"],
+            },
+        )
 
         # Calculate derived metrics
         stats["avg_win_pct"] = np.mean(stats["win_pct_last_5_years"])
-        stats["trend"] = np.polyfit(range(len(stats["win_pct_last_5_years"])),
-                                   stats["win_pct_last_5_years"], 1)[0]  # Linear trend
+        stats["trend"] = np.polyfit(
+            range(len(stats["win_pct_last_5_years"])), stats["win_pct_last_5_years"], 1
+        )[
+            0
+        ]  # Linear trend
 
         self.team_stats_cache[team_name] = stats
         return stats
 
-    def forecast_sports_outcome(self, sport: str, event: str, team: str,
-                              opponent: Optional[str] = None) -> ForecastResult:
+    def forecast_sports_outcome(
+        self, sport: str, event: str, team: str, opponent: Optional[str] = None
+    ) -> ForecastResult:
         """
         Forecast sports outcome probability.
 
@@ -444,7 +494,7 @@ class SportsForecaster:
             "regular_season": 1.0,
             "playoffs": 0.8,  # Harder in playoffs
             "championship": 0.6,  # Very competitive
-            "super_bowl": 0.55  # Most competitive
+            "super_bowl": 0.55,  # Most competitive
         }
 
         event_key = event.lower()
@@ -480,8 +530,8 @@ class SportsForecaster:
                 f"Event type adjustment: {event}",
                 f"Key players: {', '.join(team_stats['key_players'][:2])}",
                 "Home advantage considerations",
-                "Injury reports and matchup history"
-            ]
+                "Injury reports and matchup history",
+            ],
         )
 
 
@@ -538,24 +588,26 @@ class MarketAnalysisPipeline:
             # Validate and clean data
             markets = []
             for market in data:
-                if 'question' in market and market.get('active', False):
+                if "question" in market and market.get("active", False):
                     # Ensure volume is numeric
-                    volume = market.get('volume', 0)
+                    volume = market.get("volume", 0)
                     try:
                         volume = float(volume) if volume else 0
                     except (ValueError, TypeError):
                         volume = 0
 
-                    markets.append({
-                        'id': market.get('id'),
-                        'question': market.get('question', ''),
-                        'description': market.get('description'),
-                        'outcomes': market.get('outcomes', []),
-                        'volume': volume,
-                        'tags': market.get('tags', []),
-                        'end_date': market.get('endDate'),
-                        'category': None  # Will be classified
-                    })
+                    markets.append(
+                        {
+                            "id": market.get("id"),
+                            "question": market.get("question", ""),
+                            "description": market.get("description"),
+                            "outcomes": market.get("outcomes", []),
+                            "volume": volume,
+                            "tags": market.get("tags", []),
+                            "end_date": market.get("endDate"),
+                            "category": None,  # Will be classified
+                        }
+                    )
 
             return markets
 
@@ -566,15 +618,17 @@ class MarketAnalysisPipeline:
     def analyze_market(self, market: Dict[str, Any]) -> MarketAnalysis:
         """Analyze a single market with appropriate forecasting model."""
 
-        question = market['question']
+        question = market["question"]
         category = self.classifier.classify(question, market)
 
         # Apply category-specific forecasting
-        if category == 'social' and ('elon' in question.lower() or 'tweet' in question.lower()):
+        if category == "social" and (
+            "elon" in question.lower() or "tweet" in question.lower()
+        ):
             # Social media forecasting (Elon tweets)
             forecast = self._forecast_social_market(question)
 
-        elif category == 'sports':
+        elif category == "sports":
             # Sports outcome forecasting
             forecast = self._forecast_sports_market(question)
 
@@ -589,24 +643,28 @@ class MarketAnalysisPipeline:
         reasoning = self._generate_reasoning(market, category, forecast)
 
         return MarketAnalysis(
-            market_id=market['id'],
+            market_id=market["id"],
             question=question,
             category=category,
             forecast=forecast,
             confidence=confidence,
             reasoning=reasoning,
-            external_data_used=forecast.external_factors if isinstance(forecast, ForecastResult) else forecast.get('external_factors', [])
+            external_data_used=(
+                forecast.external_factors
+                if isinstance(forecast, ForecastResult)
+                else forecast.get("external_factors", [])
+            ),
         )
 
     def _forecast_social_market(self, question: str) -> ForecastResult:
         """Forecast social media related markets."""
         print(f"DEBUG: Social market analysis: {question[:60]}...")
-        if 'elon' in question.lower() and 'tweet' in question.lower():
+        if "elon" in question.lower() and "tweet" in question.lower():
             # Extract target month from question if possible
             target_month = "2026-01"  # Default
-            if 'january' in question.lower():
+            if "january" in question.lower():
                 target_month = "2026-01"
-            elif 'february' in question.lower():
+            elif "february" in question.lower():
                 target_month = "2026-02"
             # Add more month parsing as needed
 
@@ -619,14 +677,18 @@ class MarketAnalysisPipeline:
             upper_bound=0.7,
             confidence_interval=0.6,
             model_used="Generic Social Model",
-            external_factors=["Social media trends", "Historical patterns"]
+            external_factors=["Social media trends", "Historical patterns"],
         )
 
     def _forecast_sports_market(self, question: str) -> ForecastResult:
         """Forecast sports-related markets."""
 
         # Extract team names and event type from question
-        sport = "nba" if "nba" in question.lower() else "nfl" if "super bowl" in question.lower() else "general"
+        sport = (
+            "nba"
+            if "nba" in question.lower()
+            else "nfl" if "super bowl" in question.lower() else "general"
+        )
 
         # Try to identify the team
         teams = {
@@ -637,7 +699,7 @@ class MarketAnalysisPipeline:
             "eagles": "Philadelphia Eagles",
             "chiefs": "Kansas City Chiefs",
             "patriots": "New England Patriots",
-            "rams": "Los Angeles Rams"
+            "rams": "Los Angeles Rams",
         }
 
         team = None
@@ -665,13 +727,19 @@ class MarketAnalysisPipeline:
             upper_bound=0.8,
             confidence_interval=0.6,
             model_used="Generic Sports Model",
-            external_factors=["Historical team performance", "Recent form", "Event competitiveness"]
+            external_factors=[
+                "Historical team performance",
+                "Recent form",
+                "Event competitiveness",
+            ],
         )
 
-    def _forecast_generic_market(self, market: Dict[str, Any], category: str) -> Dict[str, Any]:
+    def _forecast_generic_market(
+        self, market: Dict[str, Any], category: str
+    ) -> Dict[str, Any]:
         """Generic forecasting for uncategorized markets."""
         # Use market volume and current prices as simple predictors
-        volume = float(market.get('volume', 0) or 0)
+        volume = float(market.get("volume", 0) or 0)
 
         # Simple heuristic: higher volume markets are more likely to resolve as expected
         base_prob = 0.5
@@ -686,7 +754,7 @@ class MarketAnalysisPipeline:
             "upper_bound": min(1, base_prob + 0.2),
             "confidence_interval": 0.4,
             "model_used": "Simple Heuristic Model",
-            "external_factors": ["Market volume analysis", "Historical patterns"]
+            "external_factors": ["Market volume analysis", "Historical patterns"],
         }
 
     def _calculate_confidence(self, forecast: Any, category: str) -> float:
@@ -697,24 +765,26 @@ class MarketAnalysisPipeline:
         else:
             # Generic confidence based on category
             category_confidence = {
-                'sports': 0.75,      # Good historical data
-                'social': 0.70,      # Social media patterns
-                'finance': 0.65,     # Economic indicators
-                'crypto': 0.60,      # Volatile market
-                'politics': 0.55,    # Unpredictable
-                'other': 0.50        # Limited data
+                "sports": 0.75,  # Good historical data
+                "social": 0.70,  # Social media patterns
+                "finance": 0.65,  # Economic indicators
+                "crypto": 0.60,  # Volatile market
+                "politics": 0.55,  # Unpredictable
+                "other": 0.50,  # Limited data
             }
             return category_confidence.get(category, 0.5)
 
-    def _generate_reasoning(self, market: Dict[str, Any], category: str, forecast: Any) -> str:
+    def _generate_reasoning(
+        self, market: Dict[str, Any], category: str, forecast: Any
+    ) -> str:
         """Generate human-readable reasoning for the forecast."""
-        volume = market.get('volume', 0)
+        volume = market.get("volume", 0)
         volume_desc = f"${volume:,.0f}" if volume > 0 else "unknown"
 
-        if category == 'social':
+        if category == "social":
             return f"Social media market ({volume_desc} volume) forecasted using time-series analysis of historical posting patterns with seasonal adjustments."
 
-        elif category == 'sports':
+        elif category == "sports":
             return f"Sports outcome market ({volume_desc} volume) predicted using historical team performance data, recent form, and event-specific adjustments."
 
         else:
@@ -770,22 +840,22 @@ class MarketAnalysisPipeline:
             for analysis in analyses:
                 # Store as evaluation result
                 result_data = {
-                    'market_id': analysis.market_id,
-                    'question': analysis.question,
-                    'category': analysis.category,
-                    'forecast': analysis.forecast,
-                    'confidence': analysis.confidence,
-                    'reasoning': analysis.reasoning,
-                    'external_data_used': analysis.external_data_used,
-                    'timestamp': datetime.now().isoformat()
+                    "market_id": analysis.market_id,
+                    "question": analysis.question,
+                    "category": analysis.category,
+                    "forecast": analysis.forecast,
+                    "confidence": analysis.confidence,
+                    "reasoning": analysis.reasoning,
+                    "external_data_used": analysis.external_data_used,
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 self.database.save_evaluation(
                     model_id=f"market_analysis_{analysis.category}",
-                    evaluation_type='market_forecast',
-                    evaluation_config={'market_id': analysis.market_id},
+                    evaluation_type="market_forecast",
+                    evaluation_config={"market_id": analysis.market_id},
                     results=result_data,
-                    duration_seconds=0
+                    duration_seconds=0,
                 )
 
         except Exception as e:
@@ -797,19 +867,15 @@ class MarketAnalysisPipeline:
         for analysis in analyses:
             cat = analysis.category
             if cat not in categories:
-                categories[cat] = {
-                    'count': 0,
-                    'avg_confidence': 0,
-                    'forecasts': []
-                }
+                categories[cat] = {"count": 0, "avg_confidence": 0, "forecasts": []}
 
-            categories[cat]['count'] += 1
-            categories[cat]['avg_confidence'] += analysis.confidence
-            categories[cat]['forecasts'].append(analysis.forecast)
+            categories[cat]["count"] += 1
+            categories[cat]["avg_confidence"] += analysis.confidence
+            categories[cat]["forecasts"].append(analysis.forecast)
 
         # Calculate averages
         for cat_data in categories.values():
-            cat_data['avg_confidence'] /= cat_data['count']
+            cat_data["avg_confidence"] /= cat_data["count"]
 
         return categories
 
@@ -850,25 +916,33 @@ def main():
                 print(f"   Category: {analysis.category}")
                 print(f"   Confidence: {analysis.confidence:.1%}")
 
-                if hasattr(analysis.forecast, 'prediction'):
+                if hasattr(analysis.forecast, "prediction"):
                     pred = analysis.forecast.prediction
                     low = analysis.forecast.lower_bound
                     high = analysis.forecast.upper_bound
-                    if analysis.category == 'social':
-                        print(f"   Forecast: {pred:.0f} tweets (range: {low:.0f} - {high:.0f})")
-                    elif analysis.category == 'sports':
-                        print(f"   Forecast: {pred:.1%} (range: {low:.1%} - {high:.1%})")
+                    if analysis.category == "social":
+                        print(
+                            f"   Forecast: {pred:.0f} tweets (range: {low:.0f} - {high:.0f})"
+                        )
+                    elif analysis.category == "sports":
+                        print(
+                            f"   Forecast: {pred:.1%} (range: {low:.1%} - {high:.1%})"
+                        )
                     else:
-                        print(f"   Forecast: {pred:.1%} (range: {low:.1%} - {high:.1%})")
+                        print(
+                            f"   Forecast: {pred:.1%} (range: {low:.1%} - {high:.1%})"
+                        )
                 else:
-                    pred = analysis.forecast.get('prediction', 0)
+                    pred = analysis.forecast.get("prediction", 0)
                     print(f"   Forecast: {pred:.1%}")
 
             # Category summary
             summary = pipeline.get_category_summary(analyses)
             print(f"\\n📈 CATEGORY SUMMARY:")
             for category, data in summary.items():
-                print(f"   {category.title()}: {data['count']} markets, {data['avg_confidence']:.1%} avg confidence")
+                print(
+                    f"   {category.title()}: {data['count']} markets, {data['avg_confidence']:.1%} avg confidence"
+                )
 
             # Show final cache stats
             if pipeline.enable_caching:
@@ -877,10 +951,14 @@ def main():
                     print(f"\\n💾 CACHE PERFORMANCE:")
                     print(f"   Final entries: {final_stats['total_entries']}")
                     print(f"   Total size: {final_stats['total_size_kb']:.1f} KB")
-                    if final_stats['most_accessed']:
-                        print(f"   Most accessed: {final_stats['most_accessed'][0]['topic']}")
+                    if final_stats["most_accessed"]:
+                        print(
+                            f"   Most accessed: {final_stats['most_accessed'][0]['topic']}"
+                        )
 
-            print(f"\\n✅ Analysis complete! Processed {len(analyses)} markets with caching.")
+            print(
+                f"\\n✅ Analysis complete! Processed {len(analyses)} markets with caching."
+            )
             print("💡 Results stored in ML database. Cache persists for future runs.")
 
         else:

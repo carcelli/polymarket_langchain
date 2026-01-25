@@ -48,8 +48,8 @@ class Vector2d:
     - Mixed-type operations with iterables
     """
 
-    __slots__ = ('__x', '__y')  # Memory optimization + immutability guarantee
-    typecode = 'd'
+    __slots__ = ("__x", "__y")  # Memory optimization + immutability guarantee
+    typecode = "d"
 
     def __init__(self, x: float, y: float):
         """Initialize with float conversion for type safety."""
@@ -73,7 +73,7 @@ class Vector2d:
     def __repr__(self):
         """Developer-friendly representation."""
         class_name = type(self).__name__
-        return '{}({!r}, {!r})'.format(class_name, *self)
+        return "{}({!r}, {!r})".format(class_name, *self)
 
     def __str__(self):
         """User-friendly string representation."""
@@ -81,8 +81,7 @@ class Vector2d:
 
     def __bytes__(self):
         """Binary representation with typecode prefix."""
-        return (bytes([ord(self.typecode)]) +
-                bytes(array(self.typecode, self)))
+        return bytes([ord(self.typecode)]) + bytes(array(self.typecode, self))
 
     def __eq__(self, other: Any) -> bool:
         """Equality comparison - return NotImplemented for unsupported types."""
@@ -133,17 +132,17 @@ class Vector2d:
 
     __rmatmul__ = __matmul__  # @ is commutative for dot product
 
-    def __format__(self, fmt_spec: str = '') -> str:
+    def __format__(self, fmt_spec: str = "") -> str:
         """Custom format specification with polar coordinates."""
-        if fmt_spec.endswith('p'):
+        if fmt_spec.endswith("p"):
             # Polar coordinates: <magnitude, angle>
             fmt_spec = fmt_spec[:-1]
             coords = (abs(self), math.atan2(self.y, self.x))
-            outer_fmt = '<{}, {}>'
+            outer_fmt = "<{}, {}>"
         else:
             # Cartesian coordinates: (x, y)
             coords = self
-            outer_fmt = '({}, {})'
+            outer_fmt = "({}, {})"
 
         components = (format(c, fmt_spec) for c in coords)
         return outer_fmt.format(*components)
@@ -161,6 +160,7 @@ class Vector2d:
 
 
 # ===== DEMONSTRATION OF OPERATOR OVERLOADING =====
+
 
 def demo_operator_overloading():
     """Demonstrates Chapter 13 operator overloading concepts."""

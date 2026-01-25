@@ -45,10 +45,10 @@ class SimpleFilesystemBackend:
             "type": memory_type,
             "content": content,
             "tags": tags or [],
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(memory_data, f, indent=2)
 
         return str(filepath)
@@ -67,10 +67,10 @@ class SimpleFilesystemBackend:
         analysis_data = {
             "market": market,
             "analysis": analysis,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(analysis_data, f, indent=2, default=str)
 
         return str(filepath)
@@ -84,7 +84,7 @@ class SimpleFilesystemBackend:
         memories = []
         for file_path in memories_dir.glob("*.json"):
             try:
-                with open(file_path, 'r') as f:
+                with open(file_path, "r") as f:
                     data = json.load(f)
                 memories.append(data)
             except:
@@ -104,13 +104,15 @@ class SimpleFilesystemBackend:
         analyses = []
         for file_path in analyses_dir.glob("*.json"):
             try:
-                with open(file_path, 'r') as f:
+                with open(file_path, "r") as f:
                     data = json.load(f)
                 analyses.append(data)
             except:
                 continue
 
-        return sorted(analyses, key=lambda x: x.get("timestamp", ""), reverse=True)[:limit]
+        return sorted(analyses, key=lambda x: x.get("timestamp", ""), reverse=True)[
+            :limit
+        ]
 
 
 class AgentWithMemory:
@@ -131,7 +133,7 @@ class AgentWithMemory:
         # Run analysis
         analysis = self.analyzer.analyze_market_opportunity(market_question)
 
-        if 'error' not in analysis:
+        if "error" not in analysis:
             # Store successful analysis
             stored_path = self.backend.store_analysis(market_question, analysis)
             print(f"💾 Analysis stored: {stored_path}")
@@ -143,21 +145,25 @@ class AgentWithMemory:
 
     def _learn_from_analysis(self, analysis: Dict[str, Any]):
         """Learn patterns from analysis results."""
-        action = analysis.get('action')
+        action = analysis.get("action")
 
-        if action == 'PASS':
+        if action == "PASS":
             # Learn when to pass
-            edge = analysis.get('edge', 0)
+            edge = analysis.get("edge", 0)
             if edge < 0.5:  # Very small edge
                 memory_content = f"Market showed very small edge ({edge:.2f}%) - likely not worth pursuing"
-                self.backend.store_memory("low_edge_pattern", memory_content, ["edge", "pass"])
+                self.backend.store_memory(
+                    "low_edge_pattern", memory_content, ["edge", "pass"]
+                )
 
-        elif action in ['BUY', 'SELL']:
+        elif action in ["BUY", "SELL"]:
             # Learn successful patterns
-            edge = analysis.get('edge', 0)
+            edge = analysis.get("edge", 0)
             if edge > 2.0:  # Good edge
                 memory_content = f"Found good edge ({edge:.2f}%) in {analysis.get('category', 'unknown')} market"
-                self.backend.store_memory("good_edge_pattern", memory_content, ["edge", "opportunity"])
+                self.backend.store_memory(
+                    "good_edge_pattern", memory_content, ["edge", "opportunity"]
+                )
 
     def get_market_insights(self) -> Dict[str, Any]:
         """Get insights from stored analyses."""
@@ -168,37 +174,43 @@ class AgentWithMemory:
             "categories_analyzed": set(),
             "action_distribution": {},
             "avg_edge_by_action": {},
-            "recent_opportunities": []
+            "recent_opportunities": [],
         }
 
         for analysis in analyses:
-            analysis_data = analysis.get('analysis', {})
+            analysis_data = analysis.get("analysis", {})
 
             # Track categories
-            category = analysis_data.get('category', 'unknown')
+            category = analysis_data.get("category", "unknown")
             insights["categories_analyzed"].add(category)
 
             # Track actions
-            action = analysis_data.get('action', 'unknown')
-            insights["action_distribution"][action] = insights["action_distribution"].get(action, 0) + 1
+            action = analysis_data.get("action", "unknown")
+            insights["action_distribution"][action] = (
+                insights["action_distribution"].get(action, 0) + 1
+            )
 
             # Track edges
-            edge = analysis_data.get('edge', 0)
+            edge = analysis_data.get("edge", 0)
             if action not in insights["avg_edge_by_action"]:
                 insights["avg_edge_by_action"][action] = []
             insights["avg_edge_by_action"][action].append(edge)
 
             # Track recent opportunities
-            if action in ['BUY', 'SELL'] and edge > 1.0:
-                insights["recent_opportunities"].append({
-                    "market": analysis.get('market', ''),
-                    "action": action,
-                    "edge": edge
-                })
+            if action in ["BUY", "SELL"] and edge > 1.0:
+                insights["recent_opportunities"].append(
+                    {
+                        "market": analysis.get("market", ""),
+                        "action": action,
+                        "edge": edge,
+                    }
+                )
 
         # Calculate averages
         for action, edges in insights["avg_edge_by_action"].items():
-            insights["avg_edge_by_action"][action] = sum(edges) / len(edges) if edges else 0
+            insights["avg_edge_by_action"][action] = (
+                sum(edges) / len(edges) if edges else 0
+            )
 
         return insights
 
@@ -212,7 +224,7 @@ class AgentWithMemory:
         # Group memories by type
         memory_types = {}
         for memory in memories:
-            mem_type = memory.get('type', 'unknown')
+            mem_type = memory.get("type", "unknown")
             memory_types[mem_type] = memory_types.get(mem_type, 0) + 1
 
         print("📚 Memory Types Learned:")
@@ -226,14 +238,16 @@ class AgentWithMemory:
         print(f"  • Categories analyzed: {', '.join(insights['categories_analyzed'])}")
 
         print(f"\\n🎯 Action Distribution:")
-        for action, count in insights['action_distribution'].items():
-            avg_edge = insights['avg_edge_by_action'].get(action, 0)
+        for action, count in insights["action_distribution"].items():
+            avg_edge = insights["avg_edge_by_action"].get(action, 0)
             print(f"  • {action}: {count} times (avg edge: {avg_edge:.2f}%)")
 
-        if insights['recent_opportunities']:
+        if insights["recent_opportunities"]:
             print(f"\\n💰 Recent Opportunities:")
-            for opp in insights['recent_opportunities'][:3]:
-                print(f"  • {opp['market'][:40]}... - {opp['action']} (edge: {opp['edge']:.1f}%)")
+            for opp in insights["recent_opportunities"][:3]:
+                print(
+                    f"  • {opp['market'][:40]}... - {opp['action']} (edge: {opp['edge']:.1f}%)"
+                )
 
 
 def demonstrate_backend_integration():
@@ -248,14 +262,14 @@ def demonstrate_backend_integration():
     markets_to_analyze = [
         "Russia x Ukraine ceasefire in 2025?",
         "Will the Tennessee Titans win Super Bowl 2026?",
-        "Xi Jinping out in 2025?"
+        "Xi Jinping out in 2025?",
     ]
 
     print("\\n🔍 Analyzing markets and building memory...")
     for market in markets_to_analyze:
         analysis = agent.analyze_with_memory(market)
-        action = analysis.get('action', 'UNKNOWN')
-        edge = analysis.get('edge', 0)
+        action = analysis.get("action", "UNKNOWN")
+        edge = analysis.get("edge", 0)
         print(f"  ✅ {market[:30]}...: {action} (edge: {edge:.2f}%)")
 
     # Show what the agent learned
@@ -276,7 +290,7 @@ def show_backend_routing_concept():
         "/strategies/": "StoreBackend - Trading strategies",
         "/workspace/": "FilesystemBackend - Temporary work files",
         "/market_data/": "FilesystemBackend - Cached market data",
-        "/logs/": "FilesystemBackend - Operation logs"
+        "/logs/": "FilesystemBackend - Operation logs",
     }
 
     print("📁 Virtual Filesystem Structure:")

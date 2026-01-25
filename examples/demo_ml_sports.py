@@ -26,12 +26,14 @@ def main():
         with open(results_file) as f:
             results = json.load(f)
 
-        print("📊 Model Performance (ROC-AUC: {:.3f})".format(
-            results['evaluation_metrics']['roc_auc']
-        ))
+        print(
+            "📊 Model Performance (ROC-AUC: {:.3f})".format(
+                results["evaluation_metrics"]["roc_auc"]
+            )
+        )
         print("-" * 40)
 
-        eval_metrics = results['evaluation_metrics']
+        eval_metrics = results["evaluation_metrics"]
         print(".3f")
         print(".3f")
         print(".1%")
@@ -42,8 +44,10 @@ def main():
         print(".1%")
 
         print("\n🔍 Top Features:")
-        importance = results['feature_importance']
-        sorted_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[:5]
+        importance = results["feature_importance"]
+        sorted_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[
+            :5
+        ]
         for feature, score in sorted_features:
             print(".1%")
 
@@ -52,18 +56,19 @@ def main():
     print("-" * 40)
 
     df = pd.read_parquet("data/sports_ml_dataset_synthetic.parquet")
-    sample = df[['question', 'sport', 'volume', 'market_prob', 'target']].head(2)
+    sample = df[["question", "sport", "volume", "market_prob", "target"]].head(2)
     for _, row in sample.iterrows():
-        outcome = "YES" if row['target'] == 1 else "NO"
+        outcome = "YES" if row["target"] == 1 else "NO"
         print(f"• {row['question'][:50]}...")
-        print(".0f"
-              f"   Outcome: {outcome}")
+        print(".0f" f"   Outcome: {outcome}")
 
     print("\n🚀 Integration Ready")
     print("-" * 40)
     print("To use with agents:")
     print("export MARKET_FOCUS=sports")
-    print("python scripts/python/cli.py run-memory-agent 'Find sports betting opportunities'")
+    print(
+        "python scripts/python/cli.py run-memory-agent 'Find sports betting opportunities'"
+    )
 
     print("\n✅ ML Pipeline Successfully Implemented!")
     print("   • Dataset: 2,000 synthetic sports markets")

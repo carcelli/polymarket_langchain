@@ -14,7 +14,11 @@ from datetime import datetime
 # Add project root to path
 sys.path.append(str(Path(__file__).parents[1] / "src"))
 
-from polymarket_agents.automl import AutoMLPipeline, PolymarketDataIngestion, DataQualityValidator
+from polymarket_agents.automl import (
+    AutoMLPipeline,
+    PolymarketDataIngestion,
+    DataQualityValidator,
+)
 
 
 def demonstrate_data_ingestion():
@@ -26,17 +30,25 @@ def demonstrate_data_ingestion():
 
     # Create training dataset
     print("🔄 Creating ML training dataset...")
-    dataset = ingestion.create_training_dataset(days_back=180, min_volume=5000, include_unresolved=False)
+    dataset = ingestion.create_training_dataset(
+        days_back=180, min_volume=5000, include_unresolved=False
+    )
 
     print(f"✅ Generated dataset with {len(dataset)} samples")
     print(f"   📈 Features: {len(dataset.columns)}")
-    print(f"   🎯 Target distribution: {dataset['will_resolve_yes'].value_counts().to_dict()}")
+    print(
+        f"   🎯 Target distribution: {dataset['will_resolve_yes'].value_counts().to_dict()}"
+    )
 
     # Show sample data
     print("\\n📋 Sample Data:")
-    sample = dataset[['market_id', 'question', 'category', 'volume', 'yes_price', 'will_resolve_yes']].head(3)
+    sample = dataset[
+        ["market_id", "question", "category", "volume", "yes_price", "will_resolve_yes"]
+    ].head(3)
     for _, row in sample.iterrows():
-        print(f"   • {row['question'][:60]}... (Vol: ${row['volume']:,.0f}, Yes: {row['yes_price']:.1%})")
+        print(
+            f"   • {row['question'][:60]}... (Vol: ${row['volume']:,.0f}, Yes: {row['yes_price']:.1%})"
+        )
 
     return dataset
 
@@ -55,22 +67,22 @@ def demonstrate_data_quality(dataset):
     print(f"✅ Ready for ML: {'Yes' if quality_report['ready_for_ml'] else 'No'}")
 
     # Show issues and recommendations
-    if quality_report['quality_check']['issues']:
+    if quality_report["quality_check"]["issues"]:
         print(f"\\n⚠️ Issues Found ({len(quality_report['quality_check']['issues'])}):")
-        for issue in quality_report['quality_check']['issues'][:3]:
+        for issue in quality_report["quality_check"]["issues"][:3]:
             print(f"   • {issue}")
 
-    if quality_report['recommendations']:
+    if quality_report["recommendations"]:
         print(f"\\n💡 Recommendations ({len(quality_report['recommendations'])}):")
-        for rec in quality_report['recommendations'][:3]:
+        for rec in quality_report["recommendations"][:3]:
             print(f"   • {rec}")
 
     # Class balance
-    balance = quality_report.get('class_balance', {})
+    balance = quality_report.get("class_balance", {})
     if balance:
         print("\\n⚖️ Class Balance:")
         print(f"   • Distribution: {balance.get('class_distribution', {})}")
-        minority_pct = balance.get('minority_class_pct', 0)
+        minority_pct = balance.get("minority_class_pct", 0)
         print(".1%")
         print(f"   • Balanced: {'Yes' if balance.get('balanced', False) else 'No'}")
 
@@ -84,12 +96,12 @@ def demonstrate_automl_pipeline():
 
     # Create a minimal config for demo
     config = {
-        'output_dir': './automl_demo_output',
-        'data_days_back': 90,  # Shorter for demo
-        'min_volume': 10000,   # Higher threshold for demo
-        'models_to_train': ['MarketPredictor'],  # Just one model for demo
-        'enable_github_integration': False,
-        'auto_generate_tests': False
+        "output_dir": "./automl_demo_output",
+        "data_days_back": 90,  # Shorter for demo
+        "min_volume": 10000,  # Higher threshold for demo
+        "models_to_train": ["MarketPredictor"],  # Just one model for demo
+        "enable_github_integration": False,
+        "auto_generate_tests": False,
     }
 
     print("⚙️ Configuration:")
@@ -110,15 +122,21 @@ def demonstrate_automl_pipeline():
     duration = (end_time - start_time).total_seconds()
 
     # Report results
-    if results['success']:
+    if results["success"]:
         print("\\n✅ Pipeline completed successfully!")
-        print(".1f"        print("\\n🏆 Best Model Results:")
-        best_model = results['best_model']
+        print(f"   ⏱️ Duration: {duration:.1f} seconds")
+        print("\\n🏆 Best Model Results:")
+        best_model = results["best_model"]
         print(f"   🤖 Model: {best_model['name']}")
-        print(".4f"        metrics = best_model.get('metrics', {})
+        print(f"   📊 Score: {best_model.get('score', 0):.4f}")
+        metrics = best_model.get("metrics", {})
         if metrics:
-            print(".1%"            print(".3f"            print(".3f"            print(".3f"        print("\\n📊 Data Summary:")
-        data_summary = results['data_summary']
+            print(f"   🎯 Accuracy: {metrics.get('accuracy', 0):.1%}")
+            print(f"   📈 Precision: {metrics.get('precision', 0):.3f}")
+            print(f"   📉 Recall: {metrics.get('recall', 0):.3f}")
+            print(f"   🎲 F1: {metrics.get('f1', 0):.3f}")
+        print("\\n📊 Data Summary:")
+        data_summary = results["data_summary"]
         print(f"   📈 Samples: {data_summary['final_samples']}")
         print(f"   🔧 Features: {data_summary['features_count']}")
         print(f"   📁 Output: {config['output_dir']}")
@@ -152,12 +170,12 @@ def demonstrate_model_prediction():
 
         # Create sample market for prediction
         sample_market = {
-            'id': 'demo_prediction',
-            'question': 'Will AI surpass human intelligence by 2030?',
-            'category': 'tech',
-            'volume': 150000,
-            'outcome_prices': [0.45, 0.55],  # Slightly favoring No
-            'liquidity': 30000
+            "id": "demo_prediction",
+            "question": "Will AI surpass human intelligence by 2030?",
+            "category": "tech",
+            "volume": 150000,
+            "outcome_prices": [0.45, 0.55],  # Slightly favoring No
+            "liquidity": 30000,
         }
 
         print("\\n🎯 Making prediction for sample market:")
@@ -169,20 +187,27 @@ def demonstrate_model_prediction():
         result = pipeline.predict_with_deployed_model(sample_market)
 
         print("\\n📋 Prediction Results:")
-        print(".1%"        print(".1%"        print(f"   💰 Recommended Bet: {result['recommended_bet']}")
-        print(".1%"        print(f"   🤖 Model Used: {result['model_name']}")
+        print(
+            f"   📈 Predicted Probability: {result.get('predicted_probability', 0):.1%}"
+        )
+        print(f"   🎯 Confidence: {result.get('confidence', 0):.1%}")
+        print(f"   💰 Recommended Bet: {result['recommended_bet']}")
+        print(f"   💵 Bet Size: {result.get('bet_size', 0):.1%} of bankroll")
+        print(f"   🤖 Model Used: {result['model_name']}")
 
-        if result['reasoning']:
+        if result["reasoning"]:
             print(f"\\n📝 Model Reasoning:")
             # Split reasoning into lines for better display
-            reasoning_lines = result['reasoning'].split('\\n')
+            reasoning_lines = result["reasoning"].split("\\n")
             for line in reasoning_lines[:5]:  # Show first 5 lines
                 if line.strip():
                     print(f"   {line}")
 
     except Exception as e:
         print(f"❌ Prediction demo failed: {e}")
-        print("💡 Note: This requires a successfully trained model from the pipeline demo above")
+        print(
+            "💡 Note: This requires a successfully trained model from the pipeline demo above"
+        )
 
 
 def show_automl_benefits():
@@ -197,8 +222,8 @@ def show_automl_benefits():
                 "End-to-end ML pipeline from data to deployment",
                 "Continuous model retraining with new data",
                 "Automated feature engineering and selection",
-                "Self-optimizing model hyperparameters"
-            ]
+                "Self-optimizing model hyperparameters",
+            ],
         },
         {
             "category": "📊 Data Quality",
@@ -206,8 +231,8 @@ def show_automl_benefits():
                 "Automated data validation and cleaning",
                 "Statistical outlier detection and treatment",
                 "Missing value imputation with smart strategies",
-                "Feature distribution analysis and normalization"
-            ]
+                "Feature distribution analysis and normalization",
+            ],
         },
         {
             "category": "🤖 Model Performance",
@@ -215,8 +240,8 @@ def show_automl_benefits():
                 "Automatic model selection and comparison",
                 "Ensemble methods for improved accuracy",
                 "Confidence scoring for prediction reliability",
-                "Backtesting and validation across time periods"
-            ]
+                "Backtesting and validation across time periods",
+            ],
         },
         {
             "category": "🚀 Production Ready",
@@ -224,8 +249,8 @@ def show_automl_benefits():
                 "Automated model deployment and versioning",
                 "Performance monitoring and alerting",
                 "API endpoints for real-time predictions",
-                "Comprehensive testing and validation suites"
-            ]
+                "Comprehensive testing and validation suites",
+            ],
         },
         {
             "category": "👥 Developer Experience",
@@ -233,14 +258,14 @@ def show_automl_benefits():
                 "One-command model training and deployment",
                 "Automated documentation and reporting",
                 "GitHub integration for collaboration",
-                "CLI tools for easy model management"
-            ]
-        }
+                "CLI tools for easy model management",
+            ],
+        },
     ]
 
     for category_info in benefits:
         print(f"\\n{category_info['category']}:")
-        for benefit in category_info['benefits']:
+        for benefit in category_info["benefits"]:
             print(f"   ✅ {benefit}")
 
 
@@ -258,7 +283,7 @@ def main():
         pipeline_results = demonstrate_automl_pipeline()
 
         # Demo 4: Model Prediction
-        if pipeline_results.get('success', False):
+        if pipeline_results.get("success", False):
             demonstrate_model_prediction()
 
         # Show benefits
@@ -280,6 +305,7 @@ def main():
     except Exception as e:
         print(f"\\n❌ Demo failed: {e}")
         import traceback
+
         traceback.print_exc()
 
 

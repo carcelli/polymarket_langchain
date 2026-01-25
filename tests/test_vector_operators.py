@@ -49,7 +49,7 @@ class TestVectorArithmetic:
         v1 = Vector2d(1, 2)
         v2 = Vector2d(3, 4)
         result = v1 @ v2
-        assert result == (1*3 + 2*4)  # 3 + 8 = 11
+        assert result == (1 * 3 + 2 * 4)  # 3 + 8 = 11
         assert isinstance(result, (int, float))
 
     def test_dot_product_commutative(self):
@@ -225,8 +225,8 @@ class TestFormatting:
         result = v1 + v2
 
         # Should work with polar formatting
-        polar_str = format(result, 'p')
-        assert '<' in polar_str and '>' in polar_str
+        polar_str = format(result, "p")
+        assert "<" in polar_str and ">" in polar_str
 
 
 if __name__ == "__main__":

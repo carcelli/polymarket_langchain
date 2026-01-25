@@ -37,18 +37,22 @@ def run_ml_workflow(args):
     duration = (end_time - start_time).total_seconds()
 
     # Display results
-    if result.get('status') == 'success':
-        print("\\n✅ Workflow completed successfully!"        print(".1f"        if 'parsed_info' in result:
+    if result.get("status") == "success":
+        print("\\n✅ Workflow completed successfully!")
+        print(f"   ⏱️ Duration: {duration:.1f} seconds")
+        if "parsed_info" in result:
             print("\\n📋 Key Results:")
-            for key, value in result['parsed_info'].items():
+            for key, value in result["parsed_info"].items():
                 print(f"   • {key}: {value}")
     else:
         print(f"\\n❌ Workflow failed: {result.get('error', 'Unknown error')}")
 
     # Save results if requested
     if args.save_results:
-        results_file = f"ml_workflow_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(results_file, 'w') as f:
+        results_file = (
+            f"ml_workflow_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        with open(results_file, "w") as f:
             json.dump(result, f, indent=2, default=str)
         print(f"💾 Results saved to: {results_file}")
 
@@ -72,7 +76,9 @@ def show_database_status(args):
         print(f"   🤖 Models: {stats.get('models_count', 0)}")
         print(f"   🎯 Predictions: {stats.get('predictions_count', 0)}")
         print(f"   ⚡ Evaluations: {stats.get('evaluations_count', 0)}")
-        print(f"   📈 Recent Activity (7 days): {stats.get('experiments_last_7_days', 0)} experiments")
+        print(
+            f"   📈 Recent Activity (7 days): {stats.get('experiments_last_7_days', 0)} experiments"
+        )
 
         # Show recent experiments
         print("\\n🕐 Recent Experiments:")
@@ -91,8 +97,8 @@ def show_database_status(args):
         if not best_models.empty:
             print("\\n🏆 Best Performing Models:")
             for _, model in best_models.iterrows():
-                f1_score = model.get('f1_score', 0)
-                print(".3f"
+                f1_score = model.get("f1_score", 0)
+                print(f"   • {model.get('model_name', 'Unknown')}: F1={f1_score:.3f}")
     except Exception as e:
         print(f"❌ Database error: {e}")
 
@@ -112,7 +118,7 @@ def generate_ml_report(args):
     # Save report if requested
     if args.save_report:
         report_file = f"ml_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             f.write(report)
         print(f"\\n💾 Report saved to: {report_file}")
 
@@ -129,13 +135,13 @@ def optimize_hyperparameters(args):
         "MarketPredictor": {
             "n_estimators": [50, 100, 200],
             "max_depth": [5, 10, 15, None],
-            "min_samples_split": [2, 5, 10]
+            "min_samples_split": [2, 5, 10],
         },
         "EdgeDetector": {
             "hidden_layers": [[32], [64, 32], [128, 64, 32]],
             "learning_rate": [0.001, 0.01, 0.1],
-            "dropout_rate": [0.1, 0.2, 0.3]
-        }
+            "dropout_rate": [0.1, 0.2, 0.3],
+        },
     }
 
     param_grid = param_grids.get(args.model_type, {})
@@ -145,9 +151,9 @@ def optimize_hyperparameters(args):
 
     result = agent.optimize_model_hyperparameters(args.model_type, param_grid)
 
-    if result.get('status') == 'success':
+    if result.get("status") == "success":
         print("✅ Optimization completed!")
-        if 'best_params' in result.get('parsed_info', {}):
+        if "best_params" in result.get("parsed_info", {}):
             print(f"🏆 Best parameters: {result['parsed_info']['best_params']}")
     else:
         print(f"❌ Optimization failed: {result.get('error', 'Unknown error')}")
@@ -164,7 +170,7 @@ def check_model_drift(args):
 
     result = agent.validate_model_drift(args.model_id)
 
-    if result.get('status') == 'success':
+    if result.get("status") == "success":
         print("✅ Drift check completed!")
         # Display drift metrics
         print("📊 Drift Analysis:")
@@ -185,7 +191,7 @@ def retrain_model(args):
 
     result = agent.retrain_model(args.model_id, args.new_data_days)
 
-    if result.get('status') == 'success':
+    if result.get("status") == "success":
         print("✅ Retraining completed!")
         print("📊 Performance comparison:")
         print("   (Old vs new model metrics would be displayed here)")
@@ -205,7 +211,7 @@ def create_trading_strategy(args):
 
     result = agent.generate_trading_strategy(args.model_id, args.risk_tolerance)
 
-    if result.get('status') == 'success':
+    if result.get("status") == "success":
         print("✅ Trading strategy created!")
         print("📋 Strategy Specification:")
         print("   (Strategy rules and parameters would be displayed here)")
@@ -240,48 +246,61 @@ Examples:
 
   # Create trading strategy
   python ml_agent_cli.py strategy model_20241201_120000_marketpredictor --risk-tolerance 0.05
-        """
+        """,
     )
 
-    parser.add_argument('--verbose', '-v', action='store_true',
-                       help='Enable verbose output')
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose output"
+    )
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Workflow command
-    workflow_parser = subparsers.add_parser('workflow', help='Run ML workflow')
-    workflow_parser.add_argument('task', help='ML task description')
-    workflow_parser.add_argument('--save-results', action='store_true',
-                                help='Save results to JSON file')
+    workflow_parser = subparsers.add_parser("workflow", help="Run ML workflow")
+    workflow_parser.add_argument("task", help="ML task description")
+    workflow_parser.add_argument(
+        "--save-results", action="store_true", help="Save results to JSON file"
+    )
 
     # Status command
-    status_parser = subparsers.add_parser('status', help='Show database status')
+    status_parser = subparsers.add_parser("status", help="Show database status")
 
     # Report command
-    report_parser = subparsers.add_parser('report', help='Generate ML report')
-    report_parser.add_argument('--save-report', action='store_true',
-                              help='Save report to markdown file')
+    report_parser = subparsers.add_parser("report", help="Generate ML report")
+    report_parser.add_argument(
+        "--save-report", action="store_true", help="Save report to markdown file"
+    )
 
     # Optimize command
-    optimize_parser = subparsers.add_parser('optimize', help='Optimize hyperparameters')
-    optimize_parser.add_argument('model_type', choices=['MarketPredictor', 'EdgeDetector'],
-                                help='Model type to optimize')
+    optimize_parser = subparsers.add_parser("optimize", help="Optimize hyperparameters")
+    optimize_parser.add_argument(
+        "model_type",
+        choices=["MarketPredictor", "EdgeDetector"],
+        help="Model type to optimize",
+    )
 
     # Drift command
-    drift_parser = subparsers.add_parser('drift', help='Check model drift')
-    drift_parser.add_argument('model_id', help='Model ID to check for drift')
+    drift_parser = subparsers.add_parser("drift", help="Check model drift")
+    drift_parser.add_argument("model_id", help="Model ID to check for drift")
 
     # Retrain command
-    retrain_parser = subparsers.add_parser('retrain', help='Retrain model with new data')
-    retrain_parser.add_argument('model_id', help='Model ID to retrain')
-    retrain_parser.add_argument('--new-data-days', type=int, default=30,
-                               help='Days of new data to include')
+    retrain_parser = subparsers.add_parser(
+        "retrain", help="Retrain model with new data"
+    )
+    retrain_parser.add_argument("model_id", help="Model ID to retrain")
+    retrain_parser.add_argument(
+        "--new-data-days", type=int, default=30, help="Days of new data to include"
+    )
 
     # Strategy command
-    strategy_parser = subparsers.add_parser('strategy', help='Create trading strategy')
-    strategy_parser.add_argument('model_id', help='Model ID to base strategy on')
-    strategy_parser.add_argument('--risk-tolerance', type=float, default=0.1,
-                                help='Risk tolerance for position sizing')
+    strategy_parser = subparsers.add_parser("strategy", help="Create trading strategy")
+    strategy_parser.add_argument("model_id", help="Model ID to base strategy on")
+    strategy_parser.add_argument(
+        "--risk-tolerance",
+        type=float,
+        default=0.1,
+        help="Risk tolerance for position sizing",
+    )
 
     args = parser.parse_args()
 
@@ -290,19 +309,19 @@ Examples:
         return
 
     try:
-        if args.command == 'workflow':
+        if args.command == "workflow":
             run_ml_workflow(args)
-        elif args.command == 'status':
+        elif args.command == "status":
             show_database_status(args)
-        elif args.command == 'report':
+        elif args.command == "report":
             generate_ml_report(args)
-        elif args.command == 'optimize':
+        elif args.command == "optimize":
             optimize_hyperparameters(args)
-        elif args.command == 'drift':
+        elif args.command == "drift":
             check_model_drift(args)
-        elif args.command == 'retrain':
+        elif args.command == "retrain":
             retrain_model(args)
-        elif args.command == 'strategy':
+        elif args.command == "strategy":
             create_trading_strategy(args)
 
     except KeyboardInterrupt:
@@ -312,6 +331,7 @@ Examples:
         print(f"\\n❌ Error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

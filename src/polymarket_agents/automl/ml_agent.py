@@ -22,7 +22,7 @@ from .ml_tools import (
     model_training_tool,
     model_evaluation_tool,
     prediction_tool,
-    experiment_results_tool
+    experiment_results_tool,
 )
 from .ml_database import MLDatabase
 
@@ -53,13 +53,12 @@ class MLAgent:
             model_training_tool,
             model_evaluation_tool,
             prediction_tool,
-            experiment_results_tool
+            experiment_results_tool,
         ]
 
         # Set up memory
         self.memory = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True
+            memory_key="chat_history", return_messages=True
         )
 
         # Create the agent
@@ -70,7 +69,7 @@ class MLAgent:
             memory=self.memory,
             verbose=True,
             max_iterations=10,
-            handle_parsing_errors=True
+            handle_parsing_errors=True,
         )
 
         logger.info("ML Agent initialized with tools and capabilities")
@@ -115,17 +114,17 @@ class MLAgent:
         Always provide clear explanations of what you're doing and why.
         """
 
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
 
         return create_openai_functions_agent(
-            llm=self.llm,
-            tools=self.tools,
-            prompt=prompt
+            llm=self.llm, tools=self.tools, prompt=prompt
         )
 
     def run_ml_workflow(self, task: str) -> Dict[str, Any]:
@@ -164,12 +163,14 @@ class MLAgent:
             structured_result = self._parse_agent_output(output)
 
             # Add metadata
-            structured_result.update({
-                "task": task,
-                "timestamp": datetime.now().isoformat(),
-                "agent_version": "1.0",
-                "tools_used": [tool.name for tool in self.tools]
-            })
+            structured_result.update(
+                {
+                    "task": task,
+                    "timestamp": datetime.now().isoformat(),
+                    "agent_version": "1.0",
+                    "tools_used": [tool.name for tool in self.tools],
+                }
+            )
 
             logger.info(f"ML workflow completed: {task}")
             return structured_result
@@ -180,7 +181,7 @@ class MLAgent:
                 "status": "error",
                 "task": task,
                 "error": str(e),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
     def _parse_agent_output(self, output: str) -> Dict[str, Any]:
@@ -191,26 +192,24 @@ class MLAgent:
             return parsed
         except json.JSONDecodeError:
             # If not JSON, extract structured information
-            result = {
-                "status": "success",
-                "raw_output": output,
-                "parsed_info": {}
-            }
+            result = {"status": "success", "raw_output": output, "parsed_info": {}}
 
             # Extract key information from text
-            lines = output.split('\n')
+            lines = output.split("\n")
 
             for line in lines:
                 line = line.strip()
-                if line.startswith('✅') or line.startswith('❌'):
-                    if 'success' not in result['parsed_info']:
-                        result['parsed_info']['success'] = []
-                    result['parsed_info']['success'].append(line)
-                elif 'model_id' in line.lower() or 'experiment_id' in line.lower():
+                if line.startswith("✅") or line.startswith("❌"):
+                    if "success" not in result["parsed_info"]:
+                        result["parsed_info"]["success"] = []
+                    result["parsed_info"]["success"].append(line)
+                elif "model_id" in line.lower() or "experiment_id" in line.lower():
                     # Extract IDs
-                    if ':' in line:
-                        key, value = line.split(':', 1)
-                        result['parsed_info'][key.strip().lower().replace(' ', '_')] = value.strip()
+                    if ":" in line:
+                        key, value = line.split(":", 1)
+                        result["parsed_info"][
+                            key.strip().lower().replace(" ", "_")
+                        ] = value.strip()
 
             return result
 
@@ -218,7 +217,7 @@ class MLAgent:
         """Get list of available trained models."""
         try:
             models_df = self.database.get_best_models(limit=20)
-            return models_df.to_dict('records')
+            return models_df.to_dict("records")
         except Exception as e:
             logger.error(f"Failed to get available models: {e}")
             return []
@@ -241,17 +240,25 @@ class MLAgent:
         """
         report_lines = []
         report_lines.append("# ML Agent Report")
-        report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report_lines.append(
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         report_lines.append("")
 
         # Database statistics
         try:
             db_stats = self.database.get_database_stats()
             report_lines.append("## Database Statistics")
-            report_lines.append(f"- Total Experiments: {db_stats.get('experiments_count', 0)}")
+            report_lines.append(
+                f"- Total Experiments: {db_stats.get('experiments_count', 0)}"
+            )
             report_lines.append(f"- Total Models: {db_stats.get('models_count', 0)}")
-            report_lines.append(f"- Total Predictions: {db_stats.get('predictions_count', 0)}")
-            report_lines.append(f"- Database Size: {db_stats.get('database_size_bytes', 0) / 1024:.1f} KB")
+            report_lines.append(
+                f"- Total Predictions: {db_stats.get('predictions_count', 0)}"
+            )
+            report_lines.append(
+                f"- Database Size: {db_stats.get('database_size_bytes', 0) / 1024:.1f} KB"
+            )
             report_lines.append("")
         except Exception as e:
             report_lines.append(f"## Database Error: {e}")
@@ -275,7 +282,9 @@ class MLAgent:
             if not best_models.empty:
                 report_lines.append("## Best Performing Models")
                 for _, model in best_models.iterrows():
-                    report_lines.append(f"- **{model['name']}**: F1 = {model.get('f1_score', 0):.3f} ({model['training_samples']} samples)")
+                    report_lines.append(
+                        f"- **{model['name']}**: F1 = {model.get('f1_score', 0):.3f} ({model['training_samples']} samples)"
+                    )
                 report_lines.append("")
         except Exception as e:
             report_lines.append(f"## Models Error: {e}")
@@ -287,7 +296,9 @@ class MLAgent:
             if alerts:
                 report_lines.append("## Active Alerts")
                 for alert in alerts[:5]:
-                    report_lines.append(f"- {alert['severity'].upper()}: {alert['message']}")
+                    report_lines.append(
+                        f"- {alert['severity'].upper()}: {alert['message']}"
+                    )
                 report_lines.append("")
         except Exception as e:
             report_lines.append(f"## Alerts Error: {e}")
@@ -300,9 +311,11 @@ class MLAgent:
         report_lines.append("4. Review and resolve active alerts")
         report_lines.append("5. Consider ensemble methods for improved performance")
 
-        return '\n'.join(report_lines)
+        return "\n".join(report_lines)
 
-    def optimize_model_hyperparameters(self, model_type: str, param_grid: Dict[str, List[Any]] = None) -> Dict[str, Any]:
+    def optimize_model_hyperparameters(
+        self, model_type: str, param_grid: Dict[str, List[Any]] = None
+    ) -> Dict[str, Any]:
         """
         Optimize hyperparameters for a model type.
 
@@ -319,13 +332,13 @@ class MLAgent:
                 param_grid = {
                     "n_estimators": [50, 100, 200],
                     "max_depth": [5, 10, 15, None],
-                    "min_samples_split": [2, 5, 10]
+                    "min_samples_split": [2, 5, 10],
                 }
             elif model_type == "EdgeDetector":
                 param_grid = {
                     "hidden_layers": [[32], [64, 32], [128, 64, 32]],
                     "learning_rate": [0.001, 0.01, 0.1],
-                    "dropout_rate": [0.1, 0.2, 0.3]
+                    "dropout_rate": [0.1, 0.2, 0.3],
                 }
             else:
                 return {"error": f"Unknown model type: {model_type}"}
@@ -345,7 +358,9 @@ class MLAgent:
 
         return self.run_ml_workflow(task)
 
-    def validate_model_drift(self, model_id: str, new_data: pd.DataFrame = None) -> Dict[str, Any]:
+    def validate_model_drift(
+        self, model_id: str, new_data: pd.DataFrame = None
+    ) -> Dict[str, Any]:
         """
         Check for model drift using new data.
 
@@ -396,7 +411,9 @@ class MLAgent:
 
         return self.run_ml_workflow(task)
 
-    def generate_trading_strategy(self, model_id: str, risk_tolerance: float = 0.1) -> Dict[str, Any]:
+    def generate_trading_strategy(
+        self, model_id: str, risk_tolerance: float = 0.1
+    ) -> Dict[str, Any]:
         """
         Generate a complete trading strategy using an ML model.
 
@@ -453,7 +470,7 @@ def demo_ml_agent():
         "Ingest the last 180 days of market data and check its quality",
         "Train a MarketPredictor model on recent data",
         "Evaluate the trained model's performance using backtesting",
-        "Generate a comprehensive ML report of all experiments"
+        "Generate a comprehensive ML report of all experiments",
     ]
 
     results = []
@@ -463,8 +480,9 @@ def demo_ml_agent():
         results.append(result)
 
         # Print summary
-        if result.get('status') == 'success':
-            print("✅ Completed successfully"        else:
+        if result.get("status") == "success":
+            print("✅ Completed successfully")
+        else:
             print(f"❌ Failed: {result.get('error', 'Unknown error')}")
 
     print("\\n📊 Demo Results Summary:")

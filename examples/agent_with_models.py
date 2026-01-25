@@ -21,14 +21,18 @@ from polymarket_agents.connectors.gamma import GammaMarketClient
 # Integrating Pydantic models as the "Metaphysical" layer for the agent.
 # These ensure that data flowing between tools and the agent is structured and valid.
 
+
 class MarketForecast(BaseModel):
     """Output model for the ML forecasting tool."""
+
     market_id: str
     predicted_volume_trend: str = Field(..., description="Up/Down/Flat")
     confidence_score: float = Field(..., ge=0, le=1)
     business_implication: str
 
+
 # --- 2. Tools ---
+
 
 @tool
 def fetch_polymarket_data(query: str) -> str:
@@ -38,11 +42,13 @@ def fetch_polymarket_data(query: str) -> str:
     """
     print(f"\n[Tool] Fetching data for: {query}")
     client = GammaMarketClient()
-    
+
     try:
         # Attempt to interpret query as ID first, then search
         if query.isdigit():
-             markets = client.get_markets(querystring_params={"id": query}, parse_pydantic=True)
+            markets = client.get_markets(
+                querystring_params={"id": query}, parse_pydantic=True
+            )
         else:
             # Search by string (naive search via active markets)
             # Use get_markets directly to ensure we can pass parse_pydantic=True
@@ -50,28 +56,31 @@ def fetch_polymarket_data(query: str) -> str:
                 "active": True,
                 "closed": False,
                 "archived": False,
-                "limit": 10  # Fetch more to filter locally
+                "limit": 10,  # Fetch more to filter locally
             }
             markets = client.get_markets(querystring_params=params, parse_pydantic=True)
-            
+
             # Remove quotes if present in query
-            clean_query = query.replace('"', '').replace("'", "")
-            
+            clean_query = query.replace('"', "").replace("'", "")
+
             if clean_query.lower() not in ["active", "current markets"]:
-                 markets = [m for m in markets if clean_query.lower() in m.question.lower()]
-        
+                markets = [
+                    m for m in markets if clean_query.lower() in m.question.lower()
+                ]
+
         if not markets:
             return "No markets found matching the query."
 
         # Serialize the first few results
         results_str = ""
         for m in markets[:3]:
-             results_str += f"Market ID: {m.id}, Question: {m.question}, Spread: {m.spread}, Volume: {m.volume}\n"
-        
+            results_str += f"Market ID: {m.id}, Question: {m.question}, Spread: {m.spread}, Volume: {m.volume}\n"
+
         return results_str
 
     except Exception as e:
         return f"Error fetching data: {str(e)}"
+
 
 @tool
 def analyze_market_opportunity(market_id: str, current_spread: float) -> str:
@@ -79,20 +88,26 @@ def analyze_market_opportunity(market_id: str, current_spread: float) -> str:
     Simulates an ML analysis (e.g., PyTorch forecasting) on a specific market.
     """
     print(f"\n[Tool] Analyzing market opportunity for ID: {market_id}")
-    
+
     # Mock inference
     is_good_opportunity = current_spread > 0.01  # Arbitrary logic
-    
+
     forecast = MarketForecast(
         market_id=str(market_id),
         predicted_volume_trend="Up" if is_good_opportunity else "Flat",
         confidence_score=0.85 if is_good_opportunity else 0.4,
-        business_implication="High potential for arbitrage or hedging." if is_good_opportunity else "Low actionable insight."
+        business_implication=(
+            "High potential for arbitrage or hedging."
+            if is_good_opportunity
+            else "Low actionable insight."
+        ),
     )
-    
+
     return f"ML Analysis Result: {forecast.json()}"
 
+
 # --- 3. Agent Construction ---
+
 
 def create_agent_with_models():
     api_key = os.environ.get("OPENAI_API_KEY")
@@ -133,28 +148,35 @@ def create_agent_with_models():
     """
 
     prompt = PromptTemplate.from_template(template)
-    
+
     tools = [fetch_polymarket_data, analyze_market_opportunity]
-    
+
     agent = create_react_agent(llm, tools, prompt)
-    
-    return AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+
+    return AgentExecutor(
+        agent=agent, tools=tools, verbose=True, handle_parsing_errors=True
+    )
+
 
 # --- 4. Execution ---
 
 if __name__ == "__main__":
     print("Initializing Agent with Pydantic Models Integration...")
     executor = create_agent_with_models()
-    
+
     if executor:
         # Example query
         query = "Find a market about 'MicroStrategy' and analyze it."
-        print(f"\n--- Running Agent for: {query} ---\
-")
+        print(
+            f"\n--- Running Agent for: {query} ---\
+"
+        )
         try:
             result = executor.invoke({"input": query})
-            print("\n--- Final Agent Output ---\
-")
-            print(result['output'])
+            print(
+                "\n--- Final Agent Output ---\
+"
+            )
+            print(result["output"])
         except Exception as e:
-             print(f"Agent execution failed: {e}")
+            print(f"Agent execution failed: {e}")

@@ -35,7 +35,7 @@ class MarketPredictor:
             n_outputs=1,  # Binary: will rise (1) or fall (0)
             lr=learning_rate,
             use_softmax=False,
-            random_seed=42
+            random_seed=42,
         )
 
     def extract_features(self, market_data: Dict[str, Any]) -> np.ndarray:
@@ -49,11 +49,11 @@ class MarketPredictor:
             Feature vector [current_prob, volume, spread, age, liquidity]
         """
         # Extract basic features
-        current_prob = market_data.get('current_probability', 0.5)
-        volume = market_data.get('volume', 0)
-        spread = market_data.get('spread', 0.1)
-        age_days = market_data.get('age_days', 30)
-        liquidity = market_data.get('liquidity', 0.5)
+        current_prob = market_data.get("current_probability", 0.5)
+        volume = market_data.get("volume", 0)
+        spread = market_data.get("spread", 0.1)
+        age_days = market_data.get("age_days", 30)
+        liquidity = market_data.get("liquidity", 0.5)
 
         features = np.array([current_prob, volume, spread, age_days, liquidity])
 
@@ -66,7 +66,9 @@ class MarketPredictor:
 
         return features
 
-    def train_on_historical_data(self, market_history: List[Dict[str, Any]], epochs: int = 1000):
+    def train_on_historical_data(
+        self, market_history: List[Dict[str, Any]], epochs: int = 1000
+    ):
         """
         Train the network on historical market data.
 
@@ -82,8 +84,10 @@ class MarketPredictor:
             features_list.append(features)
 
             # Target: Did probability increase? (1=yes, 0=no)
-            future_prob = market_snapshot.get('future_probability', market_snapshot['current_probability'])
-            current_prob = market_snapshot['current_probability']
+            future_prob = market_snapshot.get(
+                "future_probability", market_snapshot["current_probability"]
+            )
+            current_prob = market_snapshot["current_probability"]
 
             # Small threshold to avoid noise
             target = 1.0 if future_prob > current_prob + 0.02 else 0.0
@@ -95,7 +99,7 @@ class MarketPredictor:
         print(f"Training on {len(X)} market examples...")
         losses = self.nn.batch_train(X, y, epochs=epochs, verbose=True)
 
-        print(".4f"
+        print(f"✅ Training complete. Final loss: {losses[-1]:.4f}")
         return losses
 
     def predict_movement(self, market_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -112,10 +116,10 @@ class MarketPredictor:
         prediction = self.nn.predict(features)[0]
 
         return {
-            'prediction': 'RISE' if prediction > 0.5 else 'FALL',
-            'confidence': abs(prediction - 0.5) * 2,  # Scale to [0, 1]
-            'raw_probability': prediction,
-            'features': features.tolist()
+            "prediction": "RISE" if prediction > 0.5 else "FALL",
+            "confidence": abs(prediction - 0.5) * 2,  # Scale to [0, 1]
+            "raw_probability": prediction,
+            "features": features.tolist(),
         }
 
 
@@ -127,48 +131,48 @@ def create_sample_training_data() -> List[Dict[str, Any]]:
     return [
         # High volume, tight spread, moderate probability -> likely to rise
         {
-            'current_probability': 0.55,
-            'volume': 10000,
-            'spread': 0.02,
-            'age_days': 15,
-            'liquidity': 0.8,
-            'future_probability': 0.62  # Did rise
+            "current_probability": 0.55,
+            "volume": 10000,
+            "spread": 0.02,
+            "age_days": 15,
+            "liquidity": 0.8,
+            "future_probability": 0.62,  # Did rise
         },
         # Low volume, wide spread, high probability -> likely to fall
         {
-            'current_probability': 0.75,
-            'volume': 500,
-            'spread': 0.08,
-            'age_days': 5,
-            'liquidity': 0.3,
-            'future_probability': 0.68  # Did fall
+            "current_probability": 0.75,
+            "volume": 500,
+            "spread": 0.08,
+            "age_days": 5,
+            "liquidity": 0.3,
+            "future_probability": 0.68,  # Did fall
         },
         # Moderate conditions, low probability -> slight rise
         {
-            'current_probability': 0.45,
-            'volume': 2000,
-            'spread': 0.05,
-            'age_days': 25,
-            'liquidity': 0.6,
-            'future_probability': 0.48  # Slight rise
+            "current_probability": 0.45,
+            "volume": 2000,
+            "spread": 0.05,
+            "age_days": 25,
+            "liquidity": 0.6,
+            "future_probability": 0.48,  # Slight rise
         },
         # More training examples...
         {
-            'current_probability': 0.62,
-            'volume': 8000,
-            'spread': 0.03,
-            'age_days': 20,
-            'liquidity': 0.7,
-            'future_probability': 0.65
+            "current_probability": 0.62,
+            "volume": 8000,
+            "spread": 0.03,
+            "age_days": 20,
+            "liquidity": 0.7,
+            "future_probability": 0.65,
         },
         {
-            'current_probability': 0.38,
-            'volume': 300,
-            'spread': 0.12,
-            'age_days': 3,
-            'liquidity': 0.2,
-            'future_probability': 0.35
-        }
+            "current_probability": 0.38,
+            "volume": 300,
+            "spread": 0.12,
+            "age_days": 3,
+            "liquidity": 0.2,
+            "future_probability": 0.35,
+        },
     ]
 
 
@@ -192,27 +196,31 @@ def demo_market_prediction():
 
     test_markets = [
         {
-            'current_probability': 0.58,
-            'volume': 7500,
-            'spread': 0.04,
-            'age_days': 18,
-            'liquidity': 0.75,
-            'description': 'Tech stock earnings'
+            "current_probability": 0.58,
+            "volume": 7500,
+            "spread": 0.04,
+            "age_days": 18,
+            "liquidity": 0.75,
+            "description": "Tech stock earnings",
         },
         {
-            'current_probability': 0.42,
-            'volume': 800,
-            'spread': 0.09,
-            'age_days': 7,
-            'liquidity': 0.4,
-            'description': 'Political event outcome'
-        }
+            "current_probability": 0.42,
+            "volume": 800,
+            "spread": 0.09,
+            "age_days": 7,
+            "liquidity": 0.4,
+            "description": "Political event outcome",
+        },
     ]
 
     for market in test_markets:
         prediction = predictor.predict_movement(market)
         print(f"\n📊 Market: {market['description']}")
-        print(".1f"        print(".1%"        print(f"   Raw prob: {prediction['raw_probability']:.3f}")
+        print(f"   Current volume: ${prediction.get('volume', 0):.1f}")
+        print(
+            f"   Prediction: {prediction['prediction']} ({prediction.get('confidence', 0):.1%} confidence)"
+        )
+        print(f"   Raw prob: {prediction['raw_probability']:.3f}")
         print(f"   Features: {prediction['features']}")
 
     print("\n✨ Demo complete! This shows how neural networks can learn from")
@@ -235,18 +243,20 @@ def integrate_with_agents():
 
     # Example market for analysis
     market_data = {
-        'current_probability': 0.51,
-        'volume': 5000,
-        'spread': 0.06,
-        'age_days': 12,
-        'liquidity': 0.65
+        "current_probability": 0.51,
+        "volume": 5000,
+        "spread": 0.06,
+        "age_days": 12,
+        "liquidity": 0.65,
     }
 
     # Get NN prediction
     nn_prediction = predictor.predict_movement(market_data)
 
-    print("🧠 Neural Network Prediction:"    print(f"   Direction: {nn_prediction['prediction']}")
-    print(".1%"    print(f"   Confidence: {nn_prediction['confidence']:.2f}")
+    print("🧠 Neural Network Prediction:")
+    print(f"   Direction: {nn_prediction['prediction']}")
+    print(f"   Probability: {nn_prediction.get('raw_probability', 0):.1%}")
+    print(f"   Confidence: {nn_prediction['confidence']:.2f}")
 
     print("\n🔄 Integration Points:")
     print("   • Feed NN signals into trading agents")

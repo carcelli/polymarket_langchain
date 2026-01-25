@@ -37,19 +37,19 @@ class PolymarketStoreBackend(BackendProtocol):
         """
         self.runtime = runtime
         self.namespace = namespace
-        self.store: 'BaseStore' = runtime.store
+        self.store: "BaseStore" = runtime.store
 
     def _get_key(self, path: str) -> str:
         """Convert virtual path to store key."""
         # Remove leading slash and use as key
-        key = path.lstrip('/')
+        key = path.lstrip("/")
         return f"{self.namespace}:{key}"
 
     def _get_path(self, key: str) -> str:
         """Convert store key back to virtual path."""
         # Remove namespace prefix
         if key.startswith(f"{self.namespace}:"):
-            path = key[len(f"{self.namespace}:"):]
+            path = key[len(f"{self.namespace}:") :]
             return f"/{path}"
         return f"/{key}"
 
@@ -66,9 +66,9 @@ class PolymarketStoreBackend(BackendProtocol):
         """List files and directories in store."""
         try:
             # Search for items under this path
-            prefix = path.strip('/')
-            if prefix and not prefix.endswith('/'):
-                prefix += '/'
+            prefix = path.strip("/")
+            if prefix and not prefix.endswith("/"):
+                prefix += "/"
 
             search_key = f"{self.namespace}:{prefix}" if prefix else self.namespace
 
@@ -79,18 +79,22 @@ class PolymarketStoreBackend(BackendProtocol):
                 item_path = self._get_path(item.key)
 
                 # Check if item is under requested path
-                if not item_path.startswith(path.rstrip('/') + '/'):
+                if not item_path.startswith(path.rstrip("/") + "/"):
                     continue
 
                 # Extract metadata
-                metadata = item.value.get('metadata', {})
+                metadata = item.value.get("metadata", {})
 
-                entries.append(FileInfo(
-                    path=item_path,
-                    is_dir=False,  # Store items are always files
-                    size=len(item.value.get('content', '')),
-                    modified_at=metadata.get('modified_at', datetime.now().isoformat())
-                ))
+                entries.append(
+                    FileInfo(
+                        path=item_path,
+                        is_dir=False,  # Store items are always files
+                        size=len(item.value.get("content", "")),
+                        modified_at=metadata.get(
+                            "modified_at", datetime.now().isoformat()
+                        ),
+                    )
+                )
 
             # Sort by path
             entries.sort(key=lambda x: x.path)
@@ -106,24 +110,30 @@ class PolymarketStoreBackend(BackendProtocol):
             if not item:
                 return f"Error: File '{file_path}' not found"
 
-            content = item.value.get('content', '')
+            content = item.value.get("content", "")
 
             # Apply offset and limit
             if offset > 0:
                 content = content[offset:]
 
             if limit > 0 and len(content) > limit:
-                content = content[:limit] + f"\n... ({len(content) - limit} characters truncated)"
+                content = (
+                    content[:limit]
+                    + f"\n... ({len(content) - limit} characters truncated)"
+                )
 
             return content
 
         except Exception as e:
             return f"Error reading file '{file_path}': {str(e)}"
 
-    def grep_raw(self, pattern: str, path: str | None = None, glob: str | None = None) -> List[GrepMatch] | str:
+    def grep_raw(
+        self, pattern: str, path: str | None = None, glob: str | None = None
+    ) -> List[GrepMatch] | str:
         """Search for pattern in stored content."""
         try:
             import re
+
             regex = re.compile(pattern)
         except re.error as e:
             return f"Invalid regex pattern: {e}"
@@ -142,16 +152,14 @@ class PolymarketStoreBackend(BackendProtocol):
                 if glob and glob not in item_path:
                     continue
 
-                content = item.value.get('content', '')
-                lines = content.split('\n')
+                content = item.value.get("content", "")
+                lines = content.split("\n")
 
                 for line_num, line in enumerate(lines, 1):
                     if regex.search(line):
-                        matches.append(GrepMatch(
-                            path=item_path,
-                            line=line_num,
-                            text=line.rstrip()
-                        ))
+                        matches.append(
+                            GrepMatch(path=item_path, line=line_num, text=line.rstrip())
+                        )
 
                         if len(matches) >= 100:  # Limit results
                             break
@@ -176,15 +184,19 @@ class PolymarketStoreBackend(BackendProtocol):
                 item_path = self._get_path(item.key)
 
                 # Apply glob pattern
-                rel_path = item_path[len(path):].lstrip('/')
+                rel_path = item_path[len(path) :].lstrip("/")
                 if fnmatch.fnmatch(rel_path, pattern):
-                    metadata = item.value.get('metadata', {})
-                    matches.append(FileInfo(
-                        path=item_path,
-                        is_dir=False,
-                        size=len(item.value.get('content', '')),
-                        modified_at=metadata.get('modified_at', datetime.now().isoformat())
-                    ))
+                    metadata = item.value.get("metadata", {})
+                    matches.append(
+                        FileInfo(
+                            path=item_path,
+                            is_dir=False,
+                            size=len(item.value.get("content", "")),
+                            modified_at=metadata.get(
+                                "modified_at", datetime.now().isoformat()
+                            ),
+                        )
+                    )
 
             return matches[:50]
 
@@ -203,13 +215,13 @@ class PolymarketStoreBackend(BackendProtocol):
 
             # Store the item
             item_data = {
-                'content': content,
-                'metadata': {
-                    'created_at': datetime.now().isoformat(),
-                    'modified_at': datetime.now().isoformat(),
-                    'size': len(content),
-                    'type': 'file'
-                }
+                "content": content,
+                "metadata": {
+                    "created_at": datetime.now().isoformat(),
+                    "modified_at": datetime.now().isoformat(),
+                    "size": len(content),
+                    "type": "file",
+                },
             }
 
             self.store.put([self.namespace], key, item_data)
@@ -219,14 +231,20 @@ class PolymarketStoreBackend(BackendProtocol):
         except Exception as e:
             return WriteResult(error=f"Failed to write file '{file_path}': {str(e)}")
 
-    def edit(self, file_path: str, old_string: str, new_string: str, replace_all: bool = False) -> EditResult:
+    def edit(
+        self,
+        file_path: str,
+        old_string: str,
+        new_string: str,
+        replace_all: bool = False,
+    ) -> EditResult:
         """Edit existing file in store."""
         try:
             item = self._get_item(file_path)
             if not item:
                 return EditResult(error=f"File '{file_path}' not found")
 
-            content = item.value.get('content', '')
+            content = item.value.get("content", "")
 
             # Find and replace
             if replace_all:
@@ -235,26 +253,37 @@ class PolymarketStoreBackend(BackendProtocol):
             else:
                 index = content.find(old_string)
                 if index == -1:
-                    return EditResult(error=f"String '{old_string}' not found in '{file_path}'")
+                    return EditResult(
+                        error=f"String '{old_string}' not found in '{file_path}'"
+                    )
 
-                new_content = content[:index] + new_string + content[index + len(old_string):]
+                new_content = (
+                    content[:index] + new_string + content[index + len(old_string) :]
+                )
                 occurrences = 1
 
             # Update in store
-            item.value['content'] = new_content
-            item.value['metadata']['modified_at'] = datetime.now().isoformat()
-            item.value['metadata']['size'] = len(new_content)
+            item.value["content"] = new_content
+            item.value["metadata"]["modified_at"] = datetime.now().isoformat()
+            item.value["metadata"]["size"] = len(new_content)
 
             key = self._get_key(file_path)
             self.store.put([self.namespace], key, item.value)
 
-            return EditResult(path=file_path, files_update=None, occurrences=occurrences)
+            return EditResult(
+                path=file_path, files_update=None, occurrences=occurrences
+            )
 
         except Exception as e:
             return EditResult(error=f"Failed to edit file '{file_path}': {str(e)}")
 
-    def store_memory(self, memory_type: str, content: str, tags: List[str] = None,
-                    context: Dict[str, Any] = None) -> Optional[str]:
+    def store_memory(
+        self,
+        memory_type: str,
+        content: str,
+        tags: List[str] = None,
+        context: Dict[str, Any] = None,
+    ) -> Optional[str]:
         """Store a structured memory with rich metadata."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -262,36 +291,45 @@ class PolymarketStoreBackend(BackendProtocol):
         filepath = f"/{filename}"
 
         memory_data = {
-            'type': memory_type,
-            'content': content,
-            'tags': tags or [],
-            'context': context or {},
-            'timestamp': datetime.now().isoformat(),
-            'version': 1
+            "type": memory_type,
+            "content": content,
+            "tags": tags or [],
+            "context": context or {},
+            "timestamp": datetime.now().isoformat(),
+            "version": 1,
         }
 
         result = self.write(filepath, json.dumps(memory_data, indent=2, default=str))
         return result.path if not result.error else None
 
-    def store_analysis_pattern(self, pattern_name: str, pattern_data: Dict[str, Any],
-                              confidence: float, examples: List[str]) -> Optional[str]:
+    def store_analysis_pattern(
+        self,
+        pattern_name: str,
+        pattern_data: Dict[str, Any],
+        confidence: float,
+        examples: List[str],
+    ) -> Optional[str]:
         """Store a learned analysis pattern."""
-        filename = f"patterns/{pattern_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        filename = (
+            f"patterns/{pattern_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
         filepath = f"/{filename}"
 
         pattern = {
-            'name': pattern_name,
-            'data': pattern_data,
-            'confidence': confidence,
-            'examples': examples,
-            'created_at': datetime.now().isoformat(),
-            'usage_count': 0
+            "name": pattern_name,
+            "data": pattern_data,
+            "confidence": confidence,
+            "examples": examples,
+            "created_at": datetime.now().isoformat(),
+            "usage_count": 0,
         }
 
         result = self.write(filepath, json.dumps(pattern, indent=2, default=str))
         return result.path if not result.error else None
 
-    def get_memories_by_type(self, memory_type: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_memories_by_type(
+        self, memory_type: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Retrieve memories of a specific type."""
         try:
             items = self.store.search([self.namespace])
@@ -300,19 +338,21 @@ class PolymarketStoreBackend(BackendProtocol):
             for item in items:
                 if f"memories/{memory_type}_" in item.key:
                     try:
-                        memory_data = json.loads(item.value.get('content', '{}'))
+                        memory_data = json.loads(item.value.get("content", "{}"))
                         memories.append(memory_data)
                     except:
                         continue
 
             # Sort by timestamp, most recent first
-            memories.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+            memories.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
             return memories[:limit]
 
         except Exception:
             return []
 
-    def search_memories(self, query: str, tags: List[str] = None) -> List[Dict[str, Any]]:
+    def search_memories(
+        self, query: str, tags: List[str] = None
+    ) -> List[Dict[str, Any]]:
         """Search memories by content and tags."""
         try:
             items = self.store.search([self.namespace])
@@ -323,15 +363,17 @@ class PolymarketStoreBackend(BackendProtocol):
                     continue
 
                 try:
-                    memory_data = json.loads(item.value.get('content', '{}'))
+                    memory_data = json.loads(item.value.get("content", "{}"))
 
                     # Check content match
-                    content_match = query.lower() in memory_data.get('content', '').lower()
+                    content_match = (
+                        query.lower() in memory_data.get("content", "").lower()
+                    )
 
                     # Check tag match
                     tag_match = True
                     if tags:
-                        memory_tags = set(memory_data.get('tags', []))
+                        memory_tags = set(memory_data.get("tags", []))
                         query_tags = set(tags)
                         tag_match = bool(memory_tags.intersection(query_tags))
 

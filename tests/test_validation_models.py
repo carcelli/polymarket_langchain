@@ -10,16 +10,23 @@ from datetime import datetime
 from collections import OrderedDict
 
 # Import metaclass examples (educational only)
-from polymarket_agents.fluent_python.ch21_metaclasses.model_v7 import LineItem as MetaLineItemV7
-from polymarket_agents.fluent_python.ch21_metaclasses.model_v8 import LineItem as MetaLineItemV8
+from polymarket_agents.fluent_python.ch21_metaclasses.model_v7 import (
+    LineItem as MetaLineItemV7,
+)
+from polymarket_agents.fluent_python.ch21_metaclasses.model_v8 import (
+    LineItem as MetaLineItemV8,
+)
 
 # Import modern alternatives (production-ready)
-from polymarket_agents.modern_alternatives.dataclass_validated import LineItem as DataclassLineItem, TimeSeriesPoint
+from polymarket_agents.modern_alternatives.dataclass_validated import (
+    LineItem as DataclassLineItem,
+    TimeSeriesPoint,
+)
 from polymarket_agents.modern_alternatives.pydantic_validated import (
     LineItem as PydanticLineItem,
     MarketDataPoint,
     AgentPrediction,
-    ValuationModel
+    ValuationModel,
 )
 
 
@@ -47,9 +54,9 @@ class TestMetaclassValidation:
         item = MetaLineItemV7("Test", 1.0, 2.0)
 
         # Check that private storage names exist
-        assert hasattr(item, '_NonBlank#description')
-        assert hasattr(item, '_Quantity#weight')
-        assert hasattr(item, '_Quantity#price')
+        assert hasattr(item, "_NonBlank#description")
+        assert hasattr(item, "_Quantity#weight")
+        assert hasattr(item, "_Quantity#price")
 
         # Check that public access works
         assert item.description == "Test"
@@ -61,12 +68,12 @@ class TestMetaclassValidation:
         item = MetaLineItemV8("White mouse", 0.5, 1.5)
 
         # Check field order is preserved
-        assert item._field_order == ('description', 'weight', 'price')
+        assert item._field_order == ("description", "weight", "price")
 
         # Check ordered serialization
         ordered_dict = item.to_dict()
         assert isinstance(ordered_dict, OrderedDict)
-        assert list(ordered_dict.keys()) == ['description', 'weight', 'price']
+        assert list(ordered_dict.keys()) == ["description", "weight", "price"]
 
 
 class TestDataclassValidation:
@@ -93,19 +100,15 @@ class TestDataclassValidation:
         item = DataclassLineItem("Test", 1.0, 2.0)
 
         # Check private storage exists
-        assert hasattr(item, '_NonBlank#description')
-        assert hasattr(item, '_Quantity#weight')
-        assert hasattr(item, '_Quantity#price')
+        assert hasattr(item, "_NonBlank#description")
+        assert hasattr(item, "_Quantity#weight")
+        assert hasattr(item, "_Quantity#price")
 
     def test_serialization(self):
         """Test dataclass serialization."""
         item = DataclassLineItem("Mouse", 0.5, 1.5)
         data = item.to_dict()
-        assert data == {
-            'description': 'Mouse',
-            'weight': 0.5,
-            'price': 1.5
-        }
+        assert data == {"description": "Mouse", "weight": 0.5, "price": 1.5}
 
     def test_time_series_point(self):
         """Test the time-series example."""
@@ -155,7 +158,7 @@ class TestPydanticValidation:
             price=45000.0,
             volume=1000,
             bid=44950.0,
-            ask=45050.0
+            ask=45050.0,
         )
 
         # Symbol should be uppercased
@@ -173,7 +176,7 @@ class TestPydanticValidation:
                 price=45000.0,
                 volume=1000,
                 bid=45050.0,
-                ask=44950.0  # ask < bid
+                ask=44950.0,  # ask < bid
             )
 
     def test_agent_prediction_validation(self):
@@ -184,7 +187,7 @@ class TestPydanticValidation:
             confidence=0.8,
             edge=0.02,
             reasoning="Strong upward momentum in BTC price action over the past 24 hours",
-            model_version="v2.1"
+            model_version="v2.1",
         )
 
         assert prediction.market_id == "0x123"
@@ -199,7 +202,7 @@ class TestPydanticValidation:
                 confidence=0.8,
                 edge=0.02,
                 reasoning="Too short",  # Less than 20 chars
-                model_version="v2.1"
+                model_version="v2.1",
             )
 
     def test_complex_valuation_model(self):
@@ -208,7 +211,7 @@ class TestPydanticValidation:
             timestamp=datetime(2024, 1, 1, 12, 0, 0),
             symbol="BTC",
             price=45000.0,
-            volume=1000
+            volume=1000,
         )
 
         prediction1 = AgentPrediction(
@@ -217,7 +220,7 @@ class TestPydanticValidation:
             confidence=0.8,
             edge=0.02,
             reasoning="Technical analysis shows bullish signals",
-            model_version="v1.0"
+            model_version="v1.0",
         )
 
         prediction2 = AgentPrediction(
@@ -226,17 +229,14 @@ class TestPydanticValidation:
             confidence=0.6,
             edge=0.03,
             reasoning="Fundamental analysis supports growth",
-            model_version="v1.0"
+            model_version="v1.0",
         )
 
         valuation = ValuationModel(
             model_name="ensemble_v1",
             parameters={"alpha": 0.1, "beta": 0.9},
             market_data=market_data,
-            predictions={
-                "tech_agent": prediction1,
-                "fund_agent": prediction2
-            }
+            predictions={"tech_agent": prediction1, "fund_agent": prediction2},
         )
 
         # Test ensemble prediction
@@ -249,7 +249,7 @@ class TestPydanticValidation:
             ValuationModel(
                 model_name="test",
                 parameters={"alpha": -0.1},  # Negative parameter
-                market_data=market_data
+                market_data=market_data,
             )
 
         # Test prediction consistency
@@ -266,9 +266,9 @@ class TestPydanticValidation:
                         confidence=0.7,
                         edge=0.01,
                         reasoning="Different market analysis",
-                        model_version="v1.0"
-                    )
-                }
+                        model_version="v1.0",
+                    ),
+                },
             )
 
 
@@ -304,11 +304,15 @@ class TestApproachComparison:
 
                 # Test Pydantic
                 if should_succeed:
-                    item_py = PydanticLineItem(description=description, weight=weight, price=price)
+                    item_py = PydanticLineItem(
+                        description=description, weight=weight, price=price
+                    )
                     assert item_py.subtotal == weight * price
                 else:
                     with pytest.raises(ValueError):
-                        PydanticLineItem(description=description, weight=weight, price=price)
+                        PydanticLineItem(
+                            description=description, weight=weight, price=price
+                        )
 
     def test_storage_patterns(self):
         """Compare storage isolation patterns."""
@@ -317,10 +321,10 @@ class TestApproachComparison:
         dc_item = DataclassLineItem("Test", 1.0, 2.0)
 
         # Metaclass uses private attributes
-        assert hasattr(meta_item, '_NonBlank#description')
+        assert hasattr(meta_item, "_NonBlank#description")
 
         # Dataclass approach also uses private attributes
-        assert hasattr(dc_item, '_NonBlank#description')
+        assert hasattr(dc_item, "_NonBlank#description")
 
         # Pydantic uses its own internal storage
         py_item = PydanticLineItem(description="Test", weight=1.0, price=2.0)

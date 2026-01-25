@@ -34,18 +34,18 @@ import sys
 import os
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from polymarket_agents.utils.charfinder_server import main
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parse arguments: [host] [port]
     if len(sys.argv) >= 3:
         host, port = sys.argv[1], sys.argv[2]
     elif len(sys.argv) == 2:
-        host, port = '127.0.0.1', sys.argv[1]
+        host, port = "127.0.0.1", sys.argv[1]
     else:
-        host, port = '127.0.0.1', '2323'
+        host, port = "127.0.0.1", "2323"
 
     print("🚀 Starting Character Finder Server")
     print(f"📍 Binding to: {host}:{port}")

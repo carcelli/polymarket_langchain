@@ -27,39 +27,40 @@ def test_database_only():
 
         # Basic database operations
         experiment_id = db.create_experiment(
-            name="Core Test",
-            description="Testing basic database functionality"
+            name="Core Test", description="Testing basic database functionality"
         )
         print(f"✅ Created experiment: {experiment_id}")
 
         # Save a basic model
         model_info = {
-            'name': 'CoreTestModel',
-            'model_type': 'Test',
-            'algorithm': 'TestAlgo',
-            'hyperparameters': {'param1': 1, 'param2': 'test'},
-            'feature_columns': ['feat1', 'feat2'],
-            'training_samples': 100,
-            'training_start_time': datetime.now().isoformat(),
-            'training_end_time': datetime.now().isoformat()
+            "name": "CoreTestModel",
+            "model_type": "Test",
+            "algorithm": "TestAlgo",
+            "hyperparameters": {"param1": 1, "param2": "test"},
+            "feature_columns": ["feat1", "feat2"],
+            "training_samples": 100,
+            "training_start_time": datetime.now().isoformat(),
+            "training_end_time": datetime.now().isoformat(),
         }
 
         model_id = db.save_model(experiment_id, model_info)
         print(f"✅ Saved model: {model_id}")
 
         # Save metrics
-        metrics = {'accuracy': 0.85, 'precision': 0.82, 'recall': 0.88}
+        metrics = {"accuracy": 0.85, "precision": 0.82, "recall": 0.88}
         db.save_model_metrics(model_id, metrics)
         print(f"✅ Saved metrics: {metrics}")
 
         # Save a prediction
-        predictions = [{
-            'market_id': 'test_market_1',
-            'predicted_probability': 0.65,
-            'actual_outcome': 1,
-            'confidence': 0.8,
-            'recommended_bet': 'YES'
-        }]
+        predictions = [
+            {
+                "market_id": "test_market_1",
+                "predicted_probability": 0.65,
+                "actual_outcome": 1,
+                "confidence": 0.8,
+                "recommended_bet": "YES",
+            }
+        ]
         db.save_predictions(model_id, predictions)
         print(f"✅ Saved {len(predictions)} predictions")
 
@@ -81,6 +82,7 @@ def test_database_only():
     except Exception as e:
         print(f"❌ Database test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -99,23 +101,23 @@ def test_data_ingestion_minimal():
         # Test the basic cleaning function with mock data
         mock_raw_data = [
             {
-                'id': 'test_1',
-                'question': 'Will this work?',
-                'category': 'tech',
-                'volume': 5000,
-                'outcome_prices': [0.6, 0.4],
-                'resolved': True,
-                'winner': 'yes'
+                "id": "test_1",
+                "question": "Will this work?",
+                "category": "tech",
+                "volume": 5000,
+                "outcome_prices": [0.6, 0.4],
+                "resolved": True,
+                "winner": "yes",
             },
             {
-                'id': 'test_2',
-                'question': 'Another test?',
-                'category': 'politics',
-                'volume': 8000,
-                'outcome_prices': [0.4, 0.6],
-                'resolved': True,
-                'winner': 'no'
-            }
+                "id": "test_2",
+                "question": "Another test?",
+                "category": "politics",
+                "volume": 8000,
+                "outcome_prices": [0.4, 0.6],
+                "resolved": True,
+                "winner": "no",
+            },
         ]
 
         cleaned_df = ingestion.clean_market_data(mock_raw_data)
@@ -130,6 +132,7 @@ def test_data_ingestion_minimal():
     except Exception as e:
         print(f"❌ Data ingestion test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -141,13 +144,13 @@ def test_github_minimal():
 
     try:
         # Test basic GitHub test generation
-        from polymarket_agents.subagents.github_ml_agent import generate_ml_strategy_test
+        from polymarket_agents.subagents.github_ml_agent import (
+            generate_ml_strategy_test,
+        )
 
         # Generate a simple test
         test_code = generate_ml_strategy_test(
-            "MinimalTest",
-            "predictor",
-            "Minimal integration test"
+            "MinimalTest", "predictor", "Minimal integration test"
         )
 
         print(f"✅ Generated test code: {len(test_code)} characters")
@@ -155,24 +158,27 @@ def test_github_minimal():
         # Save to file
         os.makedirs("integration_tests", exist_ok=True)
         test_file = "integration_tests/minimal_test.py"
-        with open(test_file, 'w') as f:
+        with open(test_file, "w") as f:
             f.write(test_code)
 
         print(f"✅ Saved test file: {test_file}")
 
         # Try to commit (may fail if not configured)
         try:
-            from polymarket_agents.subagents.github_ml_agent import commit_ml_tests_to_github
+            from polymarket_agents.subagents.github_ml_agent import (
+                commit_ml_tests_to_github,
+            )
 
             test_files = {"minimal_test.py": test_code}
             result = commit_ml_tests_to_github(
-                test_files,
-                "🤖 Core Test: Minimal integration test"
+                test_files, "🤖 Core Test: Minimal integration test"
             )
             print("✅ GitHub commit successful")
 
         except Exception as e:
-            print(f"⚠️ GitHub commit failed (expected if not configured): {str(e)[:80]}...")
+            print(
+                f"⚠️ GitHub commit failed (expected if not configured): {str(e)[:80]}..."
+            )
 
         return True
 
@@ -194,7 +200,7 @@ def run_core_test():
     tests = [
         ("Database Only", test_database_only),
         ("Data Ingestion Minimal", test_data_ingestion_minimal),
-        ("GitHub Minimal", test_github_minimal)
+        ("GitHub Minimal", test_github_minimal),
     ]
 
     results = {}

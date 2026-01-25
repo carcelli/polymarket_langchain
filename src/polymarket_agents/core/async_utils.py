@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TaskMetrics:
     """Metrics for monitoring task health and performance."""
+
     name: str
     start_time: datetime = field(default_factory=datetime.now)
     restarts: int = 0
@@ -91,8 +92,9 @@ class TaskSupervisor:
         self.metrics: dict[str, TaskMetrics] = {}
         self._shutdown_event = asyncio.Event()
 
-    async def start_task(self, name: str, coro: Awaitable,
-                        restart_on_failure: bool = True) -> None:
+    async def start_task(
+        self, name: str, coro: Awaitable, restart_on_failure: bool = True
+    ) -> None:
         """Start a supervised task."""
         if name in self.tasks:
             logger.warning(f"Task {name} already exists, replacing...")
@@ -125,9 +127,7 @@ class TaskSupervisor:
     async def stop_all(self) -> None:
         """Stop all supervised tasks."""
         logger.info("Stopping all supervised tasks...")
-        stop_tasks = [
-            self.stop_task(name) for name in list(self.tasks.keys())
-        ]
+        stop_tasks = [self.stop_task(name) for name in list(self.tasks.keys())]
         await asyncio.gather(*stop_tasks, return_exceptions=True)
         logger.info("All tasks stopped")
 
@@ -146,15 +146,24 @@ class TaskSupervisor:
                 "restarts": metrics.restarts,
                 "errors": metrics.errors,
                 "last_error": str(metrics.last_error) if metrics.last_error else None,
-                "last_error_time": metrics.last_error_time.isoformat() if metrics.last_error_time else None,
+                "last_error_time": (
+                    metrics.last_error_time.isoformat()
+                    if metrics.last_error_time
+                    else None
+                ),
                 "total_runtime_seconds": metrics.total_runtime.total_seconds(),
-                "status": "running" if name in self.tasks and not self.tasks[name].done() else "stopped"
+                "status": (
+                    "running"
+                    if name in self.tasks and not self.tasks[name].done()
+                    else "stopped"
+                ),
             }
             for name, metrics in self.metrics.items()
         }
 
-    async def _run_supervised_task(self, name: str, coro: Awaitable,
-                                  restart_on_failure: bool) -> None:
+    async def _run_supervised_task(
+        self, name: str, coro: Awaitable, restart_on_failure: bool
+    ) -> None:
         """Internal method to run a supervised task with error handling."""
         while not self._shutdown_event.is_set():
             try:
@@ -178,14 +187,15 @@ class TaskSupervisor:
                     break
 
                 # Exponential backoff for retries
-                backoff_seconds = min(2 ** self.metrics[name].errors, 300)  # Max 5 minutes
+                backoff_seconds = min(
+                    2 ** self.metrics[name].errors, 300
+                )  # Max 5 minutes
                 logger.info(f"Restarting task {name} in {backoff_seconds}s...")
                 self.metrics[name].record_restart()
 
                 try:
                     await asyncio.wait_for(
-                        self._shutdown_event.wait(),
-                        timeout=backoff_seconds
+                        self._shutdown_event.wait(), timeout=backoff_seconds
                     )
                     # Shutdown was requested during backoff
                     break
@@ -198,8 +208,12 @@ class TaskSupervisor:
             self.metrics[name].update_runtime()
 
 
-async def robust_task(name: str, coro: Awaitable, restart_on_failure: bool = True,
-                     backoff_seconds: float = 5.0) -> None:
+async def robust_task(
+    name: str,
+    coro: Awaitable,
+    restart_on_failure: bool = True,
+    backoff_seconds: float = 5.0,
+) -> None:
     """
     Robust wrapper for agent tasks with proper exception handling and cleanup.
 
@@ -252,8 +266,9 @@ async def robust_task(name: str, coro: Awaitable, restart_on_failure: bool = Tru
 
 
 @asynccontextmanager
-async def managed_resource(initialize: Callable[[], Awaitable[Any]],
-                          cleanup: Callable[[Any], Awaitable[None]]):
+async def managed_resource(
+    initialize: Callable[[], Awaitable[Any]], cleanup: Callable[[Any], Awaitable[None]]
+):
     """
     Async context manager for resource lifecycle management.
 
@@ -277,6 +292,7 @@ async def managed_resource(initialize: Callable[[], Awaitable[Any]],
 
 
 # ===== EXAMPLE PATTERNS FOR AGENT COROUTINES =====
+
 
 async def example_market_monitor(market_id: str) -> None:
     """
@@ -373,23 +389,28 @@ async def example_data_ingestion_worker(queue: asyncio.Queue) -> None:
 
 # ===== UTILITY FUNCTIONS (stubs for the examples) =====
 
+
 async def connect_to_market_feed(market_id: str):
     """Stub for websocket connection."""
     await asyncio.sleep(0.1)  # Simulate connection time
     return f"mock_websocket_{market_id}"
 
+
 async def analyze_market_message(message: str) -> dict:
     """Stub for message analysis."""
     return {"edge": 0.03, "signal": "hold"}
+
 
 async def submit_trade_signal(market_id: str, analysis: dict) -> None:
     """Stub for trade submission."""
     logger.info(f"Submitted trade for {market_id}: {analysis}")
 
+
 async def establish_db_connection():
     """Stub for database connection."""
     await asyncio.sleep(0.1)
     return "mock_db_connection"
+
 
 async def process_data_item(connection, item: dict) -> None:
     """Stub for data processing."""
@@ -398,10 +419,12 @@ async def process_data_item(connection, item: dict) -> None:
 
 class ValidationError(Exception):
     """Custom validation error."""
+
     pass
 
 
 # ===== DEMONSTRATION =====
+
 
 async def demo_robust_tasks():
     """Demonstrate the robust task patterns."""

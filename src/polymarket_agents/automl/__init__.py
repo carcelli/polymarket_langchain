@@ -9,8 +9,4 @@ from .data_ingestion import PolymarketDataIngestion
 from .data_quality import DataQualityValidator
 from .auto_ml_pipeline import AutoMLPipeline
 
-__all__ = [
-    'PolymarketDataIngestion',
-    'DataQualityValidator',
-    'AutoMLPipeline'
-]
+__all__ = ["PolymarketDataIngestion", "DataQualityValidator", "AutoMLPipeline"]
