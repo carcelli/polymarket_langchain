@@ -216,7 +216,7 @@ def demo_market_prediction():
     for market in test_markets:
         prediction = predictor.predict_movement(market)
         print(f"\n📊 Market: {market['description']}")
-        print(f"   Current volume: ${prediction.get('volume', 0):.1f}")
+        print(f"   Current volume: ${market.get('volume', 0):.1f}")
         print(
             f"   Prediction: {prediction['prediction']} ({prediction.get('confidence', 0):.1%} confidence)"
         )
