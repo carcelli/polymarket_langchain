@@ -9,6 +9,7 @@ venv/
 .DS_Store
 *:Zone.Identifier
 .idea/
+.claude/*.local.*
 
 # Generated artifacts
 *.png
