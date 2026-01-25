@@ -17,9 +17,6 @@ Requirements:
 
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from polymarket_agents.langchain.agent import (
     create_probability_extraction_agent,
     compare_ml_vs_market_forecast,
@@ -28,6 +25,8 @@ from polymarket_agents.langchain.agent import (
     analyze_business_risks,
     run_agent,
 )
+
+load_dotenv()
 
 
 def test_probability_extraction():

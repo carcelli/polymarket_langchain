@@ -140,7 +140,7 @@ class TimeSeriesPoint:
         # Apply validation to all fields with validators
         for f in self.__dataclass_fields__.values():
             validator = f.metadata.get("validator")
-            if validator and callable(validator):
+            if validator:
                 value = getattr(self, f.name)
                 if hasattr(validator, "validate"):
                     # Descriptor validator
@@ -150,7 +150,7 @@ class TimeSeriesPoint:
                     setattr(self, storage_name, validated_value)
                     setattr(type(self), f.name, validator)
                     setattr(self, f.name, validated_value)
-                else:
+                elif callable(validator):
                     # Simple function validator
                     validated_value = validator(value)
                     setattr(self, f.name, validated_value)

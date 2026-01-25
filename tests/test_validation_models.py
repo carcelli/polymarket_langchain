@@ -137,11 +137,12 @@ class TestPydanticValidation:
         """Test Pydantic validation errors with rich messages."""
         with pytest.raises(ValueError) as exc_info:
             PydanticLineItem(description="", weight=0.5, price=1.5)
-        assert "description cannot be empty or blank" in str(exc_info.value)
+        # Pydantic v2 error message is different
+        assert "String should have at least 1 character" in str(exc_info.value)
 
         with pytest.raises(ValueError) as exc_info:
             PydanticLineItem(description="Mouse", weight=-1, price=1.5)
-        assert "value must be > 0" in str(exc_info.value)
+        assert "Input should be greater than 0" in str(exc_info.value)
 
     def test_json_serialization(self):
         """Test Pydantic JSON serialization."""
@@ -285,34 +286,33 @@ class TestApproachComparison:
         ]
 
         for desc, description, weight, price, should_succeed in test_cases:
-            with self.subTest(case=desc):
-                # Test metaclass v7
-                if should_succeed:
-                    item_v7 = MetaLineItemV7(description, weight, price)
-                    assert item_v7.subtotal() == weight * price
-                else:
-                    with pytest.raises(ValueError):
-                        MetaLineItemV7(description, weight, price)
+            # Test metaclass v7
+            if should_succeed:
+                item_v7 = MetaLineItemV7(description, weight, price)
+                assert item_v7.subtotal() == weight * price
+            else:
+                with pytest.raises(ValueError):
+                    MetaLineItemV7(description, weight, price)
 
-                # Test dataclass
-                if should_succeed:
-                    item_dc = DataclassLineItem(description, weight, price)
-                    assert item_dc.subtotal == weight * price
-                else:
-                    with pytest.raises(ValueError):
-                        DataclassLineItem(description, weight, price)
+            # Test dataclass
+            if should_succeed:
+                item_dc = DataclassLineItem(description, weight, price)
+                assert item_dc.subtotal == weight * price
+            else:
+                with pytest.raises(ValueError):
+                    DataclassLineItem(description, weight, price)
 
-                # Test Pydantic
-                if should_succeed:
-                    item_py = PydanticLineItem(
+            # Test Pydantic
+            if should_succeed:
+                item_py = PydanticLineItem(
+                    description=description, weight=weight, price=price
+                )
+                assert item_py.subtotal == weight * price
+            else:
+                with pytest.raises(ValueError):
+                    PydanticLineItem(
                         description=description, weight=weight, price=price
                     )
-                    assert item_py.subtotal == weight * price
-                else:
-                    with pytest.raises(ValueError):
-                        PydanticLineItem(
-                            description=description, weight=weight, price=price
-                        )
 
     def test_storage_patterns(self):
         """Compare storage isolation patterns."""

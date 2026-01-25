@@ -52,6 +52,26 @@ def negative_edge_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
 class TestStrategyRegistry:
     """Test the strategy registration and selection system."""
 
+    @pytest.fixture(autouse=True)
+    def clean_strategies(self):
+        """Ensure clean strategy registry for each test."""
+        # Backup existing strategies
+        original_strategies = STRATEGIES.copy()
+        STRATEGIES.clear()
+        
+        # Register test strategies
+        # Note: We re-register them because we cleared the global registry
+        # The decorators ran at import time, but we just wiped their work
+        STRATEGIES["test_high_edge"] = high_edge_strategy
+        STRATEGIES["test_low_edge"] = low_edge_strategy
+        STRATEGIES["test_negative_edge"] = negative_edge_strategy
+        
+        yield
+        
+        # Restore original strategies
+        STRATEGIES.clear()
+        STRATEGIES.update(original_strategies)
+
     def test_strategy_registration(self):
         """Test that strategies are properly registered."""
         available = get_available_strategies()

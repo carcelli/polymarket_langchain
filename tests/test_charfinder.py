@@ -14,7 +14,6 @@ Then run these tests:
 import pytest
 import asyncio
 import socket
-import time
 from typing import List
 
 from polymarket_agents.utils.charfinder_client import (
@@ -87,7 +86,7 @@ class TestCharacterFinderClient:
     def test_connection_error_handling(self):
         """Test handling of connection errors."""
         # Try to connect to a non-existent server
-        client = CharacterFinderClient(host="127.0.0.1", port=99999, timeout=1.0)
+        client = CharacterFinderClient(host="127.0.0.1", port=60000, timeout=1.0)
 
         with pytest.raises(ConnectionError):
             client.query("test")
@@ -116,7 +115,7 @@ class TestAsyncCharacterFinderClient:
         """Test async handling of connection errors."""
         with pytest.raises(ConnectionError):
             await async_query_unicode_names(
-                "test", host="127.0.0.1", port=99999, timeout=1.0
+                "test", host="127.0.0.1", port=60000, timeout=1.0
             )
 
 
