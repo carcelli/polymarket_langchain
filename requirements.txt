@@ -124,6 +124,7 @@ PyPika==0.48.9
 pyproject_hooks==1.1.0
 pysha3==1.0.2
 pytest==8.3.2
+pytest-asyncio==0.23.8
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-multipart==0.0.9
@@ -169,3 +170,7 @@ wrapt==1.16.0
 yarl==1.9.4
 zipp==3.19.2
 torch
+ccxt
+scipy
+structlog
+pandas

@@ -2,7 +2,7 @@ import httpx
 import json
 import time
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 @dataclass
@@ -145,3 +145,39 @@ def get_price_stream(market_id: str, days_back: int = 90) -> List[PricePoint]:
     except Exception as e:
         print(f"Exception in get_price_stream: {e}")
         return []
+
+
+def fetch_market_metadata(market_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch market metadata from Gamma API.
+
+    Args:
+        market_id: The Gamma market ID
+
+    Returns:
+        Dict with market metadata or None if not found
+    """
+    try:
+        gamma_url = f"https://gamma-api.polymarket.com/markets/{market_id}"
+
+        with httpx.Client() as client:
+            resp = client.get(gamma_url)
+            if resp.status_code != 200:
+                return None
+
+            data = resp.json()
+
+            # Extract key metadata
+            return {
+                "id": data.get("id"),
+                "question": data.get("question"),
+                "is_active": data.get("active", False),
+                "is_closed": data.get("closed", False),
+                "end_date": data.get("endDate"),
+                "volume": data.get("volume", 0),
+                "liquidity": data.get("liquidity", 0),
+            }
+
+    except Exception as e:
+        print(f"Exception in fetch_market_metadata: {e}")
+        return None

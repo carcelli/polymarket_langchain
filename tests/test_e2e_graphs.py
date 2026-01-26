@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
+from polymarket_agents.graph import memory_agent
 from polymarket_agents.graph.planning_agent import analyze_bet
 
 
@@ -16,7 +16,7 @@ class TestEndToEndGraphs(unittest.TestCase):
 
         # NOTE: This test assumes the graph can be created.
         try:
-            graph = create_memory_agent()
+            graph = memory_agent.create_memory_agent()
         except Exception as e:
             self.skipTest(f"Could not create memory agent graph: {e}")
             return
@@ -32,7 +32,7 @@ class TestEndToEndGraphs(unittest.TestCase):
             }
 
             query = "Find interesting political markets about the upcoming election"
-            result = run_memory_agent(graph, query, verbose=False)
+            result = memory_agent.run_memory_agent(graph, query, verbose=False)
 
             # Verify complete workflow executed
             self.assertIn("analysis", result)
