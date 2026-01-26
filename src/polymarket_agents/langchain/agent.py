@@ -54,36 +54,89 @@ def create_polymarket_agent(
     Returns:
         AgentExecutor ready to invoke with queries
     """
-    from langchain.agents import create_react_agent, AgentExecutor
-    from langchain_core.prompts import ChatPromptTemplate
-    from langchain_core.language_models import BaseChatModel
+    try:
+        # Try modern LangGraph API first (better JSON parsing)
+        from langgraph.prebuilt import create_react_agent
+        from langchain_core.language_models import BaseChatModel
+        
+        # Initialize LLM
+        if llm is None:
+            from langchain_openai import ChatOpenAI
+            
+            llm = ChatOpenAI(
+                model=model,
+                temperature=temperature,
+                api_key=os.getenv("OPENAI_API_KEY"),
+                **llm_kwargs,
+            )
+        elif not isinstance(llm, BaseChatModel):
+            raise ValueError("llm must be an instance of BaseChatModel")
+        
+        # Get tools
+        if tools is None:
+            from polymarket_agents.langchain.tools import get_all_tools
+            tools = get_all_tools()
+        
+        # Get context block if manager provided
+        context_block = ""
+        if context_manager:
+            context_block = context_manager.get_model_context()
+        
+        # Create system prompt
+        system_message = f"""You are an expert Polymarket trader and analyst.
 
-    from polymarket_agents.langchain.tools import get_all_tools
+{context_block}
 
-    # Initialize LLM
-    if llm is None:
-        from langchain_openai import ChatOpenAI
+Your role is to:
+1. Analyze prediction markets using available tools
+2. Find trading opportunities with positive expected value
+3. Provide probabilistic forecasts based on evidence
+4. Explain your reasoning clearly
 
-        llm = ChatOpenAI(
-            model=model,
-            temperature=temperature,
-            api_key=os.getenv("OPENAI_API_KEY"),
-            **llm_kwargs,
-        )
-    elif not isinstance(llm, BaseChatModel):
-        raise ValueError("llm must be an instance of BaseChatModel")
+IMPORTANT GUIDELINES:
+- Always fetch current data before making recommendations
+- Consider multiple information sources (news, orderbook, market data)
+- Express predictions as probabilities, not certainties
+- Note any uncertainties or limitations in your analysis
+- For trades, consider risk/reward and position sizing"""
+        
+        # LangGraph's create_react_agent handles JSON parsing correctly
+        agent = create_react_agent(llm, tools, state_modifier=system_message)
+        
+        return agent
+        
+    except ImportError:
+        # Fallback to legacy LangChain if LangGraph not available
+        from langchain.agents import create_react_agent, AgentExecutor
+        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.language_models import BaseChatModel
 
-    # Get tools
-    if tools is None:
-        tools = get_all_tools()
+        from polymarket_agents.langchain.tools import get_all_tools
 
-    # Get context block if manager provided
-    context_block = ""
-    if context_manager:
-        context_block = context_manager.get_model_context()
+        # Initialize LLM
+        if llm is None:
+            from langchain_openai import ChatOpenAI
 
-    # Create prompt template
-    system_message = f"""You are an expert Polymarket trader and analyst.
+            llm = ChatOpenAI(
+                model=model,
+                temperature=temperature,
+                api_key=os.getenv("OPENAI_API_KEY"),
+                **llm_kwargs,
+            )
+        elif not isinstance(llm, BaseChatModel):
+            raise ValueError("llm must be an instance of BaseChatModel")
+
+        # Get tools
+        if tools is None:
+            tools = get_all_tools()
+
+        # Get context block if manager provided
+        context_block = ""
+        if context_manager:
+            context_block = context_manager.get_model_context()
+
+        # Create prompt template
+        system_message = f"""You are an expert Polymarket trader and analyst.
 
 {context_block}
 
@@ -116,26 +169,26 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question"""
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_message),
-            ("human", "{input}\n\n{agent_scratchpad}"),
-        ]
-    )
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_message),
+                ("human", "{input}\n\n{agent_scratchpad}"),
+            ]
+        )
 
-    # Create agent
-    agent = create_react_agent(llm, tools, prompt)
+        # Create agent
+        agent = create_react_agent(llm, tools, prompt)
 
-    # Wrap in executor
-    executor = AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=verbose,
-        max_iterations=max_iterations,
-        handle_parsing_errors=True,
-    )
+        # Wrap in executor
+        executor = AgentExecutor(
+            agent=agent,
+            tools=tools,
+            verbose=verbose,
+            max_iterations=max_iterations,
+            handle_parsing_errors=True,
+        )
 
-    return executor
+        return executor
 
 
 def create_simple_analyst(

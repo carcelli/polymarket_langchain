@@ -6,7 +6,7 @@ Designed for integration with Polymarket agents for market prediction.
 """
 
 import numpy as np
-from typing import Optional, Union
+from typing import List, Optional, Tuple, Union
 from .utils import (
     truncated_normal,
     sigmoid,
@@ -138,7 +138,7 @@ class NeuralNetwork:
 
         return instance
 
-    def forward(self, x: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
+    def forward(self, x: np.ndarray) -> Union[np.ndarray, Tuple[np.ndarray, List[np.ndarray]]]:
         """
         Forward pass through the network.
 
@@ -146,9 +146,8 @@ class NeuralNetwork:
             x: Input features [n_inputs]
 
         Returns:
-            Tuple of (output, activations) where:
-            - output: Network output [n_outputs]
-            - activations: List of activations for each layer (for backprop)
+            For multi-layer: Tuple of (output, activations)
+            For single-layer: Just output array (backward compatibility)
         """
         # Handle both single-layer and multi-layer architectures
         if hasattr(self, "weights") and len(self.weights) > 2:
@@ -352,7 +351,7 @@ class NeuralNetwork:
         output = self.get_output(x)  # Always get raw output
 
         if self.use_softmax:
-            return output.argmax()  # Return class with highest probability
+            return int(output.argmax())  # Return class with highest probability
         else:
             return output  # Return raw output array for regression/binary tasks
 
@@ -439,22 +438,23 @@ class NeuralNetwork:
                 )
             losses.append(loss)
 
-        predictions = np.array(predictions)
+        predictions_arr = np.array(predictions)
 
         # Calculate accuracy
         if self.use_softmax:
-            pred_classes = predictions.argmax(axis=1)
+            # predictions are already class indices (ints)
+            pred_classes = predictions_arr
             true_classes = y.argmax(axis=1)
         else:
-            pred_classes = (predictions > 0.5).astype(int).ravel()
+            pred_classes = (predictions_arr > 0.5).astype(int).ravel()
             true_classes = y.astype(int).ravel()
 
-        accuracy = np.mean(pred_classes == true_classes)
+        accuracy = float(np.mean(pred_classes == true_classes))
 
         return {
             "accuracy": accuracy,
-            "avg_loss": np.mean(losses),
-            "predictions": predictions,
+            "avg_loss": float(np.mean(losses)),
+            "predictions": predictions_arr,
         }
 
     def evaluate_dataset(self, X: np.ndarray, y: np.ndarray) -> dict:

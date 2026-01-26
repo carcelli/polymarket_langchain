@@ -49,12 +49,12 @@ class MarketPredictor(MLBettingStrategy):
         print(f"🏗️ Training {self.name} on {len(training_data)} markets...")
 
         # Prepare features
-        X = []
+        X: list[np.ndarray] = []
         y_regression = []  # For predicting true probability
         y_classification = []  # For predicting binary outcome
 
         for _, row in training_data.iterrows():
-            features = self.prepare_features(row.to_dict())
+            features = self.prepare_features({str(k): v for k, v in row.to_dict().items()})
             X.append(features.flatten())
 
             # For regression: predict the "true" probability (we'll simulate this)
@@ -72,14 +72,14 @@ class MarketPredictor(MLBettingStrategy):
             # For classification: predict binary outcome
             y_classification.append(1 if true_prob > 0.5 else 0)
 
-        X = np.vstack(X)
+        X_arr = np.vstack(X)
         y_regression = np.array(y_regression)
         y_classification = np.array(y_classification)
 
         # Split data
         X_train, X_test, y_reg_train, y_reg_test, y_clf_train, y_clf_test = (
             train_test_split(
-                X, y_regression, y_classification, test_size=0.2, random_state=42
+                X_arr, y_regression, y_classification, test_size=0.2, random_state=42
             )
         )
 
@@ -205,11 +205,11 @@ class EnsemblePredictor(MarketPredictor):
         """Train ensemble of models."""
         print(f"🏗️ Training {self.name} ensemble on {len(training_data)} markets...")
 
-        X = []
+        X: list[np.ndarray] = []
         y = []
 
         for _, row in training_data.iterrows():
-            features = self.prepare_features(row.to_dict())
+            features = self.prepare_features({str(k): v for k, v in row.to_dict().items()})
             X.append(features.flatten())
 
             market_prob = (
@@ -220,14 +220,14 @@ class EnsemblePredictor(MarketPredictor):
             true_prob = row.get("actual_outcome", market_prob)
             y.append(true_prob)
 
-        X = np.vstack(X)
-        y = np.array(y)
+        X_arr = np.vstack(X)
+        y_arr = np.array(y)
 
         # Train all models
         for name, model in self.models.items():
-            model.fit(X, y)
-            pred = model.predict(X)
-            mean_squared_error(y, pred)
+            model.fit(X_arr, y_arr)
+            pred = model.predict(X_arr)
+            mean_squared_error(y_arr, pred)
             print(".4f")
         self.is_trained = True
 

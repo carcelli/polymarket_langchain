@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict, List, Optional
 import os
 
 from polymarket_agents.utils.objects import Article
@@ -56,7 +57,7 @@ class News:
             self._api = NewsApiClient(api_key)
         return self._api
 
-    def get_articles_for_cli_keywords(self, keywords) -> "list[Article]":
+    def get_articles_for_cli_keywords(self, keywords: str) -> List[Article]:
         query_words = keywords.split(",")
         all_articles = self.get_articles_for_options(query_words)
         article_objects: list[Article] = []
@@ -65,19 +66,19 @@ class News:
                 article_objects.append(Article(**article))
         return article_objects
 
-    def get_top_articles_for_market(self, market_object: dict) -> "list[Article]":
+    def get_top_articles_for_market(self, market_object: dict) -> dict:
         return self.API.get_top_headlines(
             language="en", country="usa", q=market_object["description"]
         )
 
     def get_articles_for_options(
         self,
-        market_options: "list[str]",
-        date_start: datetime = None,
-        date_end: datetime = None,
-    ) -> "list[Article]":
+        market_options: List[str],
+        date_start: Optional[datetime] = None,
+        date_end: Optional[datetime] = None,
+    ) -> Dict[str, List[dict]]:
 
-        all_articles = {}
+        all_articles: Dict[str, List[dict]] = {}
         # Default to top articles if no start and end dates are given for search
         if not date_start and not date_end:
             for option in market_options:

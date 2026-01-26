@@ -5,7 +5,7 @@ LangChain-compatible tools that enable agents to perform machine learning
 operations including data ingestion, model training, evaluation, and prediction.
 """
 
-from typing import Dict, List, Any, Optional, Type
+from typing import Dict, List, Any, Optional, Type, Union
 from datetime import datetime
 import pandas as pd
 import json
@@ -220,7 +220,7 @@ class AutoMLPipelineTool(BaseTool):
         experiment_name: str,
         days_back: int = 365,
         min_volume: float = 1000,
-        models_to_train: List[str] = None,
+        models_to_train: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Run complete AutoML pipeline."""
@@ -304,6 +304,7 @@ class ModelTrainingTool(BaseTool):
                 )
 
             # Initialize model
+            model: Union[MarketPredictor, EdgeDetector]
             if model_type == "MarketPredictor":
                 model = MarketPredictor()
             elif model_type == "EdgeDetector":
@@ -389,7 +390,7 @@ class ModelTrainingTool(BaseTool):
         except Exception as e:
             return json.dumps({"status": "error", "error": str(e)}, indent=2)
 
-    def _calculate_metrics(self, predictions_df: pd.DataFrame) -> Dict[str, float]:
+    def _calculate_metrics(self, predictions_df: pd.DataFrame) -> Dict[str, Any]:
         """Calculate model performance metrics."""
         from sklearn.metrics import (
             accuracy_score,
@@ -478,6 +479,7 @@ class ModelEvaluationTool(BaseTool):
 
             # Load model (simplified - in practice, load from model_path)
             model_type = model_dict["model_type"]
+            model: Union[MarketPredictor, EdgeDetector]
             if model_type == "MarketPredictor":
                 model = MarketPredictor()
             elif model_type == "EdgeDetector":
@@ -638,6 +640,7 @@ class PredictionTool(BaseTool):
 
             model_type = model_info[0]
 
+            model: Union[MarketPredictor, EdgeDetector]
             if model_type == "MarketPredictor":
                 model = MarketPredictor()
             elif model_type == "EdgeDetector":

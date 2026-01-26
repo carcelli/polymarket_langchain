@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from typing import Optional
 import logging
 
-from ..base import EventScanner, ScanResult, Market, Edge
+from ..base import EventScanner, ScanResult, Edge
 from .models import (
     CryptoPriceMarket,
     PriceSignal,
@@ -29,7 +29,7 @@ GAMMA_API = "https://gamma-api.polymarket.com"
 CRYPTO_TAG_ID = "21"
 
 
-class CryptoScanner(EventScanner):
+class CryptoScanner(EventScanner[CryptoPriceMarket]):
     """
     Scanner for crypto binary price prediction markets.
 
@@ -48,7 +48,7 @@ class CryptoScanner(EventScanner):
         """
         self.price_source = price_source or CoinGeckoFallback()
 
-    def scan(self) -> ScanResult:
+    def scan(self) -> ScanResult[CryptoPriceMarket]:
         """
         Fetch all crypto price prediction markets from Polymarket.
 
@@ -58,7 +58,7 @@ class CryptoScanner(EventScanner):
         markets = self._fetch_from_gamma()
         return ScanResult(markets=markets, source="polymarket_gamma")
 
-    def enrich(self, markets: list[Market]) -> list[CryptoPriceMarket]:
+    def enrich(self, markets: list[CryptoPriceMarket]) -> list[CryptoPriceMarket]:
         """
         Enrich markets with current price data from external source.
 
@@ -67,12 +67,9 @@ class CryptoScanner(EventScanner):
         - 24h price change
         - Volatility
         """
-        enriched = []
+        enriched: list[CryptoPriceMarket] = []
 
         for market in markets:
-            if not isinstance(market, CryptoPriceMarket):
-                continue
-
             try:
                 signal = self._get_price_signal(market.asset)
                 market.signal = signal
@@ -85,7 +82,7 @@ class CryptoScanner(EventScanner):
 
     def filter_tradeable(
         self,
-        markets: list[Market],
+        markets: list[CryptoPriceMarket],
         min_volume: float = 1000,
         min_liquidity: float = 500,
         min_edge: float = 0.0,
@@ -98,12 +95,9 @@ class CryptoScanner(EventScanner):
             min_liquidity: Minimum liquidity in USD
             min_edge: Minimum edge magnitude (0.05 = 5%)
         """
-        filtered = []
+        filtered: list[CryptoPriceMarket] = []
 
         for m in markets:
-            if not isinstance(m, CryptoPriceMarket):
-                continue
-
             if m.volume < min_volume:
                 continue
             if m.liquidity < min_liquidity:

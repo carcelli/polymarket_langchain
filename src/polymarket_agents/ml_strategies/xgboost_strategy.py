@@ -55,8 +55,8 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         super().__init__(name)
         self.model_path = Path(model_path)
         self.model_path.parent.mkdir(parents=True, exist_ok=True)
-        self.model = None
-        self.feature_names = None
+        self.model: Optional[Any] = None
+        self.feature_names: Optional[List[str]] = None
         self.use_xgboost = XGBOOST_AVAILABLE
         self.data_ingestor = PolymarketDataIngestion()
 
@@ -539,7 +539,7 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         for _, market in historical_data.iterrows():
             try:
                 # Convert market row to dict for prediction
-                market_dict = market.to_dict()
+                market_dict = {str(k): v for k, v in market.to_dict().items()}
 
                 # Make prediction
                 result = self.predict(market_dict)

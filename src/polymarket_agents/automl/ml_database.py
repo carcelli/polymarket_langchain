@@ -8,7 +8,7 @@ models, predictions, and performance metrics in an organized structure.
 import sqlite3
 import json
 import pandas as pd
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from pathlib import Path
 import logging
@@ -176,7 +176,7 @@ class MLDatabase:
             )
 
     def create_experiment(
-        self, name: str, description: str = "", pipeline_config: Dict[str, Any] = None
+        self, name: str, description: str = "", pipeline_config: Optional[Dict[str, Any]] = None
     ) -> str:
         """
         Create a new ML experiment.
@@ -214,9 +214,9 @@ class MLDatabase:
         self,
         experiment_id: str,
         status: str,
-        success: bool = None,
-        error_message: str = None,
-    ):
+        success: Optional[bool] = None,
+        error_message: Optional[str] = None,
+    ) -> None:
         """
         Update experiment status.
 
@@ -360,8 +360,8 @@ class MLDatabase:
         evaluation_type: str,
         evaluation_config: Dict[str, Any],
         results: Dict[str, Any],
-        duration_seconds: float = None,
-    ):
+        duration_seconds: Optional[float] = None,
+    ) -> None:
         """
         Save model evaluation results.
 
@@ -398,7 +398,7 @@ class MLDatabase:
         experiment_id: str,
         name: str,
         feature_columns: List[str],
-        feature_stats: Dict[str, Any] = None,
+        feature_stats: Optional[Dict[str, Any]] = None,
         sample_count: int = 0,
     ) -> str:
         """
@@ -444,8 +444,8 @@ class MLDatabase:
         dataset_type: str,
         sample_count: int,
         feature_count: int,
-        target_distribution: Dict[str, int] = None,
-        data_path: str = None,
+        target_distribution: Optional[Dict[str, int]] = None,
+        data_path: Optional[str] = None,
     ) -> str:
         """
         Save dataset metadata.
@@ -493,8 +493,8 @@ class MLDatabase:
         alert_type: str,
         severity: str,
         message: str,
-        details: Dict[str, Any] = None,
-    ):
+        details: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """
         Create a new ML alert.
 
@@ -517,7 +517,7 @@ class MLDatabase:
 
         logger.info(f"Created {severity} alert for model {model_id}: {message}")
 
-    def get_experiment_results(self, experiment_id: str) -> Dict[str, Any]:
+    def get_experiment_results(self, experiment_id: str) -> Optional[Dict[str, Any]]:
         """
         Get comprehensive results for an experiment.
 
@@ -525,7 +525,7 @@ class MLDatabase:
             experiment_id: Experiment ID
 
         Returns:
-            Experiment results dictionary
+            Experiment results dictionary or None if not found
         """
         with sqlite3.connect(self.db_path) as conn:
             # Get experiment info

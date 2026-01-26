@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Optional, Union
 import logging
 
-from ..base import EventScanner, ScanResult, Market, Edge
+from ..base import EventScanner, ScanResult, Edge
 from .models import (
     NBAGameMarket,
     NBAPlayerProp,
@@ -28,6 +28,9 @@ from .models import (
     parse_player_prop,
 )
 
+# Type alias for NBA markets
+NBAMarket = Union[NBAGameMarket, NBAPlayerProp]
+
 logger = logging.getLogger(__name__)
 
 GAMMA_API = "https://gamma-api.polymarket.com"
@@ -37,7 +40,7 @@ SPORTS_TAG_ID = "16"
 NBA_KEYWORDS = ["nba", "basketball", "lakers", "celtics", "knicks", "warriors"]
 
 
-class NBAScanner(EventScanner):
+class NBAScanner(EventScanner[NBAMarket]):
     """
     Scanner for NBA betting markets.
 
@@ -58,7 +61,7 @@ class NBAScanner(EventScanner):
         """
         self.data_source = data_source or StaticStandings()
 
-    def scan(self) -> ScanResult:
+    def scan(self) -> ScanResult[NBAMarket]:
         """
         Fetch all NBA markets from Polymarket.
 
@@ -68,16 +71,14 @@ class NBAScanner(EventScanner):
         markets = self._fetch_from_gamma()
         return ScanResult(markets=markets, source="polymarket_gamma")
 
-    def enrich(
-        self, markets: list[Market]
-    ) -> list[Union[NBAGameMarket, NBAPlayerProp]]:
+    def enrich(self, markets: list[NBAMarket]) -> list[NBAMarket]:
         """
         Enrich markets with team/player stats from external source.
 
         For games: Adds Matchup with Log5 probability.
         For props: Adds PlayerStats with averages.
         """
-        enriched = []
+        enriched: list[NBAMarket] = []
 
         for market in markets:
             try:
@@ -99,11 +100,11 @@ class NBAScanner(EventScanner):
 
     def filter_tradeable(
         self,
-        markets: list[Market],
+        markets: list[NBAMarket],
         min_volume: float = 1000,
         min_liquidity: float = 500,
         min_edge: float = 0.0,
-    ) -> list[Union[NBAGameMarket, NBAPlayerProp]]:
+    ) -> list[NBAMarket]:
         """
         Filter to markets worth trading.
 
@@ -112,7 +113,7 @@ class NBAScanner(EventScanner):
             min_liquidity: Minimum liquidity
             min_edge: Minimum edge magnitude (0.05 = 5%)
         """
-        filtered = []
+        filtered: list[NBAMarket] = []
 
         for m in markets:
             if m.volume < min_volume:
@@ -214,7 +215,7 @@ class NBAScanner(EventScanner):
 
         # Try to parse as player prop
         player, line, prop_type = parse_player_prop(question)
-        if player and line:
+        if player and line and prop_type is not None:
             return self._parse_player_prop(raw, event, player, line, prop_type)
 
         return None

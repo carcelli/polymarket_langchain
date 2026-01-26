@@ -147,20 +147,17 @@ def generate_performance_report(
             f"Profit factor: {abs(sum(t.get('pnl', 0) for t in filtered_trades if t.get('pnl', 0) > 0) / max(1, sum(t.get('pnl', 0) for t in filtered_trades if t.get('pnl', 0) < 0))):.2f} - {'Strong' if abs(sum(t.get('pnl', 0) for t in filtered_trades if t.get('pnl', 0) > 0) / max(1, sum(t.get('pnl', 0) for t in filtered_trades if t.get('pnl', 0) < 0))) > 1.5 else 'Needs work'}",
             f"Sharpe ratio: {sharpe_ratio:.2f} - {'Good risk-adjusted returns' if sharpe_ratio > 1.5 else 'Poor risk-adjusted returns'}",
         ],
-        "alerts": [],
     }
 
     # Generate alerts based on performance
+    alerts: List[str] = []
     if win_rate < 0.5:
-        performance_report["alerts"].append("Win rate below 50% - review strategy")
+        alerts.append("Win rate below 50% - review strategy")
     if total_pnl < 0:
-        performance_report["alerts"].append(
-            "Negative P&L - consider strategy adjustments"
-        )
+        alerts.append("Negative P&L - consider strategy adjustments")
     if sharpe_ratio < 0.5:
-        performance_report["alerts"].append(
-            "Poor risk-adjusted returns - increase edge or reduce risk"
-        )
+        alerts.append("Poor risk-adjusted returns - increase edge or reduce risk")
+    performance_report["alerts"] = alerts
 
     return performance_report
 

@@ -181,7 +181,6 @@ class ComplexMarket(BaseModel):
     rewards: str
     minimum_order_size: str
     minimum_tick_size: str
-    description: str
     category: str
     end_date_iso: str
     game_start_time: str
@@ -195,9 +194,9 @@ class ComplexMarket(BaseModel):
     icon: str
     fpmm: str
     name: str
-    description: Union[str, None] = None
+    description: Optional[str] = None
     price: float
-    tax: Union[float, None] = None
+    tax: Optional[float] = None
 
 
 class SimpleEvent(BaseModel):

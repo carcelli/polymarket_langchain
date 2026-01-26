@@ -7,7 +7,7 @@ ML-ready datasets for reliable model training.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Optional, Tuple
 import logging
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
@@ -107,7 +107,7 @@ class DataQualityValidator:
         return report
 
     def detect_outliers(
-        self, df: pd.DataFrame, columns: List[str] = None, method: str = "iqr"
+        self, df: pd.DataFrame, columns: Optional[List[str]] = None, method: str = "iqr"
     ) -> Dict[str, Any]:
         """
         Detect outliers in numerical columns.
@@ -183,7 +183,7 @@ class DataQualityValidator:
             # Use median for skewed data, mean for normal
             for col in numeric_cols:
                 if df[col].isnull().sum() > 0:
-                    skewness = df[col].skew()
+                    skewness = float(df[col].skew())
                     if abs(skewness) > 1:
                         impute_strategy = "median"
                     else:
@@ -208,7 +208,7 @@ class DataQualityValidator:
     def remove_outliers(
         self,
         df: pd.DataFrame,
-        columns: List[str] = None,
+        columns: Optional[List[str]] = None,
         method: str = "iqr",
         threshold: float = 0.05,
     ) -> pd.DataFrame:

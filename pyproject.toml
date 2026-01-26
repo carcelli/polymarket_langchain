@@ -34,3 +34,31 @@ check_untyped_defs = false
 module = "polymarket_agents.*"
 ignore_missing_imports = false
 follow_imports = "normal"
+
+[[tool.mypy.overrides]]
+module = "pandas.*"
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = "numpy.*"
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = "sklearn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "scipy.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "xgboost.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "ccxt.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tavily.*"
+ignore_missing_imports = true

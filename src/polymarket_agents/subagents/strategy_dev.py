@@ -137,10 +137,25 @@ def optimize_strategy_parameters(
             base_config.get("min_liquidity_threshold", 10000) * 1.5
         )
 
+    # Calculate specific parameter changes
+    parameter_changes: Dict[str, Any] = {}
+    for key, new_value in optimized_config.items():
+        old_value = base_config.get(key)
+        if old_value != new_value:
+            parameter_changes[key] = {
+                "old": old_value,
+                "new": new_value,
+                "change_pct": (
+                    (new_value - old_value) / max(abs(old_value), 0.001)
+                    if isinstance(old_value, (int, float))
+                    else "N/A"
+                ),
+            }
+
     optimization_results = {
         "original_config": base_config,
         "optimized_config": optimized_config,
-        "parameter_changes": {},
+        "parameter_changes": parameter_changes,
         "expected_improvements": {
             "sharpe_ratio": (
                 "+15-25%" if "sharpe_ratio" in optimization_targets else "0%"
@@ -157,20 +172,6 @@ def optimize_strategy_parameters(
             "Reduced position sizes to control drawdown",
         ],
     }
-
-    # Calculate specific parameter changes
-    for key, new_value in optimized_config.items():
-        old_value = base_config.get(key)
-        if old_value != new_value:
-            optimization_results["parameter_changes"][key] = {
-                "old": old_value,
-                "new": new_value,
-                "change_pct": (
-                    (new_value - old_value) / max(abs(old_value), 0.001)
-                    if isinstance(old_value, (int, float))
-                    else "N/A"
-                ),
-            }
 
     return optimization_results
 

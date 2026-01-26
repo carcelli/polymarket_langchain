@@ -872,7 +872,7 @@ def _get_markets_by_category_impl(category: str = None, limit: int = 10) -> str:
         return f"Error getting markets by category: {str(e)}"
 
 
-def _get_top_volume_markets_impl(limit: int = 10, category: str = None) -> str:
+def _get_top_volume_markets_impl(limit: int = 10, category: Optional[str] = None) -> str:
     """Get the highest volume markets from the database.
 
     If MARKET_FOCUS environment variable is set, defaults to that category.

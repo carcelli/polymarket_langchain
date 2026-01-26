@@ -1,0 +1,10 @@
+{
+  "python.linting.mypyEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.mypyArgs": [
+    "--config-file=mypy.ini",
+    "--show-error-codes"
+  ],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace"
+}

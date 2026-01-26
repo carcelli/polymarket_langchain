@@ -8,7 +8,10 @@ Each domain defines its own Market subclass with domain-specific fields.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Generic, Optional, TypeVar
+
+
+T = TypeVar("T")
 
 
 @dataclass
@@ -35,24 +38,24 @@ class Market:
 
 
 @dataclass
-class ScanResult:
+class ScanResult(Generic[T]):
     """Result from scanning a domain."""
 
-    markets: list[Market]
+    markets: list[T]
     timestamp: datetime = field(default_factory=datetime.utcnow)
     source: str = "polymarket"
 
     def __len__(self) -> int:
         return len(self.markets)
 
-    def top_by_volume(self, n: int = 10) -> list[Market]:
+    def top_by_volume(self, n: int = 10) -> list[T]:
         return sorted(self.markets, key=lambda m: m.volume, reverse=True)[:n]
 
-    def top_by_liquidity(self, n: int = 10) -> list[Market]:
+    def top_by_liquidity(self, n: int = 10) -> list[T]:
         return sorted(self.markets, key=lambda m: m.liquidity, reverse=True)[:n]
 
 
-class EventScanner(ABC):
+class EventScanner(ABC, Generic[T]):
     """
     Protocol for domain-specific event scanners.
 
@@ -63,12 +66,12 @@ class EventScanner(ABC):
     """
 
     @abstractmethod
-    def scan(self) -> ScanResult:
+    def scan(self) -> ScanResult[T]:
         """Fetch all relevant markets for this domain."""
         pass
 
     @abstractmethod
-    def enrich(self, markets: list[Market]) -> list[Market]:
+    def enrich(self, markets: list[T]) -> list[T]:
         """
         Enrich markets with external data.
 
@@ -80,10 +83,10 @@ class EventScanner(ABC):
     @abstractmethod
     def filter_tradeable(
         self,
-        markets: list[Market],
+        markets: list[T],
         min_volume: float = 1000,
         min_liquidity: float = 500,
-    ) -> list[Market]:
+    ) -> list[T]:
         """
         Filter to markets worth trading.
 

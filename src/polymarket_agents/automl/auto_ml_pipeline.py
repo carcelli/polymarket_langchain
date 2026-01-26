@@ -21,12 +21,30 @@ import json
 from .data_ingestion import PolymarketDataIngestion
 from .data_quality import DataQualityValidator
 from ..ml_strategies import MarketPredictor, EdgeDetector
-from ..subagents.github_ml_agent import (
-    generate_ml_strategy_test,
-    commit_ml_tests_to_github,
-)
 
 logger = logging.getLogger(__name__)
+
+
+def generate_ml_strategy_test(model_name: str, test_type: str, description: str) -> str:
+    """Stub: Generate a basic test template for an ML strategy."""
+    return f'''"""
+{description}
+"""
+import pytest
+
+class Test{model_name}:
+    """Auto-generated tests for {model_name}."""
+
+    def test_placeholder(self):
+        """Placeholder test - implement actual tests."""
+        assert True
+'''
+
+
+def commit_ml_tests_to_github(test_files: Dict[str, str], message: str) -> Dict[str, Any]:
+    """Stub: GitHub integration has been deprecated."""
+    logger.warning("GitHub integration has been deprecated. Tests saved locally only.")
+    return {"status": "skipped", "message": "GitHub integration deprecated"}
 
 
 class AutoMLPipeline:

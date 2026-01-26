@@ -63,7 +63,7 @@ class CryptoMLScanner:
         self,
         max_duration_minutes: int = 25,
         min_volume: float = 100,
-        min_edge: float = None,
+        min_edge: Optional[float] = None,
     ) -> List[Opportunity]:
         """
         Scan for profitable opportunities.
