@@ -34,7 +34,7 @@ def main():
             print(
                 f"   - View on PolygonScan: https://polygonscan.com/address/{address}"
             )
-            print(f"   - Add funds: https://wallet.polygon.technology/")
+            print("   - Add funds: https://wallet.polygon.technology/")
         else:
             print(f"\n✅ You have ${balance:.2f} USDC available for trading!")
             print("\n💡 Next steps:")

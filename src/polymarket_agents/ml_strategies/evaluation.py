@@ -1,6 +1,5 @@
 import numpy as np
-from typing import Dict, List, Tuple, Any
-from collections import Counter
+from typing import Dict, Any
 
 
 def confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:

@@ -122,7 +122,7 @@ class AutoPaperTrader:
         # Log market observation
         log_observed_market(market)
 
-        print(f"\n📊 New market detected:")
+        print("\n📊 New market detected:")
         print(f"   {market['question']}")
         print(f"   Expires in: {market['duration_minutes']:.1f} minutes")
         print(f"   Volume: ${market['volume']:,.0f}")
@@ -137,7 +137,7 @@ class AutoPaperTrader:
 
         # Place bet if confidence exceeds threshold
         if direction and confidence >= self.min_confidence:
-            print(f"\n✅ PLACING PAPER BET:")
+            print("\n✅ PLACING PAPER BET:")
             print(f"   {direction} with {confidence:.1%} confidence")
 
             bet_id = place_paper_bet(
@@ -210,9 +210,9 @@ class AutoPaperTrader:
         print(f"   Actual outcome: {actual_outcome}")
         print(f"   Our bet: {bet_info['direction']}")
         if bet_info["direction"] == actual_outcome:
-            print(f"   ✅ WIN!")
+            print("   ✅ WIN!")
         else:
-            print(f"   ❌ LOSS")
+            print("   ❌ LOSS")
 
     def run(self):
         """Main monitoring loop."""
@@ -220,11 +220,11 @@ class AutoPaperTrader:
         print("=" * 80)
         print("🤖 AUTOMATED PAPER TRADING SYSTEM")
         print("=" * 80)
-        print(f"\n⚙️  Configuration:")
+        print("\n⚙️  Configuration:")
         print(f"   Bet size: ${self.bet_size:.2f}")
         print(f"   Min confidence: {self.min_confidence:.0%}")
         print(f"   Check interval: {self.check_interval}s")
-        print(f"\n⏰ Starting monitoring...")
+        print("\n⏰ Starting monitoring...")
         print("💡 Press Ctrl+C to stop and see performance summary\n")
 
         check_count = 0
@@ -276,7 +276,7 @@ class AutoPaperTrader:
             print("=" * 70)
             get_performance_summary()
 
-            print(f"\n📝 Session stats:")
+            print("\n📝 Session stats:")
             print(f"   Markets observed: {len(self.seen_markets)}")
             print(f"   Active bets: {len(self.active_bets)}")
             print(f"   Checks performed: {check_count}")
@@ -290,11 +290,11 @@ if __name__ == "__main__":
     min_confidence = float(sys.argv[2]) if len(sys.argv) > 2 else 0.60
     check_interval = int(sys.argv[3]) if len(sys.argv) > 3 else 30
 
-    print(f"🚀 Starting Automated Paper Trading System")
+    print("🚀 Starting Automated Paper Trading System")
     print(
-        f"   To customize: python scripts/auto_paper_trader.py [bet_size] [min_confidence] [interval]"
+        "   To customize: python scripts/auto_paper_trader.py [bet_size] [min_confidence] [interval]"
     )
-    print(f"   Example: python scripts/auto_paper_trader.py 20.0 0.65 45\n")
+    print("   Example: python scripts/auto_paper_trader.py 20.0 0.65 45\n")
 
     trader = AutoPaperTrader(
         bet_size=bet_size, min_confidence=min_confidence, check_interval=check_interval

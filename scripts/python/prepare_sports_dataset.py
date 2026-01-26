@@ -614,7 +614,7 @@ def main():
     print(synthetic_df[available_cols].head())
 
     # Show statistics
-    print(f"\n📈 Dataset Statistics:")
+    print("\n📈 Dataset Statistics:")
     print(f"   Total samples: {len(synthetic_df)}")
     if "target" in synthetic_df.columns:
         print(".1%")

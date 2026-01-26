@@ -5,9 +5,8 @@ Specialized subagent for gathering and organizing market data from various sourc
 Handles data collection tasks that would otherwise clutter the main agent's context.
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
-import json
+from typing import List, Dict, Any
+from datetime import datetime
 
 # Import our existing utilities
 from polymarket_agents.analysis import MarketAnalyzer

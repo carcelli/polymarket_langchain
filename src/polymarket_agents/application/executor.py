@@ -102,22 +102,11 @@ class Executor:
             return self.process_data_chunk(data1, data2, user_input)
         else:
             # If exceeding limit, process in chunks
-            chunk_size = len(combined_data) // ((total_tokens // token_limit) + 1)
+            len(combined_data) // ((total_tokens // token_limit) + 1)
             print(
                 f"total tokens {total_tokens} exceeding llm capacity, now will split and answer"
             )
             group_size = (total_tokens // token_limit) + 1  # 3 is safe factor
-            keys_no_meaning = [
-                "image",
-                "pagerDutyNotificationEnabled",
-                "resolvedBy",
-                "endDate",
-                "clobTokenIds",
-                "negRiskMarketID",
-                "conditionId",
-                "updatedAt",
-                "startDate",
-            ]
             useful_keys = [
                 "id",
                 "questionID",
@@ -143,7 +132,7 @@ class Executor:
             for cut_data in cut_data_12:
                 sub_data1 = cut_data[0]
                 sub_data2 = cut_data[1]
-                sub_tokens = self.estimate_tokens(
+                self.estimate_tokens(
                     str(
                         self.prompter.prompts_polymarket(
                             data1=sub_data1, data2=sub_data2

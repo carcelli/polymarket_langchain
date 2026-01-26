@@ -8,7 +8,7 @@ This module provides structures for managing different types of context:
 """
 
 import os
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass, field
 from polymarket_agents.memory.manager import MemoryManager

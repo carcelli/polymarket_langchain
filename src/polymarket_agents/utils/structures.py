@@ -1,5 +1,5 @@
 import collections
-from typing import Any, Mapping, MutableMapping
+from typing import Any, Mapping
 
 
 class StrKeyDict(collections.UserDict):

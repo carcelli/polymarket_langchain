@@ -294,7 +294,7 @@ def test_predictor():
             print(f"   RSI: {ind['rsi']:.1f}")
             print(f"   Volume spike: {ind['volume_spike']:+.1%}")
         else:
-            print(f"   No clear signal")
+            print("   No clear signal")
             if "error" in details:
                 print(f"   Error: {details['error']}")
 

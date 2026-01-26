@@ -4,14 +4,13 @@ Filesystem Backend for Polymarket Agents
 Provides persistent local storage for agent memories and analysis results.
 """
 
-import os
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-from deepagents.backends.protocol import BackendProtocol, WriteResult, EditResult
-from deepagents.backends.utils import FileInfo, GrepMatch
+from deepagents.backends.protocol import BackendProtocol, WriteResult, EditResult  # type: ignore[import]
+from deepagents.backends.utils import FileInfo, GrepMatch  # type: ignore[import]
 
 
 class PolymarketFilesystemBackend(BackendProtocol):
@@ -126,7 +125,7 @@ class PolymarketFilesystemBackend(BackendProtocol):
             entries.sort(key=lambda x: x.path)
             return entries
 
-        except Exception as e:
+        except Exception:
             return []
 
     def read(self, file_path: str, offset: int = 0, limit: int = 2000) -> str:
@@ -326,7 +325,7 @@ class PolymarketFilesystemBackend(BackendProtocol):
 
     def store_analysis_result(
         self, market_question: str, analysis: Dict[str, Any]
-    ) -> str:
+    ) -> Optional[str]:
         """Store a market analysis result with metadata."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -351,8 +350,8 @@ class PolymarketFilesystemBackend(BackendProtocol):
         return result.path if not result.error else None
 
     def store_memory(
-        self, memory_type: str, content: str, tags: List[str] = None
-    ) -> str:
+        self, memory_type: str, content: str, tags: Optional[List[str]] = None
+    ) -> Optional[str]:
         """Store an agent memory."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 

@@ -613,6 +613,6 @@ Examples:
             print(f"Total markets: {len(markets)}")
             print(f"Total volume: ${total_volume:,.0f}")
             print(f"Avg duration: {avg_duration:.1f} minutes")
-            print(f"\nBy asset:")
+            print("\nBy asset:")
             for asset, count in sorted(by_asset.items()):
                 print(f"  {asset}: {count} markets")

@@ -1,9 +1,8 @@
 import numpy as np
-from typing import Dict, Any, List
+from typing import Dict, Any
 from collections import Counter
 from .registry import register_strategy
 from .base_strategy import MLBettingStrategy, StrategyResult
-from .evaluation import classification_report
 
 
 @register_strategy("knn_edge_detector")

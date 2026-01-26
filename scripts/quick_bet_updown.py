@@ -92,7 +92,7 @@ def main():
         print(f"❌ Could not find token ID for {direction}")
         sys.exit(1)
 
-    print(f"\n📊 Betting Details:")
+    print("\n📊 Betting Details:")
     print(f"   Direction: {direction}")
     print(f"   Token ID: {token_id}")
     print(f"   Amount: ${amount_usd:.2f} USDC")

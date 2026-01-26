@@ -4,11 +4,11 @@ from datetime import datetime
 
 class Prompter:
 
-    def generate_simple_ai_trader(market_description: str, relevant_info: str) -> str:
+    def generate_simple_ai_trader(self, market_description: str, relevant_info: str) -> str:
         return f"""
-            
+
         You are a trader.
-        
+
         Here is a market description: {market_description}.
 
         Here is relevant information: {relevant_info}.
@@ -17,23 +17,23 @@ class Prompter:
         """
 
     def market_analyst(self) -> str:
-        return f"""
-        You are a market analyst that takes a description of an event and produces a market forecast. 
+        return """
+        You are a market analyst that takes a description of an event and produces a market forecast.
         Assign a probability estimate to the event occurring described by the user
         """
 
-    def sentiment_analyzer(self, question: str, outcome: str) -> float:
+    def sentiment_analyzer(self, question: str, outcome: str) -> str:
         return f"""
-        You are a political scientist trained in media analysis. 
+        You are a political scientist trained in media analysis.
         You are given a question: {question}.
         and an outcome of yes or no: {outcome}.
-        
+
         You are able to review a news article or text and
-        assign a sentiment score between 0 and 1. 
-        
+        assign a sentiment score between 0 and 1.
+
         """
 
-    def prompts_polymarket(
+    def prompts_polymarket_with_prediction(
         self, data1: str, data2: str, market_question: str, outcome: str
     ) -> str:
         current_market_data = str(data1)
@@ -41,8 +41,8 @@ class Prompter:
         return f"""
         You are an AI assistant for users of a prediction market called Polymarket.
         Users want to place bets based on their beliefs of market outcomes such as political or sports events.
-        
-        Here is data for current Polymarket markets {current_market_data} and 
+
+        Here is data for current Polymarket markets {current_market_data} and
         current Polymarket events {current_event_data}.
 
         Help users identify markets to trade based on their interests or queries.
@@ -59,7 +59,7 @@ class Prompter:
         You are an AI assistant for users of a prediction market called Polymarket.
         Users want to place bets based on their beliefs of market outcomes such as political or sports events.
 
-        Here is data for current Polymarket markets {current_market_data} and 
+        Here is data for current Polymarket markets {current_market_data} and
         current Polymarket events {current_event_data}.
         Help users identify markets to trade based on their interests or queries.
         Provide specific information for markets including probabilities of outcomes.
@@ -79,21 +79,21 @@ class Prompter:
         """
 
     def read_polymarket(self) -> str:
-        return f"""
+        return """
         You are an prediction market analyst.
         """
 
     def polymarket_analyst_api(self) -> str:
-        return f"""You are an AI assistant for analyzing prediction markets.
+        return """You are an AI assistant for analyzing prediction markets.
                 You will be provided with json output for api data from Polymarket.
-                Polymarket is an online prediction market that lets users Bet on the outcome of future events in a wide range of topics, like sports, politics, and pop culture. 
+                Polymarket is an online prediction market that lets users Bet on the outcome of future events in a wide range of topics, like sports, politics, and pop culture.
                 Get accurate real-time probabilities of the events that matter most to you. """
 
     def filter_events(self) -> str:
         return (
             self.polymarket_analyst_api()
-            + f"""
-        
+            + """
+
         Filter these events for the ones you will be best at trading on profitably.
 
         """
@@ -102,8 +102,8 @@ class Prompter:
     def filter_markets(self) -> str:
         return (
             self.polymarket_analyst_api()
-            + f"""
-        
+            + """
+
         Filter these markets for the ones you will be best at trading on profitably.
 
         """
@@ -113,8 +113,8 @@ class Prompter:
         return f"""
         You are a Superforecaster tasked with correctly predicting the likelihood of events.
         Use the following systematic process to develop an accurate prediction for the following
-        question=`{question}` and description=`{description}` combination. 
-        
+        question=`{question}` and description=`{description}` combination.
+
         Here are the key steps to use in your analysis:
 
         1. Breaking Down the Question:
@@ -135,7 +135,7 @@ class Prompter:
             - Express predictions in terms of probabilities rather than certainties.
             - Assign likelihoods to different outcomes and avoid binary thinking.
             - Embrace uncertainty and recognize that all forecasts are probabilistic in nature.
-        
+
         Given these steps produce a statement on the probability of outcome=`{outcome}` occuring.
 
         Give your response in the following format:
@@ -151,8 +151,8 @@ class Prompter:
     ) -> str:
         return (
             self.polymarket_analyst_api()
-            + f"""
-        
+            + """
+
                 Imagine yourself as the top trader on Polymarket, dominating the world of information markets with your keen insights and strategic acumen. You have an extraordinary ability to analyze and interpret data from diverse sources, turning complex information into profitable trading opportunities.
                 You excel in predicting the outcomes of global events, from political elections to economic developments, using a combination of data analysis and intuition. Your deep understanding of probability and statistics allows you to assess market sentiment and make informed decisions quickly.
                 Every day, you approach Polymarket with a disciplined strategy, identifying undervalued opportunities and managing your portfolio with precision. You are adept at evaluating the credibility of information and filtering out noise, ensuring that your trades are based on reliable data.
@@ -162,7 +162,7 @@ class Prompter:
 
         """
             + f"""
-        
+
         You made the following prediction for a market: {prediction}
 
         The current outcomes ${outcomes} prices are: ${outcome_prices}
@@ -183,15 +183,15 @@ class Prompter:
             size:0.1,
             side:BUY,
         ```
-        
+
         """
         )
 
     def format_price_from_one_best_trade_output(self, output: str) -> str:
-        return f"""
-        
+        return """
+
         You will be given an input such as:
-    
+
         `
             price:0.5,
             size:0.1,
@@ -202,14 +202,14 @@ class Prompter:
         In this case, you would return "0.5".
 
         Only return the number after price:
-        
+
         """
 
     def format_size_from_one_best_trade_output(self, output: str) -> str:
-        return f"""
-        
+        return """
+
         You will be given an input such as:
-    
+
         `
             price:0.5,
             size:0.1,
@@ -220,19 +220,19 @@ class Prompter:
         In this case, you would return "0.1".
 
         Only return the number after size:
-        
+
         """
 
     def create_new_market(self, filtered_markets: str) -> str:
         return f"""
         {filtered_markets}
-        
+
         Invent an information market similar to these markets that ends in the future,
         at least 6 months after today, which is: {datetime.today().strftime('%Y-%m-%d')},
         so this date plus 6 months at least.
 
         Output your format in:
-        
+
         Question: "..."?
         Outcomes: A or B
 
@@ -241,5 +241,5 @@ class Prompter:
 
         Question: "Will Kamala win"
         Outcomes: Yes or No
-        
+
         """

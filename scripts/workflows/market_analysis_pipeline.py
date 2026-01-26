@@ -938,7 +938,7 @@ def main():
 
             # Category summary
             summary = pipeline.get_category_summary(analyses)
-            print(f"\\n📈 CATEGORY SUMMARY:")
+            print("\\n📈 CATEGORY SUMMARY:")
             for category, data in summary.items():
                 print(
                     f"   {category.title()}: {data['count']} markets, {data['avg_confidence']:.1%} avg confidence"
@@ -948,7 +948,7 @@ def main():
             if pipeline.enable_caching:
                 final_stats = pipeline.get_cache_stats()
                 if final_stats:
-                    print(f"\\n💾 CACHE PERFORMANCE:")
+                    print("\\n💾 CACHE PERFORMANCE:")
                     print(f"   Final entries: {final_stats['total_entries']}")
                     print(f"   Total size: {final_stats['total_size_kb']:.1f} KB")
                     if final_stats["most_accessed"]:

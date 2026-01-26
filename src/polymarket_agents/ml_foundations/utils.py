@@ -9,8 +9,8 @@ Core utility functions for neural network implementation:
 """
 
 import numpy as np
-from scipy.stats import truncnorm
-from typing import Tuple, Union, Optional
+from scipy.stats import truncnorm  # type: ignore[import]
+from typing import Tuple, Optional
 
 
 def truncated_normal(

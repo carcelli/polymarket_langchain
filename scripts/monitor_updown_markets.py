@@ -261,7 +261,7 @@ def monitor_markets(interval_seconds=30):
                                     f"   🤖 Model Prediction: {direction} (Conf: {confidence:.1%})"
                                 )
                             else:
-                                print(f"   🤖 Model Uncertain, defaulting to UP")
+                                print("   🤖 Model Uncertain, defaulting to UP")
 
                         # Log Virtual Bet
                         try:

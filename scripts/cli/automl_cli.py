@@ -46,7 +46,7 @@ def run_automl_pipeline(args):
         "auto_generate_tests": args.generate_tests,
     }
 
-    print(f"Configuration:")
+    print("Configuration:")
     print(f"  📊 Data: {args.days_back} days back, min volume ${args.min_volume:,.0f}")
     print(f"  🤖 Models: {', '.join(args.models)}")
     print(f"  📁 Output: {args.output_dir}")

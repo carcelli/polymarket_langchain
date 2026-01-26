@@ -66,7 +66,7 @@ def demonstrate_github_tools():
     if "error" in activity:
         print(f"❌ {activity['error']}")
     else:
-        print(f"📊 Repository Activity (last 30 days):")
+        print("📊 Repository Activity (last 30 days):")
         print(f"   Commits: {activity['activity_metrics']['commits']}")
         print(f"   Issues: {activity['activity_metrics']['issues_created']}")
         print(f"   PRs: {activity['activity_metrics']['pull_requests']}")
@@ -105,7 +105,7 @@ def demonstrate_automated_reporting():
     print(f"Title: 📊 Market Analysis: {market}")
     print()
     print("Body:")
-    print(f"## Market Analysis Report")
+    print("## Market Analysis Report")
     print(f"**Market:** {market}")
     print(f"**Action:** {analysis.get('action', 'UNKNOWN')}")
     print(f"**Edge:** {analysis.get('edge', 0):.2f}%")

@@ -49,18 +49,14 @@ from typing import TypedDict, Annotated, List, Optional, Dict, Any
 from datetime import datetime
 
 from dotenv import load_dotenv
-
-load_dotenv()  # Load environment variables
-
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
-
-# LangSmith tracing for observability
 from langsmith import traceable
 
-# Local imports
 from polymarket_agents.memory.manager import MemoryManager
+
+load_dotenv()  # Load environment variables
 
 
 # =============================================================================

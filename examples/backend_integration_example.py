@@ -233,17 +233,17 @@ class AgentWithMemory:
 
         # Show recent insights
         insights = self.get_market_insights()
-        print(f"\\n📊 Analysis Insights:")
+        print("\\n📊 Analysis Insights:")
         print(f"  • Total analyses: {insights['total_analyses']}")
         print(f"  • Categories analyzed: {', '.join(insights['categories_analyzed'])}")
 
-        print(f"\\n🎯 Action Distribution:")
+        print("\\n🎯 Action Distribution:")
         for action, count in insights["action_distribution"].items():
             avg_edge = insights["avg_edge_by_action"].get(action, 0)
             print(f"  • {action}: {count} times (avg edge: {avg_edge:.2f}%)")
 
         if insights["recent_opportunities"]:
-            print(f"\\n💰 Recent Opportunities:")
+            print("\\n💰 Recent Opportunities:")
             for opp in insights["recent_opportunities"][:3]:
                 print(
                     f"  • {opp['market'][:40]}... - {opp['action']} (edge: {opp['edge']:.1f}%)"

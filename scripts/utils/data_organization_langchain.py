@@ -765,7 +765,7 @@ def main():
     )
 
     print("\\n✅ Data organization analysis complete!")
-    print(f"Run with OPENAI_API_KEY to create vector stores for semantic search.")
+    print("Run with OPENAI_API_KEY to create vector stores for semantic search.")
 
 
 if __name__ == "__main__":

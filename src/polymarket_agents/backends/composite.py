@@ -4,11 +4,11 @@ Composite Backend for Polymarket Agents
 Combines multiple backends with path-based routing for optimal data management.
 """
 
-from typing import Dict, Any, Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 from deepagents.backends import CompositeBackend as BaseCompositeBackend
 
 if TYPE_CHECKING:
-    from langgraph.store.base import BaseStore
+    pass
 
 from .filesystem import PolymarketFilesystemBackend
 from .store import PolymarketStoreBackend
@@ -67,7 +67,7 @@ def create_memory_focused_backend(
     - /memories/* → FilesystemBackend (local persistence)
     - Everything else → StateBackend (ephemeral)
     """
-    from deepagents.backends import StateBackend, FilesystemBackend
+    from deepagents.backends import StateBackend
 
     def backend_factory(rt):
         memory_backend = PolymarketFilesystemBackend(

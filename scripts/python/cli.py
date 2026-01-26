@@ -382,7 +382,7 @@ def dashboard(
         dashboard_instance.run(refresh_rate=refresh)
 
     except ImportError as e:
-        console.print(f"[red]❌ Error: Missing dependencies[/red]")
+        console.print("[red]❌ Error: Missing dependencies[/red]")
         console.print(f"[dim]   {e}[/dim]")
         console.print("\n[yellow]📦 Please install required packages:[/yellow]")
         console.print("   pip install rich")
@@ -451,11 +451,11 @@ def list_agents() -> None:
         print(f"   Command: python cli.py {info['command']}")
         print(f"   Capabilities: {', '.join(info['capabilities'])}")
 
-    print(f"\n💡 Usage Examples:")
-    print(f"   python cli.py run-memory-agent 'Find political markets'")
-    print(f"   python cli.py run-planning-agent 'Will BTC hit 100k?'")
-    print(f"   python cli.py scan-opportunities --category politics")
-    print(f"   python cli.py run-ml-research-agent --focus-area 'time series'")
+    print("\n💡 Usage Examples:")
+    print("   python cli.py run-memory-agent 'Find political markets'")
+    print("   python cli.py run-planning-agent 'Will BTC hit 100k?'")
+    print("   python cli.py scan-opportunities --category politics")
+    print("   python cli.py run-ml-research-agent --focus-area 'time series'")
 
 
 if __name__ == "__main__":

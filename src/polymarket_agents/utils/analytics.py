@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import Sequence
 from polymarket_agents.utils.database import PricePoint
 
 

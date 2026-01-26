@@ -67,7 +67,7 @@ class MarketAnalyzer:
             try:
                 price_list = eval(prices) if prices else ["0", "0"]
                 yes_price = float(price_list[0]) if len(price_list) > 0 else 0
-                no_price = float(price_list[1]) if len(price_list) > 1 else 0
+                float(price_list[1]) if len(price_list) > 1 else 0
                 implied_prob = yes_price * 100
             except Exception:
                 implied_prob = 0

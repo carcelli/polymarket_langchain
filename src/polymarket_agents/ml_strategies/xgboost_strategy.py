@@ -11,7 +11,6 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 import logging
-import json
 
 from polymarket_agents.ml_strategies.base_strategy import (
     MLBettingStrategy,

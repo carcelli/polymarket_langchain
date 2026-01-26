@@ -161,7 +161,7 @@ class NBASimulator:
             home_team, away_team, True, market_price
         )
 
-        print(f"\n📊 New Market Analyzed:")
+        print("\n📊 New Market Analyzed:")
         print(f"   {market['question']}")
         print(f"   Matchup: {home_team} vs {away_team}")
         print(f"   Volume: ${market['volume']/1000:.1f}k")
@@ -212,7 +212,7 @@ class NBASimulator:
     ):
         """Place virtual bet on game."""
 
-        print(f"\n💰 PLACING VIRTUAL BET:")
+        print("\n💰 PLACING VIRTUAL BET:")
         print(f"   Betting on: {predicted_winner}")
         print(f"   Amount: ${self.bet_amount:.2f}")
         print(f"   Edge: {edge:+.1%}")
@@ -245,7 +245,7 @@ class NBASimulator:
         )
         self.conn.commit()
 
-        print(f"   ✅ Logged to database")
+        print("   ✅ Logged to database")
 
     def check_resolutions(self):
         """Check for resolved games and update P&L."""
@@ -383,12 +383,12 @@ class NBASimulator:
         win_rate = self.winning_bets / self.total_bets if self.total_bets > 0 else 0
         roi = self.total_profit / 1000 if self.total_bets > 0 else 0
 
-        print(f"\n💰 Portfolio:")
-        print(f"   Starting bankroll: $1,000.00")
+        print("\n💰 Portfolio:")
+        print("   Starting bankroll: $1,000.00")
         print(f"   Current bankroll: ${self.bankroll:.2f}")
         print(f"   Total P&L: ${self.total_profit:+.2f} ({roi:+.1%} ROI)")
 
-        print(f"\n📈 Performance:")
+        print("\n📈 Performance:")
         print(f"   Total bets: {self.total_bets}")
         print(f"   Wins: {self.winning_bets}")
         print(f"   Losses: {self.total_bets - self.winning_bets}")
@@ -404,10 +404,10 @@ class NBASimulator:
                 or 0
             )
 
-            print(f"\n⚖️  Metrics:")
+            print("\n⚖️  Metrics:")
             print(f"   Avg P&L per bet: ${avg_profit:+.2f}")
 
-        print(f"\n🎯 Assessment:")
+        print("\n🎯 Assessment:")
         if self.total_bets < 20:
             print(f"   ⏳ Need {20 - self.total_bets} more bets for assessment")
         elif win_rate > 0.55 and self.total_profit > 0:
@@ -430,7 +430,7 @@ class NBASimulator:
         print(f"⚙️  Min volume: ${self.min_volume/1000:.0f}k")
         print(f"⚙️  Bet size: ${self.bet_amount:.2f}")
         print(f"⏰ Poll interval: {self.poll_interval}s")
-        print(f"\n💡 Press Ctrl+C to stop and see summary\n")
+        print("\n💡 Press Ctrl+C to stop and see summary\n")
 
         check_count = 0
 
@@ -493,10 +493,10 @@ if __name__ == "__main__":
         poll_interval=poll_interval,
     )
 
-    print(f"🚀 Starting NBA simulator")
+    print("🚀 Starting NBA simulator")
     print(
-        f"   Customize: python scripts/nba_simulator.py [min_edge] [min_vol] [bet_size] [interval]"
+        "   Customize: python scripts/nba_simulator.py [min_edge] [min_vol] [bet_size] [interval]"
     )
-    print(f"   Example: python scripts/nba_simulator.py 0.03 30000 25.0 600\n")
+    print("   Example: python scripts/nba_simulator.py 0.03 30000 25.0 600\n")
 
     sim.run()

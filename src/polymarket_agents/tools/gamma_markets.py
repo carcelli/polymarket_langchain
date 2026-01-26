@@ -114,7 +114,7 @@ class GammaMarketsTool(BaseTool):
                     }
                     markets.append(market_snapshot)
 
-                except (KeyError, ValueError, TypeError) as e:
+                except (KeyError, ValueError, TypeError):
                     # Skip malformed market data but continue processing
                     continue
 

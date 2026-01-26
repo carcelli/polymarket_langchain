@@ -29,7 +29,7 @@ class Search:
     def _get_client(self):
         if self._client is None:
             try:
-                from tavily import TavilyClient
+                from tavily import TavilyClient  # type: ignore[import]
             except ImportError as e:
                 raise ImportError("pip install tavily-python") from e
             self._client = TavilyClient(api_key=self.config.tavily_api_key)

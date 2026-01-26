@@ -236,7 +236,7 @@ class AutoMLPipeline:
         ]
 
         X = dataset[feature_cols]
-        y = dataset["will_resolve_yes"]
+        dataset["will_resolve_yes"]
 
         # Handle any remaining missing values
         X = X.fillna(X.mean())

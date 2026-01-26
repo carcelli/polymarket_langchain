@@ -5,9 +5,8 @@ Specialized subagent for tracking trading performance, generating reports,
 and monitoring system health.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime, timedelta
-import json
 
 
 def generate_performance_report(

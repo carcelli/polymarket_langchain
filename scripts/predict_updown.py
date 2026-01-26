@@ -236,7 +236,7 @@ def monitor_with_predictions(check_interval: int = 30, min_confidence: float = 0
                 print(
                     f"\n   💡 If a market appears, consider betting {strong_signals[0][1]['direction']}"
                 )
-                print(f"      (Paper trade first to validate!)")
+                print("      (Paper trade first to validate!)")
 
             time.sleep(check_interval)
 
@@ -265,7 +265,7 @@ if __name__ == "__main__":
                 print(f"   Direction: {pred['direction']}")
                 print(f"   Confidence: {pred['confidence']:.1%}")
             else:
-                print(f"   No strong signal")
+                print("   No strong signal")
 
             diag = pred["diagnostics"]
             if diag:

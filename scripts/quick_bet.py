@@ -62,7 +62,7 @@ def main():
         else market["outcomes"].split(",")[outcome_index]
     )
 
-    print(f"\n📊 Betting Details:")
+    print("\n📊 Betting Details:")
     print(f"   Outcome: {outcome_name}")
     print(f"   Token ID: {token_id}")
     print(f"   Amount: ${amount_usd:.2f} USDC")
@@ -77,7 +77,7 @@ def main():
         print(
             f"\n❌ Insufficient funds! You need ${amount_usd:.2f} but only have ${balance:.2f}"
         )
-        print(f"   Fund your wallet: 0xa59Dd0c1Ff78cC7Ba899De496ea1Fb82B60B1E67")
+        print("   Fund your wallet: 0xa59Dd0c1Ff78cC7Ba899De496ea1Fb82B60B1E67")
         sys.exit(1)
 
     # Confirm

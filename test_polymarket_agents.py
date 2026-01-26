@@ -17,7 +17,7 @@ Requirements:
 
 import os
 from dotenv import load_dotenv
-from polymarket_agents.langchain.agent import (
+from polymarket_agents.langchain.agent import (  # type: ignore[import]
     create_probability_extraction_agent,
     compare_ml_vs_market_forecast,
     create_crypto_agent,

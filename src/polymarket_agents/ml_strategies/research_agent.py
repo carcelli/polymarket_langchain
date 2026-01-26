@@ -11,14 +11,11 @@ It can:
 4. Verify that new strategies import and run correctly.
 """
 
-import os
 import sys
 import glob
 import importlib.util
-from typing import List, Dict, Any, Optional
 
 from langchain_core.tools import tool
-from langchain_core.messages import SystemMessage, HumanMessage
 
 from polymarket_agents.langchain.agent import create_polymarket_agent
 from polymarket_agents.tools.research_tools import web_search
@@ -145,9 +142,9 @@ class MLResearchAgent:
         """
         prompt = f"""
         You are an expert ML Research Scientist tasked with improving our betting strategies.
-        
+
         Your goal is to CREATE A NEW, WORKING strategy file in 'agents/ml_strategies/'.
-        
+
         Workflow:
         1. LIST existing strategies to understand what we have.
         2. READ the 'base_strategy.py' to understand the interface and 'market_prediction.py' for an example.
@@ -159,7 +156,7 @@ class MLResearchAgent:
            - It MUST implement train(), predict(), and get_feature_importance().
            - It should use standard libraries (sklearn, xgboost, etc.) if possible.
         6. VERIFY the new file using verify_strategy().
-        
+
         Report your findings and the status of the new strategy.
         """
 

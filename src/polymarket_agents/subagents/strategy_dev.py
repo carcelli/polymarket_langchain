@@ -5,8 +5,7 @@ Specialized subagent for developing, testing, and refining trading strategies
 for prediction markets.
 """
 
-import json
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 
 

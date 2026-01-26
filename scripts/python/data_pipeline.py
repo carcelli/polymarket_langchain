@@ -84,7 +84,7 @@ class DataPipeline:
     def run_full_pipeline(self) -> Dict[str, Any]:
         """Run complete data pipeline and information management cycle."""
         print(f"\n{'='*70}")
-        print(f"🚀 DATA PIPELINE & INFORMATION MANAGEMENT SYSTEM")
+        print("🚀 DATA PIPELINE & INFORMATION MANAGEMENT SYSTEM")
         print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'='*70}")
 
@@ -96,19 +96,19 @@ class DataPipeline:
         }
 
         # Phase 1: Data Refresh
-        print(f"\n📊 PHASE 1: DATA REFRESH")
+        print("\n📊 PHASE 1: DATA REFRESH")
         results["data_refresh"] = self._run_data_refresh()
 
         # Phase 2: Information Management
-        print(f"\n🧠 PHASE 2: INFORMATION MANAGEMENT")
+        print("\n🧠 PHASE 2: INFORMATION MANAGEMENT")
         results["information_management"] = self._run_information_management()
 
         # Phase 3: Monitoring & Alerts
-        print(f"\n📈 PHASE 3: MONITORING & ALERTS")
+        print("\n📈 PHASE 3: MONITORING & ALERTS")
         results["monitoring"] = self._run_monitoring()
 
         print(f"\n{'='*70}")
-        print(f"✅ PIPELINE COMPLETE")
+        print("✅ PIPELINE COMPLETE")
         print(f"{'='*70}\n")
 
         return results
@@ -119,7 +119,7 @@ class DataPipeline:
 
         # Markets refresh
         if self._should_refresh("markets", self.config.market_refresh_interval):
-            print(f"  📈 Refreshing markets...")
+            print("  📈 Refreshing markets...")
             try:
                 from scripts.python.refresh_markets import refresh_database
 
@@ -135,7 +135,7 @@ class DataPipeline:
 
         # News refresh
         if self._should_refresh("news", self.config.news_refresh_interval):
-            print(f"  📰 Refreshing news...")
+            print("  📰 Refreshing news...")
             try:
                 news_stats = self._refresh_news_data()
                 results["news"] = news_stats
@@ -149,7 +149,7 @@ class DataPipeline:
 
         # Cleanup operations
         if self._should_refresh("cleanup", self.config.cleanup_interval):
-            print(f"  🧹 Running cleanup operations...")
+            print("  🧹 Running cleanup operations...")
             try:
                 cleanup_stats = self._run_cleanup_operations()
                 results["cleanup"] = cleanup_stats
@@ -172,14 +172,14 @@ class DataPipeline:
         results["overflow_check"] = overflow_status
 
         if overflow_status["overflow_detected"]:
-            print(f"  ⚠️  Information overflow detected! Processing...")
+            print("  ⚠️  Information overflow detected! Processing...")
             overflow_results = self._handle_information_overflow(overflow_status)
             results["overflow_handling"] = overflow_results
         else:
-            print(f"  ✅ Information levels within limits")
+            print("  ✅ Information levels within limits")
 
         # Run summarization agents
-        print(f"  🤖 Running summarization agents...")
+        print("  🤖 Running summarization agents...")
         try:
             summarization_results = self._run_summarization_agents()
             results["summarization"] = summarization_results
@@ -191,7 +191,7 @@ class DataPipeline:
             print(f"    ❌ Summarization failed: {e}")
 
         # Update priority scores
-        print(f"  📊 Updating priority scores...")
+        print("  📊 Updating priority scores...")
         try:
             priority_results = self._update_priority_scores()
             results["priority_update"] = priority_results
@@ -209,7 +209,7 @@ class DataPipeline:
         results = {}
 
         # Data health checks
-        print(f"  🔍 Running data health checks...")
+        print("  🔍 Running data health checks...")
         health_results = self._check_data_health()
         results["health_check"] = health_results
 
@@ -218,10 +218,10 @@ class DataPipeline:
                 f"    ⚠️  {health_results['issues_count']} data health issues detected"
             )
         else:
-            print(f"    ✅ All data health checks passed")
+            print("    ✅ All data health checks passed")
 
         # Performance metrics
-        print(f"  📈 Collecting performance metrics...")
+        print("  📈 Collecting performance metrics...")
         metrics = self._collect_performance_metrics()
         results["performance_metrics"] = metrics
         print(f"    📊 Total markets: {metrics.get('total_markets', 0):,}")
@@ -229,7 +229,7 @@ class DataPipeline:
 
         # Generate alerts
         if self.config.enable_alerts:
-            print(f"  🚨 Checking for alerts...")
+            print("  🚨 Checking for alerts...")
             alerts = self._generate_alerts(health_results, metrics)
             results["alerts"] = alerts
             if alerts:
@@ -237,7 +237,7 @@ class DataPipeline:
                 for alert in alerts:
                     print(f"      - {alert['level'].upper()}: {alert['message']}")
             else:
-                print(f"    ✅ No alerts generated")
+                print("    ✅ No alerts generated")
 
         return results
 
@@ -548,7 +548,7 @@ class DataPipeline:
     def run_continuous(self, interval_seconds: int = 600):
         """Run the pipeline continuously."""
         print(f"\n🔄 Starting continuous data pipeline (every {interval_seconds}s)")
-        print(f"   Press Ctrl+C to stop\n")
+        print("   Press Ctrl+C to stop\n")
 
         cycle_count = 0
 
@@ -565,7 +565,7 @@ class DataPipeline:
                     critical_alerts = [a for a in alerts if a["level"] == "error"]
 
                     if critical_alerts:
-                        print(f"🚨 CRITICAL ALERTS DETECTED:")
+                        print("🚨 CRITICAL ALERTS DETECTED:")
                         for alert in critical_alerts:
                             print(f"   {alert['message']}")
 
@@ -660,7 +660,7 @@ Examples:
             results = pipeline.run_full_pipeline()
 
         # Print summary
-        print(f"\n📋 Pipeline Summary:")
+        print("\n📋 Pipeline Summary:")
         for phase, phase_results in results.items():
             if isinstance(phase_results, dict) and phase_results:
                 print(

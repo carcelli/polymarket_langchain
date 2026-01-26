@@ -64,7 +64,6 @@ def get_price_stream(market_id: str, days_back: int = 90) -> List[PricePoint]:
             # days_back=90 suggests we might want daily or 6h.
             # CLOB supports intervals: 1m, 1h, 1d, etc.
             interval = "1d"
-            fidelity = 1000  # Just a safe upper bound?
 
             clob_url = "https://clob.polymarket.com/prices-history"
             params = {"market": token_id, "interval": interval, "fidelity": 1000}

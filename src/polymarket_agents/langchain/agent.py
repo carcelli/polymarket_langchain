@@ -12,19 +12,21 @@ Example Usage:
 """
 
 import os
-from typing import Optional, List, Dict, Any
+import logging
+from typing import Optional, List, Dict, Any, Union
 
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
+from langchain_core.pydantic_v1 import BaseModel as BaseModelV1, Field as FieldV1
+
+from polymarket_agents.utils.context import ContextManager
+from polymarket_agents.config import DEFAULT_MODEL
 
 load_dotenv()
 
 # =============================================================================
 # AGENT CREATION FUNCTIONS
 # =============================================================================
-
-
-from polymarket_agents.utils.context import ContextManager
-from polymarket_agents.config import DEFAULT_MODEL
 
 
 def create_polymarket_agent(
@@ -277,9 +279,6 @@ def create_research_agent(
 # AGENT EXECUTION HELPERS
 # =============================================================================
 
-
-import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -361,13 +360,13 @@ def find_best_trade(
 
     query = f"""
     Find the best trading opportunity on Polymarket right now.
-    
+
     Requirements:
     - {"Focus on " + category + " markets" if category else "Any category is fine"}
     - Risk tolerance: {risk_tolerance}
     - Look for mispriced markets where your forecast differs from market price
     - Consider liquidity and spread
-    
+
     Steps:
     1. Fetch current tradeable markets
     2. Analyze the most interesting ones
@@ -375,7 +374,7 @@ def find_best_trade(
     4. Use superforecaster methodology to estimate probabilities
     5. Compare your probability to market prices
     6. Recommend a specific trade with reasoning
-    
+
     Return your recommendation with:
     - Market question
     - Current market price
@@ -437,11 +436,6 @@ def create_ml_forecast_comparison_agent(
         max_iterations=12,  # More iterations for complex comparisons
         **llm_kwargs,
     )
-
-
-from pydantic import BaseModel, Field
-from typing import Optional, Union
-from langchain_core.pydantic_v1 import BaseModel as BaseModelV1, Field as FieldV1
 
 
 class ForecastComparison(BaseModel):
@@ -826,7 +820,7 @@ def create_business_domain_agent(
         },
     }
 
-    config = domain_configs.get(
+    domain_configs.get(
         domain,
         {
             "categories": None,

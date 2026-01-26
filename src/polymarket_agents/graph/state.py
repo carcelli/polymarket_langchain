@@ -1,5 +1,4 @@
-import operator
-from typing import Annotated, List, TypedDict, Union, Any
+from typing import Annotated, List, TypedDict, Union
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from polymarket_agents.utils.objects import Market  # Importing our Pydantic model

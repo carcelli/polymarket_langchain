@@ -401,7 +401,7 @@ def refresh_database(
         Dict with refresh statistics
     """
     print(f"\n{'='*60}")
-    print(f"  🔄 MARKET DATABASE REFRESH")
+    print("  🔄 MARKET DATABASE REFRESH")
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}")
 
@@ -419,7 +419,7 @@ def refresh_database(
             for cat, count in cleanup_stats["deleted_by_category"].items():
                 print(f"       - {cat}: {count}")
         else:
-            print(f"     No expired markets to clean up")
+            print("     No expired markets to clean up")
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -485,7 +485,7 @@ def refresh_database(
 
     # Print summary
     print(f"\n\n  {'─'*56}")
-    print(f"  ✅ REFRESH COMPLETE")
+    print("  ✅ REFRESH COMPLETE")
     print(f"  {'─'*56}")
     if cleanup:
         print(f"  Expired deleted: {cleanup_stats['deleted_count']:,}")
@@ -494,7 +494,7 @@ def refresh_database(
     print(f"  Total markets:   {stats['end_count']:,}")
     print(f"  Net change:      {stats['new_markets']:+,}")
     print(f"  Total volume:    ${stats['total_volume']:,.0f}")
-    print(f"\n  By Category:")
+    print("\n  By Category:")
     for cat, count in sorted(stats["categories"].items(), key=lambda x: -x[1]):
         print(f"    {cat}: {count:,}")
     print(f"{'='*60}\n")
@@ -524,7 +524,7 @@ def run_continuous(
     """
     print(f"\n🔁 Starting continuous refresh (every {interval}s)")
     print(f"   Auto-cleanup: {'ON' if cleanup else 'OFF'} (grace: {grace_hours}h)")
-    print(f"   Press Ctrl+C to stop\n")
+    print("   Press Ctrl+C to stop\n")
 
     refresh_count = 0
 

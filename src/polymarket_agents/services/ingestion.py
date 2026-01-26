@@ -1,12 +1,10 @@
 import json
 import time
 from datetime import datetime
-from typing import List, Dict, Any
 
 from polymarket_agents.langchain.tools import (
     fetch_tradeable_markets,
     search_news,
-    get_market_by_token,
 )
 from polymarket_agents.memory.manager import MemoryManager
 from polymarket_agents.utils.structures import StrKeyDict

@@ -5,8 +5,7 @@ Specialized subagent for portfolio risk assessment, position sizing,
 and risk management analysis.
 """
 
-import math
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 
 def calculate_portfolio_risk(
@@ -24,7 +23,6 @@ def calculate_portfolio_risk(
 
     total_exposure = 0
     position_risks = []
-    correlations = {}  # Would be calculated in real implementation
 
     for pos in positions:
         market_value = pos.get("size", 0) * pos.get("price", 1.0)
@@ -72,7 +70,7 @@ def calculate_portfolio_risk(
         "recommendations": [
             f"Portfolio exposure is {total_exposure/total_portfolio:.1%} of total capital",
             f"Largest position represents {concentration_limit:.1%} of portfolio",
-            f"Consider reducing concentration if above 20% in single position",
+            "Consider reducing concentration if above 20% in single position",
             f"Current diversification ratio: {diversification_ratio:.2f} (higher is better)",
         ],
     }

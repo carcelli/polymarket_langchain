@@ -7,10 +7,9 @@ for machine learning model training.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Tuple
 from datetime import datetime, timedelta
 import sqlite3
-import json
 import requests
 from pathlib import Path
 import logging
@@ -385,7 +384,7 @@ class PolymarketDataIngestion:
         ]
 
         if not include_unresolved:
-            filtered_df = filtered_df[filtered_df["resolved"] == True]
+            filtered_df = filtered_df[filtered_df["resolved"]]
 
         logger.info(f"Filtered to {len(filtered_df)} markets (min_volume={min_volume})")
 

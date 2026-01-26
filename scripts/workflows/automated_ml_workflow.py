@@ -150,7 +150,7 @@ class AutomatedMLWorkflow:
         # Create experiment for tracking
         experiment_id = self.database.create_experiment(
             name=f"Data Collection - {self.workflow_id}",
-            description=f"Automated workflow data collection phase",
+            description="Automated workflow data collection phase",
         )
 
         # Execute data collection
@@ -202,7 +202,7 @@ class AutomatedMLWorkflow:
         print("Analyzing data quality and ML readiness...")
 
         # Execute data assessment
-        task = f"""
+        task = """
         Assess collected market data for ML training:
         - Analyze data quality metrics
         - Check for missing values and outliers

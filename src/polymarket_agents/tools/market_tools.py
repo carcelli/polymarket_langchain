@@ -7,7 +7,6 @@ from langchain_core.tools import tool
 from polymarket_agents.utils.database import (
     fetch_market_metadata,
     get_price_stream,
-    PricePoint,
 )
 from polymarket_agents.utils.analytics import calculate_price_trend
 

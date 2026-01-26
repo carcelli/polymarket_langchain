@@ -97,7 +97,7 @@ class SimpleMLWorkflow:
             print(
                 f"✅ Training completed: {training_results.get('models_trained', 0)} models"
             )
-            print(f"✅ Results stored in database")
+            print("✅ Results stored in database")
 
             return {
                 "workflow_id": self.workflow_id,
@@ -131,7 +131,7 @@ class SimpleMLWorkflow:
         # Create experiment for tracking
         experiment_id = self.database.create_experiment(
             name=f"Data Collection - {self.workflow_id}",
-            description=f"Simple workflow data collection phase",
+            description="Simple workflow data collection phase",
         )
 
         # Try to get data (may use mock data if API unavailable)
@@ -484,7 +484,7 @@ if __name__ == "__main__":
     if results.get("success"):
         print("\\n🎉 Simple ML Workflow completed successfully!")
         print(f"Workflow ID: {results['workflow_id']}")
-        print(f"Status: ✅ Completed")
+        print("Status: ✅ Completed")
     else:
         print(
             f"\\n❌ Simple ML Workflow failed: {results.get('error', 'Unknown error')}"

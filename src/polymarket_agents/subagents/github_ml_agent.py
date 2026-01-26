@@ -5,15 +5,11 @@ Specialized subagent that creates machine learning models and tests
 for finding profitable betting opportunities, then commits them to GitHub.
 """
 
-import os
-import json
-import re
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 from pathlib import Path
 
-from .github_agent import create_github_subagent, check_github_repo_status
-from ..ml_strategies import MarketPredictor, EdgeDetector
+from .github_agent import check_github_repo_status
 from polymarket_agents.analysis import MarketAnalyzer
 
 

@@ -11,7 +11,7 @@ Usage:
 import sqlite3
 import time
 import json
-import ccxt
+import ccxt  # type: ignore[import]
 import httpx
 import numpy as np
 from datetime import datetime, timezone
@@ -137,15 +137,15 @@ class CryptoDataCollector:
         self.conn.commit()
         return count
 
-    def _fetch_markets(self, max_duration: int = 30) -> List[Dict]:
-        """Fetch active crypto markets."""
+    def _fetch_markets(self, max_duration: int = 60) -> List[Dict]:
+        """Fetch active crypto markets (Up/Down style)."""
 
         markets = []
         offset = 0
         limit = 50
         now = datetime.now(timezone.utc)
 
-        while offset < 200:
+        while offset < 500:  # Paginate deeper to find Up/Down markets
             try:
                 resp = httpx.get(
                     f"{GAMMA_API}/events",
@@ -166,6 +166,11 @@ class CryptoDataCollector:
                     break
 
                 for event in events:
+                    # Focus on "Up or Down" 15-minute markets
+                    title = event.get("title", "").lower()
+                    if "up or down" not in title:
+                        continue
+
                     for market in event.get("markets", []):
                         end_str = market.get("endDate")
                         if not end_str:
@@ -470,7 +475,7 @@ def main():
             stats = collector.get_stats()
             print(f"[{datetime.now().strftime('%H:%M:%S')}] "
                   f"Collected: {count} | Total: {stats['total_snapshots']:,} | "
-                  f"Resolved: {stats['resolved_markets']:,}")
+                  f"Resolved: {stats['resolved_markets']:,} (+{resolved})")
 
             # Check duration limit
             if args.duration > 0:
@@ -486,7 +491,7 @@ def main():
 
     finally:
         stats = collector.get_stats()
-        print(f"\n📊 Final Statistics:")
+        print("\n📊 Final Statistics:")
         print(f"   Total snapshots: {stats['total_snapshots']:,}")
         print(f"   Unique markets: {stats['unique_markets']:,}")
         print(f"   Resolved: {stats['resolved_markets']:,}")

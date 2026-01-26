@@ -4,7 +4,6 @@ Handles Unicode normalization, diacritic removal, and ASCII-fication.
 """
 
 import unicodedata
-import string
 
 
 def nfc_equal(str1: str, str2: str) -> bool:

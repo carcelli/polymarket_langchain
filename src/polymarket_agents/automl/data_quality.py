@@ -7,7 +7,7 @@ ML-ready datasets for reliable model training.
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Dict, List, Any, Tuple
 import logging
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
@@ -464,10 +464,10 @@ class DataQualityValidator:
             recommendations.extend(balance.get("recommendations", []))
 
         # Feature issues
-        for col, stats in validation_report["feature_distributions"].items():
-            if stats.get("issues"):
+        for col, feature_stats in validation_report["feature_distributions"].items():
+            if feature_stats.get("issues"):
                 recommendations.extend(
-                    [f"{col}: {issue}" for issue in stats["issues"][:2]]
+                    [f"{col}: {issue}" for issue in feature_stats["issues"][:2]]
                 )
 
         validation_report["recommendations"] = list(

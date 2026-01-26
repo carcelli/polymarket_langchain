@@ -5,13 +5,13 @@ LangChain-compatible tools that enable agents to perform machine learning
 operations including data ingestion, model training, evaluation, and prediction.
 """
 
-from typing import Dict, List, Any, Optional, Type, Union
+from typing import Dict, List, Any, Optional, Type
 from datetime import datetime
 import pandas as pd
 import json
 import sqlite3
 
-from langchain.tools import BaseTool, tool
+from langchain.tools import BaseTool
 from langchain_core.callbacks import CallbackManagerForToolRun
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -114,7 +114,7 @@ class DataIngestionTool(BaseTool):
             # Apply filters
             dataset = dataset[dataset["volume"] >= min_volume]
             if not include_unresolved:
-                dataset = dataset[dataset["resolved"] == True]
+                dataset = dataset[dataset["resolved"]]
 
             # Store in database
             db = MLDatabase()
@@ -582,7 +582,6 @@ class ModelEvaluationTool(BaseTool):
         """Run cross-validation evaluation."""
         from sklearn.model_selection import cross_val_score
         from sklearn.ensemble import RandomForestClassifier
-        import numpy as np
 
         # Prepare data for sklearn
         feature_cols = [
@@ -710,7 +709,6 @@ class ExperimentResultsTool(BaseTool):
 
             # Format results for agent consumption
             formatted_results = {
-                "status": "success",
                 "experiment_id": experiment_id,
                 "experiment_name": results["experiment"]["name"],
                 "status": results["experiment"]["status"],

@@ -120,7 +120,7 @@ def preprocess_mnist_data(
     train_y = one_hot(train_labels, 10)
     test_y = one_hot(test_labels, 10)
 
-    print(f"✅ Preprocessing complete:")
+    print("✅ Preprocessing complete:")
     print(f"   Train: {train_X.shape} images, {train_y.shape} labels")
     print(f"   Test:  {test_X.shape} images, {test_y.shape} labels")
 

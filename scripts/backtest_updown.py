@@ -63,7 +63,7 @@ class Backtest:
             min_confidence: Minimum confidence to place bet
         """
 
-        print(f"\n🎯 Running backtest...")
+        print("\n🎯 Running backtest...")
         print(f"   Starting capital: ${self.starting_capital:.2f}")
         print(f"   Bet size: ${bet_size:.2f}")
         print(f"   Min confidence: {min_confidence:.1%}")
@@ -199,18 +199,18 @@ class Backtest:
         print("📊 BACKTEST RESULTS")
         print("=" * 70)
 
-        print(f"\n💰 Capital:")
+        print("\n💰 Capital:")
         print(f"   Starting: ${self.starting_capital:.2f}")
         print(f"   Ending: ${metrics['final_capital']:.2f}")
         print(f"   P&L: ${metrics['total_pnl']:+.2f} ({metrics['return_pct']:+.1%})")
 
-        print(f"\n📈 Performance:")
+        print("\n📈 Performance:")
         print(f"   Total trades: {metrics['total_trades']}")
         print(f"   Wins: {metrics['wins']}")
         print(f"   Losses: {metrics['losses']}")
         print(f"   Win rate: {metrics['win_rate']:.1%}")
 
-        print(f"\n⚖️  Risk Metrics:")
+        print("\n⚖️  Risk Metrics:")
         print(f"   Avg win: ${metrics['avg_win']:+.2f}")
         print(f"   Avg loss: ${metrics['avg_loss']:+.2f}")
         print(f"   Profit factor: {metrics['profit_factor']:.2f}")
@@ -218,7 +218,7 @@ class Backtest:
         print(f"   Sharpe ratio: {metrics['sharpe_ratio']:.2f}")
 
         # Assessment
-        print(f"\n🎯 Assessment:")
+        print("\n🎯 Assessment:")
         if metrics["win_rate"] > 0.55 and metrics["total_pnl"] > 0:
             print("   ✅ Strategy shows promise - consider paper trading")
         elif metrics["win_rate"] > 0.50:

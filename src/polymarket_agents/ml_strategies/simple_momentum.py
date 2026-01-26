@@ -10,7 +10,7 @@ from .registry import register_strategy
 
 
 @register_strategy("momentum_30d")
-def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
+def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Simple 30-day price momentum signal.
 
@@ -64,7 +64,7 @@ def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
 
 
 @register_strategy("volume_spike")
-def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
+def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Volume spike detector.
 

@@ -7,7 +7,7 @@ that traditional analysis might miss.
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
@@ -161,7 +161,7 @@ class EdgeDetector(MLBettingStrategy):
             X_test_scaled = self.scaler.transform(X_test)
 
             # Train model
-            history = self.model.fit(
+            self.model.fit(
                 X_train_scaled,
                 y_train,
                 epochs=50,

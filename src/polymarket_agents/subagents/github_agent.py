@@ -6,7 +6,7 @@ Handles issues, PRs, commits, and repository operations.
 """
 
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 
 # GitHub toolkit imports (will be available when installed)

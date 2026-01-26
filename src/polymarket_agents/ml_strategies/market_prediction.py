@@ -7,7 +7,7 @@ and market characteristics.
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, accuracy_score
@@ -91,8 +91,8 @@ class MarketPredictor(MLBettingStrategy):
         reg_pred = self.regressor.predict(X_test)
         clf_pred = self.classifier.predict(X_test)
 
-        reg_mse = mean_squared_error(y_reg_test, reg_pred)
-        clf_acc = accuracy_score(y_clf_test, clf_pred)
+        mean_squared_error(y_reg_test, reg_pred)
+        accuracy_score(y_clf_test, clf_pred)
 
         print(".4f")
         print(".1%")
@@ -121,7 +121,7 @@ class MarketPredictor(MLBettingStrategy):
 
         # Get predictions
         predicted_true_prob = self.regressor.predict(features)[0]
-        predicted_outcome = self.classifier.predict(features)[0]
+        self.classifier.predict(features)[0]
 
         # Current market probability
         prices = market_data.get("outcome_prices", ["0.5", "0.5"])
@@ -227,7 +227,7 @@ class EnsemblePredictor(MarketPredictor):
         for name, model in self.models.items():
             model.fit(X, y)
             pred = model.predict(X)
-            mse = mean_squared_error(y, pred)
+            mean_squared_error(y, pred)
             print(".4f")
         self.is_trained = True
 

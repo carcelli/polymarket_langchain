@@ -153,7 +153,7 @@ def demonstrate_ml_agent_workflows():
             print(f"❌ Error: {e}")
             results.append({"status": "error", "error": str(e)})
 
-    print(f"\\n📊 Agent Workflow Summary:")
+    print("\\n📊 Agent Workflow Summary:")
     print(f"   • Workflows executed: {len(workflows)}")
     print(f"   • Successful: {sum(1 for r in results if r.get('status') == 'success')}")
     print(f"   • Failed: {sum(1 for r in results if r.get('status') != 'success')}")

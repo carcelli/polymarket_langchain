@@ -70,7 +70,6 @@ class PolymarketStoreBackend(BackendProtocol):
             if prefix and not prefix.endswith("/"):
                 prefix += "/"
 
-            search_key = f"{self.namespace}:{prefix}" if prefix else self.namespace
 
             items = self.store.search([self.namespace])
             entries = []

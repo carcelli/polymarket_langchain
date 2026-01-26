@@ -445,7 +445,7 @@ class Simulator:
         print(f"⚙️  Min confidence: {self.min_confidence:.0%}")
         print(f"⚙️  Risk per trade: {self.risk_per_trade:.1%}")
         print(f"⏰ Poll interval: {self.poll_interval}s")
-        print(f"\n🎯 Target: 200+ trades to prove edge")
+        print("\n🎯 Target: 200+ trades to prove edge")
         print("💡 Press Ctrl+C to stop and see summary\n")
 
         check_count = 0
@@ -536,8 +536,8 @@ class Simulator:
             else 0
         )
 
-        print(f"\n💰 Portfolio:")
-        print(f"   Starting bankroll: $1,000.00")
+        print("\n💰 Portfolio:")
+        print("   Starting bankroll: $1,000.00")
         print(f"   Current bankroll: ${self.bankroll:.2f}")
         print(
             f"   Total P&L: ${self.total_profit:+.2f} ({self.total_profit/1000*100:+.1f}%)"
@@ -545,7 +545,7 @@ class Simulator:
         print(f"   Peak bankroll: ${self.max_bankroll:.2f}")
         print(f"   Current drawdown: {drawdown:.1%}")
 
-        print(f"\n📈 Performance:")
+        print("\n📈 Performance:")
         print(f"   Total bets: {self.total_bets}")
         print(f"   Wins: {self.winning_bets}")
         print(f"   Losses: {self.total_bets - self.winning_bets}")
@@ -585,7 +585,7 @@ class Simulator:
                     or 0
                 )
 
-            print(f"\n⚖️  Risk Metrics:")
+            print("\n⚖️  Risk Metrics:")
             print(f"   Avg P&L per bet: ${avg_profit:+.2f}")
             print(f"   Avg win: ${avg_win:+.2f}")
             print(f"   Avg loss: ${avg_loss:+.2f}")
@@ -594,7 +594,7 @@ class Simulator:
                 print(f"   Profit factor: {profit_factor:.2f}")
 
         # Assessment
-        print(f"\n🎯 Assessment:")
+        print("\n🎯 Assessment:")
         if self.total_bets < 200:
             print(f"   ⏳ Need {200 - self.total_bets} more bets to assess edge")
         elif win_rate > 0.55 and self.total_profit > 0:
@@ -621,10 +621,10 @@ if __name__ == "__main__":
         poll_interval=poll_interval,
     )
 
-    print(f"🚀 Starting production simulator")
+    print("🚀 Starting production simulator")
     print(
-        f"   Customize: python scripts/monitor_simulator.py [min_conf] [risk] [interval]"
+        "   Customize: python scripts/monitor_simulator.py [min_conf] [risk] [interval]"
     )
-    print(f"   Example: python scripts/monitor_simulator.py 0.65 0.03 45\n")
+    print("   Example: python scripts/monitor_simulator.py 0.65 0.03 45\n")
 
     sim.run_monitor_loop()

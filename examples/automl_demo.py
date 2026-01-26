@@ -196,7 +196,7 @@ def demonstrate_model_prediction():
         print(f"   🤖 Model Used: {result['model_name']}")
 
         if result["reasoning"]:
-            print(f"\\n📝 Model Reasoning:")
+            print("\\n📝 Model Reasoning:")
             # Split reasoning into lines for better display
             reasoning_lines = result["reasoning"].split("\\n")
             for line in reasoning_lines[:5]:  # Show first 5 lines

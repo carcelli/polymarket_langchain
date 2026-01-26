@@ -7,8 +7,8 @@ that can analyze markets and make predictions.
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional
+from datetime import datetime
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
@@ -83,7 +83,7 @@ class MLBettingStrategy(ABC):
         prices = market_data.get("outcome_prices", ["0.5", "0.5"])
         if isinstance(prices, list) and len(prices) >= 2:
             yes_price = float(prices[0])
-            no_price = float(prices[1])
+            float(prices[1])
             features.extend(
                 [
                     yes_price,  # implied probability

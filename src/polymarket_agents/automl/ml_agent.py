@@ -5,7 +5,7 @@ An intelligent agent that uses ML tools to perform complete automated
 machine learning workflows for Polymarket data analysis and prediction.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime
 import json
 import logging

@@ -275,7 +275,7 @@ if __name__ == "__main__":
 
     # Summary stats
     total_volume = sum(m["volume"] for m in markets)
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Total markets: {len(markets)}")
     print(f"   Total volume: ${total_volume/1000:.1f}k")
     print(f"   Avg volume: ${total_volume/len(markets)/1000:.1f}k" if markets else "")
@@ -285,7 +285,7 @@ if __name__ == "__main__":
         else ""
     )
 
-    print(f"\n💡 Next steps:")
-    print(f"   1. Run NBA simulator: python scripts/nba_simulator.py")
-    print(f"   2. Add predictions with team records and home advantage")
-    print(f"   3. Track virtual P&L over 20+ games")
+    print("\n💡 Next steps:")
+    print("   1. Run NBA simulator: python scripts/nba_simulator.py")
+    print("   2. Add predictions with team records and home advantage")
+    print("   3. Track virtual P&L over 20+ games")

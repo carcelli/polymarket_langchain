@@ -84,7 +84,7 @@ class VirtualTrader:
         self.consecutive_losses = 0
         self.seen_markets = set()
 
-        print(f"✅ Virtual Trader initialized")
+        print("✅ Virtual Trader initialized")
         print(f"   Starting bankroll: ${self.bankroll:.2f}")
         print(f"   Market types: {', '.join(self.market_types)}")
         print(f"   Min edge: {self.min_edge:.1%}")
@@ -449,7 +449,7 @@ class VirtualTrader:
 
         self.conn.commit()
 
-        print(f"\n📝 VIRTUAL BET PLACED:")
+        print("\n📝 VIRTUAL BET PLACED:")
         print(f"   Market: {market['question'][:70]}")
         print(f"   Type: {market_type}")
         print(f"   Betting: {prediction['bet_side']}")
@@ -563,7 +563,7 @@ class VirtualTrader:
                 self.conn.commit()
 
                 result = "WIN" if profit > 0 else "LOSS"
-                print(f"\n✅ TRADE RESOLVED:")
+                print("\n✅ TRADE RESOLVED:")
                 print(f"   Market: {market_id}")
                 print(f"   Predicted: {bet_side} | Actual: {outcome}")
                 print(f"   Result: {result}")
@@ -637,12 +637,12 @@ class VirtualTrader:
         print("📊 VIRTUAL TRADER SUMMARY")
         print("=" * 80)
 
-        print(f"\n💰 Portfolio:")
+        print("\n💰 Portfolio:")
         print(f"   Starting: ${VIRTUAL_BANKROLL_START:.2f}")
         print(f"   Current: ${self.bankroll:.2f}")
         print(f"   P&L: ${pnl or 0:+.2f} ({roi:+.1%} ROI)")
 
-        print(f"\n📈 Performance:")
+        print("\n📈 Performance:")
         print(f"   Total bets: {total or 0}")
         print(f"   Wins: {wins or 0}")
         print(f"   Win rate: {win_rate:.1%}")
@@ -660,7 +660,7 @@ class VirtualTrader:
         ).fetchall()
 
         if by_type:
-            print(f"\n📊 By Market Type:")
+            print("\n📊 By Market Type:")
             for mtype, count, profit in by_type:
                 print(f"   {mtype}: {count} bets, ${profit or 0:+.2f}")
 
@@ -735,7 +735,7 @@ class VirtualTrader:
         print("\n" + "=" * 80)
         print("🚀 VIRTUAL TRADER - PRODUCTION SIMULATION")
         print("=" * 80)
-        print(f"\n💡 Press Ctrl+C to stop and see summary\n")
+        print("\n💡 Press Ctrl+C to stop and see summary\n")
 
         try:
             while True:

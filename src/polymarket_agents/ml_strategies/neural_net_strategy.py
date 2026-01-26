@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import expit as sigmoid
 from scipy.stats import truncnorm
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from .registry import register_strategy
 from .base_strategy import MLBettingStrategy, StrategyResult
 

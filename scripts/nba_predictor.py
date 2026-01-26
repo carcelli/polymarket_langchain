@@ -235,7 +235,7 @@ def demo_predictions():
         elif rec == "AVOID":
             print(f"  ⚠️  WARNING: {home_team} overpriced by {abs(edge):.1%}")
         else:
-            print(f"  ⏭️  PASS: Edge too small")
+            print("  ⏭️  PASS: Edge too small")
 
 
 if __name__ == "__main__":

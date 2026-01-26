@@ -20,3 +20,17 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+polymarket_agents = ["py.typed"]
+
+[tool.mypy]
+ignore_missing_imports = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "polymarket_agents.*"
+ignore_missing_imports = false
+follow_imports = "normal"

@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-from newsapi import NewsApiClient
 
 from polymarket_agents.utils.objects import Article
 

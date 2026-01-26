@@ -6,7 +6,7 @@ Designed for integration with Polymarket agents for market prediction.
 """
 
 import numpy as np
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 from .utils import (
     truncated_normal,
     sigmoid,
@@ -56,7 +56,8 @@ class NeuralNetwork:
         self.n_inputs = n_inputs
         self.n_hidden = n_hidden
         self.n_outputs = n_outputs
-
+        self.layer_sizes = [n_inputs, n_hidden, n_outputs]
+        
         # Xavier/Glorot initialization for better gradient flow
         # Scale by sqrt(n_inputs) to prevent vanishing/exploding gradients
         input_rad = 1 / np.sqrt(n_inputs)
@@ -69,6 +70,9 @@ class NeuralNetwork:
         # Hidden → Output weights (including bias row)
         X = truncated_normal(low=-hidden_rad, upp=hidden_rad)
         self.who = X.rvs((n_outputs, n_hidden + 1))  # +1 for bias
+        
+        # Store as list for consistency with from_layers
+        self.weights = [self.wih, self.who]
 
     @classmethod
     def from_layers(
