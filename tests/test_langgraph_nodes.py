@@ -1,26 +1,26 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from agents.graph.memory_agent import (
+from polymarket_agents.graph.memory_agent import (
     memory_node,
     enrichment_node,
     reasoning_node,
     decide_node,
     MemoryAgentState,
 )
-from agents.graph.planning_agent import (
+from polymarket_agents.graph.planning_agent import (
     research_node,
     stats_node,
     probability_node,
     decision_node,
     PlanningState,
 )
-from agents.graph.state import AgentState
+from polymarket_agents.graph.state import AgentState
 
 
 class TestMemoryAgentNodes(unittest.TestCase):
     """Test individual nodes from the memory agent."""
 
-    @patch("agents.graph.memory_agent.MemoryManager")
+    @patch("polymarket_agents.graph.memory_agent.MemoryManager")
     def test_memory_node_success(self, mock_mm_class):
         """Test memory node retrieves data successfully."""
         # Setup mock
@@ -51,7 +51,7 @@ class TestMemoryAgentNodes(unittest.TestCase):
             result["memory_context"]["database_stats"]["total_markets"], 1000
         )
 
-    @patch("agents.polymarket.gamma.GammaMarketClient")
+    @patch("polymarket_agents.connectors.gamma.GammaMarketClient")
     def test_enrichment_node_api_call(self, mock_gamma_class):
         """Test enrichment node makes API calls when needed."""
         mock_gamma = MagicMock()
@@ -107,7 +107,7 @@ class TestPlanningAgentNodes(unittest.TestCase):
 class TestNodeErrorHandling(unittest.TestCase):
     """Test error handling in nodes."""
 
-    @patch("agents.graph.memory_agent.MemoryManager")
+    @patch("polymarket_agents.graph.memory_agent.MemoryManager")
     def test_memory_node_handles_exceptions(self, mock_mm):
         """Test memory node gracefully handles database errors."""
         # Setup mock to raise exception

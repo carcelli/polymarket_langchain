@@ -5,7 +5,6 @@ import os
 import pdb
 import time
 import ast
-import requests
 
 from dotenv import load_dotenv
 
@@ -46,13 +45,15 @@ class Polymarket:
         self.private_key = os.getenv("POLYGON_WALLET_PRIVATE_KEY")
         if not self.private_key:
             raise ValueError("POLYGON_WALLET_PRIVATE_KEY missing from .env")
-            
+
         self.polygon_rpc = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
         self.w3 = Web3(Web3.HTTPProvider(self.polygon_rpc))
 
         # Validate RPC connection
         if not self.w3.is_connected():
-            raise ConnectionError(f"Failed to connect to Polygon RPC: {self.polygon_rpc}")
+            raise ConnectionError(
+                f"Failed to connect to Polygon RPC: {self.polygon_rpc}"
+            )
 
         # Derive and store account from private key
         if self._is_valid_private_key(self.private_key):
@@ -477,15 +478,15 @@ if __name__ == "__main__":
     # pdb.set_trace()
 
     """
-    
+
     (Pdb) pprint(o)
             OrderBookSummary(
-                market='0x26ee82bee2493a302d21283cb578f7e2fff2dd15743854f53034d12420863b55', 
-                asset_id='11015470973684177829729219287262166995141465048508201953575582100565462316088', 
+                market='0x26ee82bee2493a302d21283cb578f7e2fff2dd15743854f53034d12420863b55',
+                asset_id='11015470973684177829729219287262166995141465048508201953575582100565462316088',
                 bids=[OrderSummary(price='0.01', size='600005'), OrderSummary(price='0.02', size='200000'), ...
                 asks=[OrderSummary(price='0.99', size='100000'), OrderSummary(price='0.98', size='200000'), ...
             )
-    
+
     """
 
     # https://polygon-rpc.com

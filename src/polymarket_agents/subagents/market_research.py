@@ -5,13 +5,10 @@ Specialized subagent for in-depth market research and analysis.
 Handles complex research tasks that would bloat the main agent's context.
 """
 
-import os
 from typing import List, Dict, Any
-from datetime import datetime, timedelta
 
 # Import our existing tools and utilities
-from market_analysis_workflow import MarketAnalyzer
-from polymarket_agents.utils.text import asciize
+from polymarket_agents.analysis import MarketAnalyzer
 from polymarket_agents.ml_strategies.registry import best_strategy
 
 
@@ -32,7 +29,7 @@ def search_related_markets(query: str, limit: int = 5) -> List[Dict[str, Any]]:
     scored_markets = []
 
     for market in all_markets:
-        question = market['question'].lower()
+        question = market["question"].lower()
         score = 0
 
         # Exact word matches get higher scores
@@ -56,13 +53,15 @@ def search_related_markets(query: str, limit: int = 5) -> List[Dict[str, Any]]:
 
     results = []
     for market, score in scored_markets[:limit]:
-        results.append({
-            'market': market,
-            'relevance_score': score,
-            'category': market['category'],
-            'volume': market['volume'],
-            'probability': market['implied_probability']
-        })
+        results.append(
+            {
+                "market": market,
+                "relevance_score": score,
+                "category": market["category"],
+                "volume": market["volume"],
+                "probability": market["implied_probability"],
+            }
+        )
 
     return results
 
@@ -83,7 +82,7 @@ def analyze_market_with_strategies(market_data: Dict[str, Any]) -> Dict[str, Any
                 "market_id": market_data.get("id", "unknown"),
                 "analysis_type": "ml_strategy",
                 "error": strategy_result["error"],
-                "strategies_available": strategy_result.get("strategies_tried", 0)
+                "strategies_available": strategy_result.get("strategies_tried", 0),
             }
 
         # Format for research output
@@ -100,15 +99,15 @@ def analyze_market_with_strategies(market_data: Dict[str, Any]) -> Dict[str, Any
             "additional_insights": {
                 "momentum": strategy_result.get("momentum"),
                 "volume_ratio": strategy_result.get("volume_ratio"),
-                "data_points": strategy_result.get("data_points")
-            }
+                "data_points": strategy_result.get("data_points"),
+            },
         }
 
     except Exception as e:
         return {
             "market_id": market_data.get("id", "unknown"),
             "analysis_type": "ml_strategy",
-            "error": f"Strategy analysis failed: {str(e)}"
+            "error": f"Strategy analysis failed: {str(e)}",
         }
 
 
@@ -126,7 +125,7 @@ def analyze_market_trends(market_id: str, days_back: int = 30) -> Dict[str, Any]
     market_data = None
 
     for market in markets:
-        if str(market['id']) == str(market_id):
+        if str(market["id"]) == str(market_id):
             market_data = market
             break
 
@@ -134,27 +133,27 @@ def analyze_market_trends(market_id: str, days_back: int = 30) -> Dict[str, Any]
         return {"error": f"Market {market_id} not found"}
 
     # Mock trend analysis (in real implementation, this would use historical data)
-    current_prob = market_data['implied_probability']
-    volume = market_data['volume']
+    current_prob = market_data["implied_probability"]
+    volume = market_data["volume"]
 
     # Simulate trend analysis
     trend_analysis = {
-        'market_id': market_id,
-        'current_probability': current_prob,
-        'volume': volume,
-        'trend_direction': 'stable',  # Could be 'up', 'down', 'stable'
-        'volatility': 'medium',  # Could be 'low', 'medium', 'high'
-        'momentum': 0.0,  # -1 to 1 scale
-        'key_insights': [
+        "market_id": market_id,
+        "current_probability": current_prob,
+        "volume": volume,
+        "trend_direction": "stable",  # Could be 'up', 'down', 'stable'
+        "volatility": "medium",  # Could be 'low', 'medium', 'high'
+        "momentum": 0.0,  # -1 to 1 scale
+        "key_insights": [
             f"Market shows {current_prob:.1%} implied probability",
             f"Trading volume of ${volume:,.0f} indicates {'high' if volume > 10000000 else 'moderate'} interest",
-            "Price action suggests market expectations are stabilizing"
+            "Price action suggests market expectations are stabilizing",
         ],
-        'recommendations': [
+        "recommendations": [
             "Monitor for significant volume changes",
             "Watch for news events that could shift probability",
-            "Consider position sizing based on volatility assessment"
-        ]
+            "Consider position sizing based on volatility assessment",
+        ],
     }
 
     return trend_analysis
@@ -174,7 +173,6 @@ def create_market_research_subagent():
     return {
         "name": "market-research",
         "description": "Conducts in-depth market research, finds related markets, analyzes trends, and provides detailed market intelligence. Use for complex research tasks that require multiple data sources and analysis.",
-
         "system_prompt": """You are a specialized market research analyst for prediction markets.
 
 Your role is to provide comprehensive market intelligence that would otherwise clutter the main agent's context.
@@ -212,9 +210,8 @@ RECOMMENDATIONS
         "tools": [
             search_related_markets,
             analyze_market_trends,
-            analyze_market_with_strategies
+            analyze_market_with_strategies,
         ],
-
         # Use a more analytical model for research
         "model": "gpt-4o",  # Could be overridden based on available models
     }

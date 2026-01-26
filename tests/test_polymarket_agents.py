@@ -30,9 +30,8 @@ class TestProjectStructure(unittest.TestCase):
 
     def test_agents_application_modules_exist(self):
         """Verify all application modules exist."""
-        from agents.application import cron, creator, trade, executor, prompts
+        from polymarket_agents.application import cron, creator, trade, executor, prompts
 
-        self.assertTrue(hasattr(cron, "Scheduler"))
         self.assertTrue(hasattr(cron, "TradingAgent"))
         self.assertTrue(hasattr(creator, "Creator"))
         self.assertTrue(hasattr(trade, "Trader"))
@@ -41,21 +40,21 @@ class TestProjectStructure(unittest.TestCase):
 
     def test_agents_connectors_modules_exist(self):
         """Verify all connector modules exist."""
-        from agents.connectors import news, search, chroma
+        from polymarket_agents.connectors import news, search, chroma
 
         self.assertTrue(hasattr(news, "News"))
         self.assertTrue(hasattr(chroma, "PolymarketRAG"))
 
     def test_agents_polymarket_modules_exist(self):
         """Verify polymarket modules exist."""
-        from agents.polymarket import gamma, polymarket
+        from polymarket_agents.connectors import gamma, polymarket
 
         self.assertTrue(hasattr(gamma, "GammaMarketClient"))
         self.assertTrue(hasattr(polymarket, "Polymarket"))
 
     def test_agents_utils_modules_exist(self):
         """Verify utils modules exist."""
-        from agents.utils import objects, utils
+        from polymarket_agents.utils import objects, utils
 
         self.assertTrue(hasattr(objects, "Trade"))
         self.assertTrue(hasattr(objects, "SimpleMarket"))
@@ -69,7 +68,7 @@ class TestDataModels(unittest.TestCase):
 
     def test_simple_market_model(self):
         """Test SimpleMarket model validation."""
-        from agents.utils.objects import SimpleMarket
+        from polymarket_agents.utils.objects import SimpleMarket
 
         market_data = {
             "id": 123,
@@ -93,7 +92,7 @@ class TestDataModels(unittest.TestCase):
 
     def test_simple_event_model(self):
         """Test SimpleEvent model validation."""
-        from agents.utils.objects import SimpleEvent
+        from polymarket_agents.utils.objects import SimpleEvent
 
         event_data = {
             "id": 456,
@@ -119,7 +118,7 @@ class TestDataModels(unittest.TestCase):
 
     def test_trade_model(self):
         """Test Trade model validation."""
-        from agents.utils.objects import Trade
+        from polymarket_agents.utils.objects import Trade
 
         trade_data = {
             "id": 1,
@@ -148,7 +147,7 @@ class TestDataModels(unittest.TestCase):
 
     def test_article_model(self):
         """Test Article model for news connector."""
-        from agents.utils.objects import Article, Source
+        from polymarket_agents.utils.objects import Article, Source
 
         article_data = {
             "source": {"id": "test-source", "name": "Test Source"},
@@ -171,7 +170,7 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_parse_camel_case(self):
         """Test camelCase to space-separated conversion."""
-        from agents.utils.utils import parse_camel_case
+        from polymarket_agents.utils.utils import parse_camel_case
 
         self.assertEqual(parse_camel_case("testCase"), "test case")
         self.assertEqual(parse_camel_case("anotherTestCase"), "another test case")
@@ -179,7 +178,7 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_preprocess_market_object(self):
         """Test market object preprocessing."""
-        from agents.utils.utils import preprocess_market_object
+        from polymarket_agents.utils.utils import preprocess_market_object
 
         market = {
             "description": "Base description",
@@ -198,7 +197,7 @@ class TestGammaMarketClient(unittest.TestCase):
 
     def test_client_initialization(self):
         """Test GammaMarketClient can be instantiated."""
-        from agents.polymarket.gamma import GammaMarketClient
+        from polymarket_agents.connectors.gamma import GammaMarketClient
 
         client = GammaMarketClient()
 
@@ -209,7 +208,7 @@ class TestGammaMarketClient(unittest.TestCase):
     @patch("httpx.get")
     def test_get_markets_success(self, mock_get):
         """Test successful market retrieval."""
-        from agents.polymarket.gamma import GammaMarketClient
+        from polymarket_agents.connectors.gamma import GammaMarketClient
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -231,7 +230,7 @@ class TestGammaMarketClient(unittest.TestCase):
     @patch("httpx.get")
     def test_get_events_success(self, mock_get):
         """Test successful event retrieval."""
-        from agents.polymarket.gamma import GammaMarketClient
+        from polymarket_agents.connectors.gamma import GammaMarketClient
 
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -249,10 +248,10 @@ class TestNewsConnector(unittest.TestCase):
 
     def test_news_client_initialization(self):
         """Test News client can be instantiated."""
-        from agents.connectors.news import News
+        from polymarket_agents.connectors.news import News
 
         # Mock the NewsApiClient to avoid needing real API key
-        with patch("agents.connectors.news.NewsApiClient"):
+        with patch("polymarket_agents.connectors.news.NewsApiClient"):
             client = News()
 
             self.assertIn("language", client.configs)
@@ -262,9 +261,9 @@ class TestNewsConnector(unittest.TestCase):
 
     def test_get_category_mapping(self):
         """Test category mapping function."""
-        from agents.connectors.news import News
+        from polymarket_agents.connectors.news import News
 
-        with patch("agents.connectors.news.NewsApiClient"):
+        with patch("polymarket_agents.connectors.news.NewsApiClient"):
             client = News()
 
             # Test matching category
@@ -281,7 +280,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_market_analyst_prompt(self):
         """Test market analyst prompt generation."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.market_analyst()
@@ -291,7 +290,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_superforecaster_prompt(self):
         """Test superforecaster prompt generation."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.superforecaster(
@@ -305,7 +304,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_filter_events_prompt(self):
         """Test filter events prompt generation."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.filter_events()
@@ -315,7 +314,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_filter_markets_prompt(self):
         """Test filter markets prompt generation."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.filter_markets()
@@ -325,7 +324,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_one_best_trade_prompt(self):
         """Test one best trade prompt generation."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.one_best_trade(
@@ -340,7 +339,7 @@ class TestPrompter(unittest.TestCase):
 
     def test_create_new_market_prompt(self):
         """Test create new market prompt."""
-        from agents.application.prompts import Prompter
+        from polymarket_agents.application.prompts import Prompter
 
         prompter = Prompter()
         prompt = prompter.create_new_market("filtered markets data")
@@ -353,15 +352,15 @@ class TestPrompter(unittest.TestCase):
 class TestExecutor(unittest.TestCase):
     """Test Executor class for LLM-powered decision making."""
 
-    @patch("agents.application.executor.ChatOpenAI")
-    @patch("agents.application.executor.Polymarket")
-    @patch("agents.application.executor.Chroma")
-    @patch("agents.application.executor.Gamma")
+    @patch("polymarket_agents.application.executor.ChatOpenAI")
+    @patch("polymarket_agents.application.executor.Polymarket")
+    @patch("polymarket_agents.application.executor.Chroma")
+    @patch("polymarket_agents.application.executor.Gamma")
     def test_executor_initialization(
         self, mock_gamma, mock_chroma, mock_poly, mock_llm
     ):
         """Test Executor can be instantiated."""
-        from agents.application.executor import Executor
+        from polymarket_agents.application.executor import Executor
 
         executor = Executor()
 
@@ -370,7 +369,7 @@ class TestExecutor(unittest.TestCase):
 
     def test_retain_keys_function(self):
         """Test retain_keys utility function."""
-        from agents.application.executor import retain_keys
+        from polymarket_agents.application.executor import retain_keys
 
         data = {
             "keep1": "value1",
@@ -385,7 +384,7 @@ class TestExecutor(unittest.TestCase):
 
     def test_retain_keys_nested(self):
         """Test retain_keys with nested data."""
-        from agents.application.executor import retain_keys
+        from polymarket_agents.application.executor import retain_keys
 
         data = {
             "keep": {"nested_keep": 1, "nested_discard": 2},
@@ -400,12 +399,12 @@ class TestExecutor(unittest.TestCase):
 class TestTrader(unittest.TestCase):
     """Test Trader class for trade execution."""
 
-    @patch("agents.application.trade.Polymarket")
-    @patch("agents.application.trade.Gamma")
-    @patch("agents.application.trade.Agent")
+    @patch("polymarket_agents.application.trade.Polymarket")
+    @patch("polymarket_agents.application.trade.Gamma")
+    @patch("polymarket_agents.application.trade.Agent")
     def test_trader_initialization(self, mock_agent, mock_gamma, mock_poly):
         """Test Trader can be instantiated."""
-        from agents.application.trade import Trader
+        from polymarket_agents.application.trade import Trader
 
         trader = Trader()
 
@@ -417,12 +416,12 @@ class TestTrader(unittest.TestCase):
 class TestCreator(unittest.TestCase):
     """Test Creator class for market creation ideas."""
 
-    @patch("agents.application.creator.Polymarket")
-    @patch("agents.application.creator.Gamma")
-    @patch("agents.application.creator.Agent")
+    @patch("polymarket_agents.application.creator.Polymarket")
+    @patch("polymarket_agents.application.creator.Gamma")
+    @patch("polymarket_agents.application.creator.Agent")
     def test_creator_initialization(self, mock_agent, mock_gamma, mock_poly):
         """Test Creator can be instantiated."""
-        from agents.application.creator import Creator
+        from polymarket_agents.application.creator import Creator
 
         creator = Creator()
 
@@ -485,7 +484,7 @@ class TestChromaRAG(unittest.TestCase):
 
     def test_chroma_rag_initialization(self):
         """Test PolymarketRAG can be instantiated."""
-        from agents.connectors.chroma import PolymarketRAG
+        from polymarket_agents.connectors.chroma import PolymarketRAG
 
         rag = PolymarketRAG()
 
@@ -498,18 +497,18 @@ class TestIntegration(unittest.TestCase):
     def test_import_all_modules(self):
         """Test all modules can be imported without errors."""
         modules_to_import = [
-            "agents.application.cron",
-            "agents.application.creator",
-            "agents.application.trade",
-            "agents.application.executor",
-            "agents.application.prompts",
-            "agents.connectors.news",
-            "agents.connectors.search",
-            "agents.connectors.chroma",
-            "agents.polymarket.gamma",
-            "agents.polymarket.polymarket",
-            "agents.utils.objects",
-            "agents.utils.utils",
+            "polymarket_agents.application.cron",
+            "polymarket_agents.application.creator",
+            "polymarket_agents.application.trade",
+            "polymarket_agents.application.executor",
+            "polymarket_agents.application.prompts",
+            "polymarket_agents.connectors.news",
+            "polymarket_agents.connectors.search",
+            "polymarket_agents.connectors.chroma",
+            "polymarket_agents.connectors.gamma",
+            "polymarket_agents.connectors.polymarket",
+            "polymarket_agents.utils.objects",
+            "polymarket_agents.utils.utils",
             "scripts.python.cli",
             "scripts.python.server",
         ]

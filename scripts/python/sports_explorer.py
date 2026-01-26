@@ -237,7 +237,7 @@ def display_teams(league: Optional[str] = None, limit: int = 100):
     teams = fetch_teams(limit=limit, league=league)
 
     if not teams:
-        print(f"\n⚠️  No teams found" + (f" for league '{league}'" if league else ""))
+        print("\n⚠️  No teams found" + (f" for league '{league}'" if league else ""))
         return
 
     print(f"\n📊 Found {len(teams)} teams\n")
@@ -363,7 +363,7 @@ def display_market_types():
     uncategorized = [t for t in market_types if t not in categorized]
     if uncategorized:
         print(f"\n{'─' * 60}")
-        print(f"  Other")
+        print("  Other")
         print(f"{'─' * 60}")
         for t in uncategorized:
             print(f"  • {t}")

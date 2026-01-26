@@ -45,21 +45,19 @@ Usage:
 """
 
 import os
-import json
 from typing import TypedDict, Annotated, List, Optional, Dict, Any
 from datetime import datetime
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langsmith import traceable
 
 from polymarket_agents.memory.manager import MemoryManager
+
+load_dotenv()
 
 
 # =============================================================================
@@ -334,7 +332,9 @@ def probability_node(state: PlanningState) -> Dict:
         xgboost_reasoning = None
 
         try:
-            from polymarket_agents.ml_strategies.xgboost_strategy import XGBoostProbabilityStrategy
+            from polymarket_agents.ml_strategies.xgboost_strategy import (
+                XGBoostProbabilityStrategy,
+            )
 
             # Check if model exists and is trained
             model_path = "data/models/xgboost_probability_model.json"
@@ -431,7 +431,7 @@ Based on your knowledge and the above context, what is the TRUE probability of Y
         if "PROBABILITY:" in response_text:
             try:
                 prob_line = [
-                    l for l in response_text.split("\n") if "PROBABILITY:" in l
+                    line for line in response_text.split("\n") if "PROBABILITY:" in line
                 ][0]
                 prob_str = prob_line.split(":")[1].strip()
                 estimated_prob = float(prob_str.replace("%", "").strip())
@@ -705,7 +705,7 @@ def find_value_opportunities(
     Returns:
         List of recommendations sorted by edge
     """
-    print(f"\n🔍 Scanning for value opportunities...")
+    print("\n🔍 Scanning for value opportunities...")
     if category:
         print(f"   Category: {category}")
     print(f"   Min Volume: ${min_volume:,.0f}")

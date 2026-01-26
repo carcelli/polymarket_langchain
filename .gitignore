@@ -1,3 +1,4 @@
+.mypy_cache/
 # Python / venv
 __pycache__/
 *.py[cod]
@@ -9,6 +10,7 @@ venv/
 .DS_Store
 *:Zone.Identifier
 .idea/
+.claude/*.local.*
 
 # Generated artifacts
 *.png

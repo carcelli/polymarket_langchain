@@ -398,7 +398,7 @@ def run_politics_workflow(limit: int = 20, dry_run: bool = False, verbose: bool 
         print(f"\n  ... and {len(active_markets) - display_count} more markets")
 
     # ── STEP 4: Store in Database ──
-    print_step(4, "STORE IN DATABASE", f"Saving to SQLite database (data/memory.db)...")
+    print_step(4, "STORE IN DATABASE", "Saving to SQLite database (data/memory.db)...")
 
     if not dry_run:
         memory = MemoryManager(db_path="data/memory.db")

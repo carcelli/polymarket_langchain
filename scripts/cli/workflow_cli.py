@@ -27,10 +27,10 @@ def run_workflow(args):
 
     # Build configuration
     config = {
-        'days_back': args.days_back,
-        'min_volume': args.min_volume,
-        'models': args.models if args.models else ['MarketPredictor', 'EdgeDetector'],
-        'output_dir': args.output_dir
+        "days_back": args.days_back,
+        "min_volume": args.min_volume,
+        "models": args.models if args.models else ["MarketPredictor", "EdgeDetector"],
+        "output_dir": args.output_dir,
     }
 
     print("Configuration:")
@@ -43,7 +43,7 @@ def run_workflow(args):
     # Confirm execution
     if not args.yes:
         confirm = input("This will run a complete ML pipeline. Continue? (y/N): ")
-        if confirm.lower() not in ['y', 'yes']:
+        if confirm.lower() not in ["y", "yes"]:
             print("Workflow cancelled.")
             return
 
@@ -58,25 +58,27 @@ def run_workflow(args):
         duration = (end_time - start_time).total_seconds()
 
         # Report results
-        if results.get('success'):
+        if results.get("success"):
             print("\\n✅ WORKFLOW COMPLETED SUCCESSFULLY")
             print("=" * 40)
 
-            summary = results.get('summary', {})
+            summary = results.get("summary", {})
 
             print("📊 Results Summary:")
             print(f"   Workflow ID: {results['workflow_id']}")
-            print(".1f"            print(f"   Data Samples: {summary.get('data_samples', 0)}")
+            print(f"   Duration: {summary.get('duration', 0):.1f} seconds")
+            print(f"   Data Samples: {summary.get('data_samples', 0)}")
             print(f"   Models Trained: {summary.get('models_trained', 0)}")
 
-            best_score = summary.get('best_model_score')
+            best_score = summary.get("best_model_score")
             if best_score:
-                print(".3f"            print(f"   GitHub Commits: {summary.get('github_commits', 0)}")
+                print(f"   Best Score: {best_score:.3f}")
+            print(f"   GitHub Commits: {summary.get('github_commits', 0)}")
 
             # Save detailed results
             if args.save_results:
                 results_file = f"workflow_results_{results['workflow_id']}.json"
-                with open(results_file, 'w') as f:
+                with open(results_file, "w") as f:
                     json.dump(results, f, indent=2, default=str)
                 print(f"\\n💾 Detailed results saved to: {results_file}")
 
@@ -93,6 +95,7 @@ def run_workflow(args):
         print(f"\\n❌ Workflow error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
 
 
@@ -118,21 +121,25 @@ def show_workflow_history(args):
 
                 for i, result_file in enumerate(result_files[:10]):
                     try:
-                        with open(result_file, 'r') as f:
+                        with open(result_file, "r") as f:
                             workflow_data = json.load(f)
 
-                        workflow_id = workflow_data.get('workflow_id', 'unknown')
-                        status = "✅ Success" if workflow_data.get('success') else "❌ Failed"
-                        timestamp = workflow_data.get('timestamp', 'unknown')
+                        workflow_id = workflow_data.get("workflow_id", "unknown")
+                        status = (
+                            "✅ Success"
+                            if workflow_data.get("success")
+                            else "❌ Failed"
+                        )
+                        timestamp = workflow_data.get("timestamp", "unknown")
 
                         print(f"{i+1}. {result_file.name}")
                         print(f"   {status}")
                         print(f"   🕐 {timestamp}")
 
-                        if workflow_data.get('success'):
-                            summary = workflow_data.get('summary', {})
-                            models = summary.get('models_trained', 0)
-                            data = summary.get('data_samples', 0)
+                        if workflow_data.get("success"):
+                            summary = workflow_data.get("summary", {})
+                            models = summary.get("models_trained", 0)
+                            data = summary.get("data_samples", 0)
                             print(f"   🤖 {models} models, 📊 {data} samples")
 
                         print()
@@ -164,15 +171,17 @@ def show_workflow_status(args):
             latest = max(result_files, key=lambda x: x.stat().st_mtime)
 
             try:
-                with open(latest, 'r') as f:
+                with open(latest, "r") as f:
                     workflow_data = json.load(f)
 
                 print(f"Latest Workflow: {workflow_data.get('workflow_id', 'unknown')}")
-                print(f"Status: {'✅ Completed' if workflow_data.get('success') else '❌ Failed'}")
+                print(
+                    f"Status: {'✅ Completed' if workflow_data.get('success') else '❌ Failed'}"
+                )
                 print(f"Timestamp: {workflow_data.get('timestamp', 'unknown')}")
 
-                if workflow_data.get('success'):
-                    summary = workflow_data.get('summary', {})
+                if workflow_data.get("success"):
+                    summary = workflow_data.get("summary", {})
                     print(f"Duration: {summary.get('total_duration', 0):.1f} seconds")
                     print(f"Models Trained: {summary.get('models_trained', 0)}")
                     print(f"Data Samples: {summary.get('data_samples', 0)}")
@@ -206,35 +215,49 @@ Examples:
 
   # Custom configuration
   python workflow_cli.py run --days-back 180 --min-volume 10000 --output-dir ./my_results
-        """
+        """,
     )
 
-    parser.add_argument('--verbose', '-v', action='store_true',
-                       help='Enable verbose output')
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose output"
+    )
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Run command
-    run_parser = subparsers.add_parser('run', help='Run complete automated ML workflow')
-    run_parser.add_argument('--days-back', type=int, default=180,
-                           help='Days of historical data to collect')
-    run_parser.add_argument('--min-volume', type=int, default=5000,
-                           help='Minimum market volume threshold')
-    run_parser.add_argument('--models', nargs='+',
-                           default=['MarketPredictor', 'EdgeDetector'],
-                           help='ML models to train')
-    run_parser.add_argument('--output-dir', type=str, default='./workflow_results',
-                           help='Output directory for results')
-    run_parser.add_argument('--yes', '-y', action='store_true',
-                           help='Skip confirmation prompt')
-    run_parser.add_argument('--save-results', action='store_true',
-                           help='Save detailed results to JSON file')
+    run_parser = subparsers.add_parser("run", help="Run complete automated ML workflow")
+    run_parser.add_argument(
+        "--days-back", type=int, default=180, help="Days of historical data to collect"
+    )
+    run_parser.add_argument(
+        "--min-volume", type=int, default=5000, help="Minimum market volume threshold"
+    )
+    run_parser.add_argument(
+        "--models",
+        nargs="+",
+        default=["MarketPredictor", "EdgeDetector"],
+        help="ML models to train",
+    )
+    run_parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="./workflow_results",
+        help="Output directory for results",
+    )
+    run_parser.add_argument(
+        "--yes", "-y", action="store_true", help="Skip confirmation prompt"
+    )
+    run_parser.add_argument(
+        "--save-results", action="store_true", help="Save detailed results to JSON file"
+    )
 
     # Status command
-    status_parser = subparsers.add_parser('status', help='Show current workflow status')
+    status_parser = subparsers.add_parser("status", help="Show current workflow status")
 
     # History command
-    history_parser = subparsers.add_parser('history', help='Show workflow execution history')
+    history_parser = subparsers.add_parser(
+        "history", help="Show workflow execution history"
+    )
 
     args = parser.parse_args()
 
@@ -243,11 +266,11 @@ Examples:
         return
 
     try:
-        if args.command == 'run':
+        if args.command == "run":
             run_workflow(args)
-        elif args.command == 'status':
+        elif args.command == "status":
             show_workflow_status(args)
-        elif args.command == 'history':
+        elif args.command == "history":
             show_workflow_history(args)
 
     except KeyboardInterrupt:
@@ -257,10 +280,10 @@ Examples:
         print(f"\\n❌ Error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

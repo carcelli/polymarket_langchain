@@ -10,7 +10,7 @@ from .registry import register_strategy
 
 
 @register_strategy("momentum_30d")
-def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
+def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Simple 30-day price momentum signal.
 
@@ -24,7 +24,7 @@ def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
             "edge": 0.0,
             "recommendation": "HOLD",
             "confidence": 0.0,
-            "reasoning": "Insufficient price history for momentum analysis"
+            "reasoning": "Insufficient price history for momentum analysis",
         }
 
     # Get recent vs older prices
@@ -59,12 +59,12 @@ def momentum_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "confidence": confidence,
         "reasoning": reasoning,
         "momentum": momentum,
-        "data_points": len(history)
+        "data_points": len(history),
     }
 
 
 @register_strategy("volume_spike")
-def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
+def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Volume spike detector.
 
@@ -79,7 +79,7 @@ def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
             "edge": 0.0,
             "recommendation": "HOLD",
             "confidence": 0.0,
-            "reasoning": "No volume history available"
+            "reasoning": "No volume history available",
         }
 
     # Calculate volume ratio
@@ -109,5 +109,5 @@ def volume_spike_strategy(market_data: Dict[str, Any]) -> Dict[str, float]:
         "reasoning": reasoning,
         "volume_ratio": volume_ratio,
         "current_volume": volume,
-        "avg_volume": avg_volume
+        "avg_volume": avg_volume,
     }

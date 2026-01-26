@@ -6,8 +6,15 @@ Designed for integration with Polymarket agents for market prediction.
 """
 
 import numpy as np
-from typing import Optional, Tuple, Union
-from .utils import truncated_normal, sigmoid, softmax, cross_entropy_loss, confusion_matrix, precision_recall
+from typing import List, Optional, Tuple, Union
+from .utils import (
+    truncated_normal,
+    sigmoid,
+    softmax,
+    cross_entropy_loss,
+    confusion_matrix,
+    precision_recall,
+)
 
 
 class NeuralNetwork:
@@ -26,7 +33,7 @@ class NeuralNetwork:
         lr: float = 0.1,
         bias: float = 1.0,
         use_softmax: bool = True,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
     ):
         """
         Initialize neural network.
@@ -49,7 +56,8 @@ class NeuralNetwork:
         self.n_inputs = n_inputs
         self.n_hidden = n_hidden
         self.n_outputs = n_outputs
-
+        self.layer_sizes = [n_inputs, n_hidden, n_outputs]
+        
         # Xavier/Glorot initialization for better gradient flow
         # Scale by sqrt(n_inputs) to prevent vanishing/exploding gradients
         input_rad = 1 / np.sqrt(n_inputs)
@@ -62,6 +70,9 @@ class NeuralNetwork:
         # Hidden → Output weights (including bias row)
         X = truncated_normal(low=-hidden_rad, upp=hidden_rad)
         self.who = X.rvs((n_outputs, n_hidden + 1))  # +1 for bias
+        
+        # Store as list for consistency with from_layers
+        self.weights = [self.wih, self.who]
 
     @classmethod
     def from_layers(
@@ -70,8 +81,8 @@ class NeuralNetwork:
         lr: float = 0.1,
         bias: float = 1.0,
         use_softmax: bool = True,
-        random_seed: Optional[int] = None
-    ) -> 'NeuralNetwork':
+        random_seed: Optional[int] = None,
+    ) -> "NeuralNetwork":
         """
         Create a multi-layer neural network with arbitrary architecture.
 
@@ -127,7 +138,7 @@ class NeuralNetwork:
 
         return instance
 
-    def forward(self, x: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
+    def forward(self, x: np.ndarray) -> Union[np.ndarray, Tuple[np.ndarray, List[np.ndarray]]]:
         """
         Forward pass through the network.
 
@@ -135,12 +146,11 @@ class NeuralNetwork:
             x: Input features [n_inputs]
 
         Returns:
-            Tuple of (output, activations) where:
-            - output: Network output [n_outputs]
-            - activations: List of activations for each layer (for backprop)
+            For multi-layer: Tuple of (output, activations)
+            For single-layer: Just output array (backward compatibility)
         """
         # Handle both single-layer and multi-layer architectures
-        if hasattr(self, 'weights') and len(self.weights) > 2:
+        if hasattr(self, "weights") and len(self.weights) > 2:
             # Multi-layer forward pass
             output, activations = self._forward_multilayer(x)
             return output, activations
@@ -221,11 +231,15 @@ class NeuralNetwork:
 
         # Calculate loss
         if self.use_softmax:
-            loss = cross_entropy_loss(output_activation.reshape(1, -1), target.reshape(1, -1))
+            loss = cross_entropy_loss(
+                output_activation.reshape(1, -1), target.reshape(1, -1)
+            )
         else:
             # Binary cross-entropy for sigmoid
-            loss = -np.sum(target * np.log(output_activation + 1e-15) +
-                          (1 - target) * np.log(1 - output_activation + 1e-15))
+            loss = -np.sum(
+                target * np.log(output_activation + 1e-15)
+                + (1 - target) * np.log(1 - output_activation + 1e-15)
+            )
 
         # Output layer error (delta)
         if self.use_softmax:
@@ -235,12 +249,18 @@ class NeuralNetwork:
             output_error = jacobian @ (target - output_activation)
         else:
             # Sigmoid derivative: output * (1 - output)
-            output_error = (target - output_activation) * output_activation * (1 - output_activation)
+            output_error = (
+                (target - output_activation)
+                * output_activation
+                * (1 - output_activation)
+            )
 
         # Hidden layer error (backpropagate)
         # Remove bias term from weights for backprop
         who_no_bias = self.who[:, :-1]  # Remove bias column
-        hidden_error = (who_no_bias.T @ output_error) * hidden_output * (1 - hidden_output)
+        hidden_error = (
+            (who_no_bias.T @ output_error) * hidden_output * (1 - hidden_output)
+        )
 
         # Update weights
         # Output layer weights
@@ -263,7 +283,7 @@ class NeuralNetwork:
             Loss value
         """
         # Handle both single-layer and multi-layer architectures
-        if hasattr(self, 'weights') and len(self.weights) > 2:
+        if hasattr(self, "weights") and len(self.weights) > 2:
             # Multi-layer training
             return self._train_multilayer(x, target)
         else:
@@ -291,7 +311,11 @@ class NeuralNetwork:
         for i in reversed(range(len(self.weights) - 1)):
             # Remove bias from weights for backprop
             w_no_bias = self.weights[i + 1][:, :-1]  # Remove bias column
-            delta = (w_no_bias.T @ deltas[-1]) * activations[i + 1][:-1].reshape(-1, 1) * (1 - activations[i + 1][:-1].reshape(-1, 1))
+            delta = (
+                (w_no_bias.T @ deltas[-1])
+                * activations[i + 1][:-1].reshape(-1, 1)
+                * (1 - activations[i + 1][:-1].reshape(-1, 1))
+            )
             deltas.append(delta)
 
         deltas.reverse()
@@ -307,7 +331,10 @@ class NeuralNetwork:
         if self.use_softmax:
             loss = cross_entropy_loss(output.reshape(1, -1), target.reshape(1, -1))
         else:
-            loss = -np.sum(target * np.log(output + 1e-15) + (1 - target) * np.log(1 - output + 1e-15))
+            loss = -np.sum(
+                target * np.log(output + 1e-15)
+                + (1 - target) * np.log(1 - output + 1e-15)
+            )
 
         return loss
 
@@ -324,7 +351,7 @@ class NeuralNetwork:
         output = self.get_output(x)  # Always get raw output
 
         if self.use_softmax:
-            return output.argmax()  # Return class with highest probability
+            return int(output.argmax())  # Return class with highest probability
         else:
             return output  # Return raw output array for regression/binary tasks
 
@@ -349,11 +376,7 @@ class NeuralNetwork:
         return output
 
     def batch_train(
-        self,
-        X: np.ndarray,
-        y: np.ndarray,
-        epochs: int = 100,
-        verbose: bool = False
+        self, X: np.ndarray, y: np.ndarray, epochs: int = 100, verbose: bool = False
     ) -> list:
         """
         Train network on batch of examples.
@@ -405,28 +428,33 @@ class NeuralNetwork:
 
             # Calculate loss using raw output
             if self.use_softmax:
-                loss = cross_entropy_loss(output.reshape(1, -1), y_sample.reshape(1, -1))
+                loss = cross_entropy_loss(
+                    output.reshape(1, -1), y_sample.reshape(1, -1)
+                )
             else:
-                loss = -np.sum(y_sample * np.log(output + 1e-15) +
-                              (1 - y_sample) * np.log(1 - output + 1e-15))
+                loss = -np.sum(
+                    y_sample * np.log(output + 1e-15)
+                    + (1 - y_sample) * np.log(1 - output + 1e-15)
+                )
             losses.append(loss)
 
-        predictions = np.array(predictions)
+        predictions_arr = np.array(predictions)
 
         # Calculate accuracy
         if self.use_softmax:
-            pred_classes = predictions.argmax(axis=1)
+            # predictions are already class indices (ints)
+            pred_classes = predictions_arr
             true_classes = y.argmax(axis=1)
         else:
-            pred_classes = (predictions > 0.5).astype(int).ravel()
+            pred_classes = (predictions_arr > 0.5).astype(int).ravel()
             true_classes = y.astype(int).ravel()
 
-        accuracy = np.mean(pred_classes == true_classes)
+        accuracy = float(np.mean(pred_classes == true_classes))
 
         return {
-            'accuracy': accuracy,
-            'avg_loss': np.mean(losses),
-            'predictions': predictions
+            "accuracy": accuracy,
+            "avg_loss": float(np.mean(losses)),
+            "predictions": predictions_arr,
         }
 
     def evaluate_dataset(self, X: np.ndarray, y: np.ndarray) -> dict:
@@ -456,43 +484,51 @@ class NeuralNetwork:
 
         # Calculate metrics
         precision, recall = precision_recall(cm)
-        accuracy = np.mean(preds == targets) if self.use_softmax else np.mean(pred_classes == true_classes)
+        accuracy = (
+            np.mean(preds == targets)
+            if self.use_softmax
+            else np.mean(pred_classes == true_classes)
+        )
 
         return {
             "accuracy": accuracy,
             "precision": precision,
             "recall": recall,
-            "f1_score": 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0,
-            "confusion_matrix": cm
+            "f1_score": (
+                2 * precision * recall / (precision + recall)
+                if (precision + recall) > 0
+                else 0
+            ),
+            "confusion_matrix": cm,
         }
 
     def save_weights(self, filepath: str) -> None:
         """Save network weights to file."""
         weights = {
-            'wih': self.wih,
-            'who': self.who,
-            'config': {
-                'n_inputs': self.n_inputs,
-                'n_hidden': self.n_hidden,
-                'n_outputs': self.n_outputs,
-                'lr': self.lr,
-                'bias': self.bias,
-                'use_softmax': self.use_softmax
-            }
+            "wih": self.wih,
+            "who": self.who,
+            "config": {
+                "n_inputs": self.n_inputs,
+                "n_hidden": self.n_hidden,
+                "n_outputs": self.n_outputs,
+                "lr": self.lr,
+                "bias": self.bias,
+                "use_softmax": self.use_softmax,
+            },
         }
         np.savez(filepath, **weights)
 
     @classmethod
-    def load_weights(cls, filepath: str) -> 'NeuralNetwork':
+    def load_weights(cls, filepath: str) -> "NeuralNetwork":
         """Load network from saved weights."""
         # Handle both .npz and bare filenames
-        if not filepath.endswith('.npz'):
-            filepath += '.npz'
+        if not filepath.endswith(".npz"):
+            filepath += ".npz"
         data = np.load(filepath, allow_pickle=True)
-        config = data['config'].item()
+        config = data["config"].item()
 
         nn = cls(**config)
-        nn.wih = data['wih']
-        nn.who = data['who']
+        nn.wih = data["wih"]
+        nn.who = data["who"]
 
         return nn

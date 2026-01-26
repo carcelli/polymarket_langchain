@@ -25,6 +25,7 @@ import logging
 try:
     import pandas as pd
     from prophet import Prophet
+
     FORECASTING_AVAILABLE = True
 except ImportError:
     pd = None
@@ -44,7 +45,12 @@ class CacheManager:
     and efficient retrieval for improved pipeline performance.
     """
 
-    def __init__(self, db_path: str = "data/cache.db", ttl_seconds: int = 86400, max_connections: int = 1):
+    def __init__(
+        self,
+        db_path: str = "data/cache.db",
+        ttl_seconds: int = 86400,
+        max_connections: int = 1,
+    ):
         """
         Initialize cache manager.
 
@@ -61,12 +67,15 @@ class CacheManager:
         # Initialize database schema
         self._init_db()
 
-        logger.info(f"CacheManager initialized: {self.db_path} (TTL: {self.default_ttl}s)")
+        logger.info(
+            f"CacheManager initialized: {self.db_path} (TTL: {self.default_ttl}s)"
+        )
 
     def _init_db(self):
         """Initialize database schema and indexes."""
         with sqlite3.connect(str(self.db_path)) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS cache (
                     topic TEXT PRIMARY KEY,
                     data TEXT NOT NULL,  -- JSON serialized
@@ -76,16 +85,21 @@ class CacheManager:
                     last_accessed TEXT,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create indexes for performance
             conn.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON cache(timestamp)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_ttl ON cache(ttl_seconds)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_access ON cache(last_accessed)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_access ON cache(last_accessed)"
+            )
 
             conn.commit()
 
-    def get(self, topic: str, ttl_seconds: Optional[int] = None) -> Optional[Union[Dict, List]]:
+    def get(
+        self, topic: str, ttl_seconds: Optional[int] = None
+    ) -> Optional[Union[Dict, List]]:
         """
         Retrieve data from cache if fresh.
 
@@ -102,11 +116,14 @@ class CacheManager:
             conn.execute("PRAGMA journal_mode=WAL")  # Better concurrency
 
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT data, timestamp, ttl_seconds, access_count
                 FROM cache
                 WHERE topic = ?
-            """, (topic,))
+            """,
+                (topic,),
+            )
 
             row = cursor.fetchone()
             if not row:
@@ -121,18 +138,23 @@ class CacheManager:
                 effective_ttl = min(ttl, stored_ttl) if stored_ttl else ttl
 
                 if datetime.now() - ts > timedelta(seconds=effective_ttl):
-                    logger.debug(f"Cache expired: {topic} (age: {(datetime.now() - ts).total_seconds():.0f}s)")
+                    logger.debug(
+                        f"Cache expired: {topic} (age: {(datetime.now() - ts).total_seconds():.0f}s)"
+                    )
                     # Clean up expired entry
                     self.delete(topic)
                     return None
 
                 # Update access statistics
                 new_access_count = access_count + 1
-                cursor.execute("""
+                cursor.execute(
+                    """
                     UPDATE cache
                     SET access_count = ?, last_accessed = ?
                     WHERE topic = ?
-                """, (new_access_count, datetime.now().isoformat(), topic))
+                """,
+                    (new_access_count, datetime.now().isoformat(), topic),
+                )
                 conn.commit()
 
                 # Deserialize data
@@ -145,7 +167,12 @@ class CacheManager:
                 self.delete(topic)
                 return None
 
-    def set(self, topic: str, data: Union[Dict, List, Any], ttl_seconds: Optional[int] = None):
+    def set(
+        self,
+        topic: str,
+        data: Union[Dict, List, Any],
+        ttl_seconds: Optional[int] = None,
+    ):
         """
         Store data in cache with timestamp.
 
@@ -163,11 +190,14 @@ class CacheManager:
             with sqlite3.connect(str(self.db_path)) as conn:
                 conn.execute("PRAGMA journal_mode=WAL")
 
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO cache
                     (topic, data, timestamp, ttl_seconds, access_count, last_accessed)
                     VALUES (?, ?, ?, ?, 0, ?)
-                """, (topic, data_json, timestamp, ttl, timestamp))
+                """,
+                    (topic, data_json, timestamp, ttl, timestamp),
+                )
 
                 conn.commit()
 
@@ -196,10 +226,12 @@ class CacheManager:
             cursor = conn.cursor()
 
             # Find expired entries
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT topic, timestamp, ttl_seconds
                 FROM cache
-            """)
+            """
+            )
 
             expired_topics = []
             for topic, ts_str, ttl in cursor.fetchall():
@@ -212,8 +244,10 @@ class CacheManager:
 
             # Delete expired entries
             if expired_topics:
-                placeholders = ','.join('?' * len(expired_topics))
-                cursor.execute(f"DELETE FROM cache WHERE topic IN ({placeholders})", expired_topics)
+                placeholders = ",".join("?" * len(expired_topics))
+                cursor.execute(
+                    f"DELETE FROM cache WHERE topic IN ({placeholders})", expired_topics
+                )
                 conn.commit()
 
             logger.info(f"Cleared {len(expired_topics)} expired cache entries")
@@ -225,38 +259,44 @@ class CacheManager:
             cursor = conn.cursor()
 
             # Overall stats
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*), SUM(LENGTH(data)), AVG(access_count)
                 FROM cache
-            """)
+            """
+            )
             total_entries, total_size_bytes, avg_access = cursor.fetchone()
 
             # Fresh vs expired
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*)
                 FROM cache
                 WHERE datetime(timestamp, '+' || ttl_seconds || ' seconds') > datetime('now')
-            """)
+            """
+            )
             fresh_entries = cursor.fetchone()[0]
 
             # Most accessed
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT topic, access_count
                 FROM cache
                 ORDER BY access_count DESC
                 LIMIT 5
-            """)
+            """
+            )
             top_accessed = cursor.fetchall()
 
             return {
-                'total_entries': total_entries or 0,
-                'fresh_entries': fresh_entries or 0,
-                'expired_entries': (total_entries or 0) - (fresh_entries or 0),
-                'total_size_kb': round((total_size_bytes or 0) / 1024, 2),
-                'avg_access_count': round(avg_access or 0, 2),
-                'most_accessed': [{'topic': t, 'accesses': a} for t, a in top_accessed],
-                'db_path': str(self.db_path),
-                'default_ttl_seconds': self.default_ttl
+                "total_entries": total_entries or 0,
+                "fresh_entries": fresh_entries or 0,
+                "expired_entries": (total_entries or 0) - (fresh_entries or 0),
+                "total_size_kb": round((total_size_bytes or 0) / 1024, 2),
+                "avg_access_count": round(avg_access or 0, 2),
+                "most_accessed": [{"topic": t, "accesses": a} for t, a in top_accessed],
+                "db_path": str(self.db_path),
+                "default_ttl_seconds": self.default_ttl,
             }
 
     def cleanup(self):
@@ -292,7 +332,9 @@ class CachedDataFetcher:
     def __init__(self, cache_manager: CacheManager):
         self.cache = cache_manager
 
-    def fetch_with_cache(self, topic: str, fetch_func, ttl_seconds: Optional[int] = None):
+    def fetch_with_cache(
+        self, topic: str, fetch_func, ttl_seconds: Optional[int] = None
+    ):
         """
         Generic fetch with cache pattern.
 
@@ -334,59 +376,109 @@ class SocialMediaDataFetcher(CachedDataFetcher):
             # Historical data from web sources (approximations)
             # Based on public data: ~299/month in 2023, ~561/month in 2022, etc.
             historical = {
-                '2022-01': 561, '2022-02': 561, '2022-03': 561, '2022-04': 561,
-                '2022-05': 561, '2022-06': 561, '2022-07': 561, '2022-08': 561,
-                '2022-09': 561, '2022-10': 561, '2022-11': 561, '2022-12': 561,
-                '2023-01': 299, '2023-02': 299, '2023-03': 299, '2023-04': 299,
-                '2023-05': 299, '2023-06': 299, '2023-07': 299, '2023-08': 299,
-                '2023-09': 299, '2023-10': 299, '2023-11': 299, '2023-12': 299,
-                '2024-01': 2034, '2024-02': 2034, '2024-03': 2034, '2024-04': 2034,
-                '2024-05': 2034, '2024-06': 2034, '2024-07': 2034, '2024-08': 2034,
-                '2024-09': 2034, '2024-10': 2034, '2024-11': 2034, '2024-12': 2034,
-                '2025-01': 777, '2025-02': 777, '2025-03': 777, '2025-04': 777,
+                "2022-01": 561,
+                "2022-02": 561,
+                "2022-03": 561,
+                "2022-04": 561,
+                "2022-05": 561,
+                "2022-06": 561,
+                "2022-07": 561,
+                "2022-08": 561,
+                "2022-09": 561,
+                "2022-10": 561,
+                "2022-11": 561,
+                "2022-12": 561,
+                "2023-01": 299,
+                "2023-02": 299,
+                "2023-03": 299,
+                "2023-04": 299,
+                "2023-05": 299,
+                "2023-06": 299,
+                "2023-07": 299,
+                "2023-08": 299,
+                "2023-09": 299,
+                "2023-10": 299,
+                "2023-11": 299,
+                "2023-12": 299,
+                "2024-01": 2034,
+                "2024-02": 2034,
+                "2024-03": 2034,
+                "2024-04": 2034,
+                "2024-05": 2034,
+                "2024-06": 2034,
+                "2024-07": 2034,
+                "2024-08": 2034,
+                "2024-09": 2034,
+                "2024-10": 2034,
+                "2024-11": 2034,
+                "2024-12": 2034,
+                "2025-01": 777,
+                "2025-02": 777,
+                "2025-03": 777,
+                "2025-04": 777,
             }
 
             # Forecast next month using Prophet (if available)
             if FORECASTING_AVAILABLE and pd is not None and Prophet is not None:
                 try:
-                    df = pd.DataFrame([
-                        {'ds': f"{year}-{month:02d}-01", 'y': count}
-                        for (year_month, count) in historical.items()
-                        for year, month in [year_month.split('-')]
-                    ])
-                    df['ds'] = pd.to_datetime(df['ds'])
-                    df = df.sort_values('ds')
+                    df = pd.DataFrame(
+                        [
+                            {"ds": f"{year}-{month:02d}-01", "y": count}
+                            for (year_month, count) in historical.items()
+                            for year, month in [year_month.split("-")]
+                        ]
+                    )
+                    df["ds"] = pd.to_datetime(df["ds"])
+                    df = df.sort_values("ds")
 
                     model = Prophet(yearly_seasonality=True, daily_seasonality=False)
                     model.fit(df)
 
                     # Forecast next month
-                    future = pd.DataFrame({'ds': [pd.to_datetime(target_month + '-01')]})
+                    future = pd.DataFrame(
+                        {"ds": [pd.to_datetime(target_month + "-01")]}
+                    )
                     forecast = model.predict(future)
                     next_month = forecast.iloc[-1]
 
                     # Add forecast to historical data
                     forecast_date = target_month
-                    historical[f"{forecast_date} (forecast)"] = max(0, next_month['yhat'])
-                    historical[f"{forecast_date}_lower"] = max(0, next_month['yhat_lower'])
-                    historical[f"{forecast_date}_upper"] = max(0, next_month['yhat_upper'])
+                    historical[f"{forecast_date} (forecast)"] = max(
+                        0, next_month["yhat"]
+                    )
+                    historical[f"{forecast_date}_lower"] = max(
+                        0, next_month["yhat_lower"]
+                    )
+                    historical[f"{forecast_date}_upper"] = max(
+                        0, next_month["yhat_upper"]
+                    )
 
                 except Exception as e:
                     logger.warning(f"Could not generate forecast: {e}")
                     # Fallback to simple average
                     recent_values = list(historical.values())[-3:]  # Last 3 months
-                    avg_recent = sum(recent_values) / len(recent_values) if recent_values else 1500
+                    avg_recent = (
+                        sum(recent_values) / len(recent_values)
+                        if recent_values
+                        else 1500
+                    )
                     historical[f"{target_month} (forecast)"] = avg_recent
             else:
-                logger.info("Forecasting libraries not available, using historical average")
+                logger.info(
+                    "Forecasting libraries not available, using historical average"
+                )
                 # Add simple forecast based on recent average
                 recent_values = list(historical.values())[-3:]  # Last 3 months
-                avg_recent = sum(recent_values) / len(recent_values) if recent_values else 1500
+                avg_recent = (
+                    sum(recent_values) / len(recent_values) if recent_values else 1500
+                )
                 historical[f"{target_month} (forecast)"] = avg_recent
 
             return historical
 
-        return self.fetch_with_cache(topic, _fetch_fresh, ttl_seconds=7*24*3600)  # 1 week TTL
+        return self.fetch_with_cache(
+            topic, _fetch_fresh, ttl_seconds=7 * 24 * 3600
+        )  # 1 week TTL
 
 
 class CryptoDataFetcher(CachedDataFetcher):
@@ -402,22 +494,21 @@ class CryptoDataFetcher(CachedDataFetcher):
 
             try:
                 from pycoingecko import CoinGeckoAPI
+
                 cg = CoinGeckoAPI()
 
                 # Get last 365 days of data
                 data = cg.get_coin_market_chart_by_id(
-                    id='bitcoin',
-                    vs_currency='usd',
-                    days=365
+                    id="bitcoin", vs_currency="usd", days=365
                 )
 
-                prices = data['prices']  # [[timestamp, price], ...]
-                df = pd.DataFrame(prices, columns=['timestamp', 'price'])
-                df['date'] = pd.to_datetime(df['timestamp'], unit='ms')
-                df['month'] = df['date'].dt.strftime('%Y-%m')
+                prices = data["prices"]  # [[timestamp, price], ...]
+                df = pd.DataFrame(prices, columns=["timestamp", "price"])
+                df["date"] = pd.to_datetime(df["timestamp"], unit="ms")
+                df["month"] = df["date"].dt.strftime("%Y-%m")
 
                 # Calculate monthly averages
-                monthly_avg = df.groupby('month')['price'].mean()
+                monthly_avg = df.groupby("month")["price"].mean()
                 monthly_prices.update(monthly_avg.to_dict())
 
             except ImportError:
@@ -427,13 +518,13 @@ class CryptoDataFetcher(CachedDataFetcher):
 
             # Supplement with known historical data and projections
             supplements = {
-                '2024-12': 95000,  # Approximate
-                '2025-01': 85000,
-                '2025-02': 82000,
-                '2025-03': 80000,
-                '2025-04': 82551.92,  # Provided value
-                '2025-05': 88000,
-                '2025-06': 92000,
+                "2024-12": 95000,  # Approximate
+                "2025-01": 85000,
+                "2025-02": 82000,
+                "2025-03": 80000,
+                "2025-04": 82551.92,  # Provided value
+                "2025-05": 88000,
+                "2025-06": 92000,
             }
 
             # Only add supplements that don't exist
@@ -443,7 +534,9 @@ class CryptoDataFetcher(CachedDataFetcher):
 
             return dict(sorted(monthly_prices.items()))
 
-        return self.fetch_with_cache(topic, _fetch_fresh, ttl_seconds=24*3600)  # 24 hour TTL
+        return self.fetch_with_cache(
+            topic, _fetch_fresh, ttl_seconds=24 * 3600
+        )  # 24 hour TTL
 
 
 class SportsDataFetcher(CachedDataFetcher):
@@ -459,7 +552,11 @@ class SportsDataFetcher(CachedDataFetcher):
             team_data = {
                 "name": team_name,
                 "historical_win_pct": {
-                    "2020": 0.5, "2021": 0.55, "2022": 0.6, "2023": 0.65, "2024": 0.7
+                    "2020": 0.5,
+                    "2021": 0.55,
+                    "2022": 0.6,
+                    "2023": 0.65,
+                    "2024": 0.7,
                 },
                 "recent_form": 0.75,  # Last season win %
                 "home_advantage": 0.6,
@@ -467,21 +564,25 @@ class SportsDataFetcher(CachedDataFetcher):
                     "Roster stability",
                     "Injury history",
                     "Coaching changes",
-                    "Venue advantages"
+                    "Venue advantages",
                 ],
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
 
             return team_data
 
-        return self.fetch_with_cache(topic, _fetch_fresh, ttl_seconds=7*24*3600)  # 1 week TTL
+        return self.fetch_with_cache(
+            topic, _fetch_fresh, ttl_seconds=7 * 24 * 3600
+        )  # 1 week TTL
 
 
 def test_cache_system():
     """Test the cache system functionality."""
     print("🧪 Testing Cache System...")
 
-    with CacheManager(db_path="data/test_cache.db", ttl_seconds=300) as cache:  # 5 min TTL
+    with CacheManager(
+        db_path="data/test_cache.db", ttl_seconds=300
+    ) as cache:  # 5 min TTL
         # Test basic operations
         cache.set("test_key", {"data": "test_value", "number": 42})
         result = cache.get("test_key")
@@ -501,7 +602,9 @@ def test_cache_system():
 
         # Test stats
         stats = cache.get_stats()
-        print(f"✅ Cache stats: {stats['total_entries']} entries, {stats['total_size_kb']:.1f} KB")
+        print(
+            f"✅ Cache stats: {stats['total_entries']} entries, {stats['total_size_kb']:.1f} KB"
+        )
 
         print("✅ All cache tests passed!")
 

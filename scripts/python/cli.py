@@ -176,7 +176,10 @@ def run_memory_agent(
     print("=" * 60)
 
     try:
-        from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
+        from polymarket_agents.graph.memory_agent import (
+            create_memory_agent,
+            run_memory_agent,
+        )
 
         graph = create_memory_agent()
         result = run_memory_agent(graph, query)
@@ -312,7 +315,8 @@ def run_deep_research_agent(
 @app.command()
 def run_ml_research_agent(
     focus_area: str = typer.Option(
-        "general", help="Specific area to research (e.g., 'time series', 'nlp', 'ensemble')"
+        "general",
+        help="Specific area to research (e.g., 'time series', 'nlp', 'ensemble')",
     )
 ) -> None:
     """
@@ -329,7 +333,7 @@ def run_ml_research_agent(
 
         agent = MLResearchAgent()
         result = agent.run_research_cycle(focus_area=focus_area)
-        
+
         print("\n📝 Research Report:")
         print(result)
 
@@ -339,44 +343,46 @@ def run_ml_research_agent(
 
 @app.command()
 def dashboard(
-    refresh: float = typer.Option(2.0, "--refresh", "-r", help="Refresh rate in seconds"),
+    refresh: float = typer.Option(
+        2.0, "--refresh", "-r", help="Refresh rate in seconds"
+    ),
 ) -> None:
     """
     Launch the live CLI dashboard for monitoring agent executions and performance.
-    
+
     The dashboard provides real-time visibility into:
     - Agent execution flow and status
     - Recent execution history
     - Performance metrics (success rate, latency, token usage)
     - System health (database, API connectivity)
     - Top markets by volume
-    
+
     Args:
         refresh: Dashboard refresh rate in seconds (default: 2.0)
     """
     from rich.console import Console
-    
+
     console = Console()
     console.print("[bold cyan]🚀 Launching Polymarket Agents Dashboard...[/bold cyan]")
     console.print("[dim]   (This may take a moment to initialize)[/dim]\n")
-    
+
     try:
         # Import here to avoid loading Rich unless needed
         import sys
         from pathlib import Path
-        
+
         # Ensure scripts/cli is in path
         cli_dir = Path(__file__).parent.parent / "cli"
         if str(cli_dir) not in sys.path:
             sys.path.insert(0, str(cli_dir))
-        
+
         from dashboard import PolymarketDashboard
-        
+
         dashboard_instance = PolymarketDashboard()
         dashboard_instance.run(refresh_rate=refresh)
-        
+
     except ImportError as e:
-        console.print(f"[red]❌ Error: Missing dependencies[/red]")
+        console.print("[red]❌ Error: Missing dependencies[/red]")
         console.print(f"[dim]   {e}[/dim]")
         console.print("\n[yellow]📦 Please install required packages:[/yellow]")
         console.print("   pip install rich")
@@ -385,7 +391,9 @@ def dashboard(
         console.print("\n[yellow]💡 Troubleshooting:[/yellow]")
         console.print("   1. Ensure data/markets.db exists")
         console.print("   2. Run an agent first to generate tracking data:")
-        console.print("      python scripts/python/cli.py run-memory-agent 'Find crypto markets'")
+        console.print(
+            "      python scripts/python/cli.py run-memory-agent 'Find crypto markets'"
+        )
         console.print("   3. Check that database tables are initialized")
 
 
@@ -443,11 +451,11 @@ def list_agents() -> None:
         print(f"   Command: python cli.py {info['command']}")
         print(f"   Capabilities: {', '.join(info['capabilities'])}")
 
-    print(f"\n💡 Usage Examples:")
-    print(f"   python cli.py run-memory-agent 'Find political markets'")
-    print(f"   python cli.py run-planning-agent 'Will BTC hit 100k?'")
-    print(f"   python cli.py scan-opportunities --category politics")
-    print(f"   python cli.py run-ml-research-agent --focus-area 'time series'")
+    print("\n💡 Usage Examples:")
+    print("   python cli.py run-memory-agent 'Find political markets'")
+    print("   python cli.py run-planning-agent 'Will BTC hit 100k?'")
+    print("   python cli.py scan-opportunities --category politics")
+    print("   python cli.py run-ml-research-agent --focus-area 'time series'")
 
 
 if __name__ == "__main__":

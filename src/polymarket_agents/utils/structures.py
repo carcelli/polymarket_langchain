@@ -1,5 +1,6 @@
 import collections
-from typing import Any, Mapping, MutableMapping
+from typing import Any, Mapping
+
 
 class StrKeyDict(collections.UserDict):
     """
@@ -41,10 +42,10 @@ class StrKeyDict(collections.UserDict):
         if isinstance(other, Mapping):
             for k, v in other.items():
                 self[k] = v
-        elif hasattr(other, 'keys'): # Mapping-like
-             for k in other.keys():
-                 self[k] = other[k]
-        else: # Iterable of pairs
+        elif hasattr(other, "keys"):  # Mapping-like
+            for k in other.keys():
+                self[k] = other[k]
+        else:  # Iterable of pairs
             for k, v in other:
                 self[k] = v
         for k, v in kwds.items():

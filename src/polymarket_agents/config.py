@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def get_polygon_private_key() -> str:
     """Load wallet private key: raw string > file path > error."""
     raw = os.getenv("POLYGON_WALLET_PRIVATE_KEY")
@@ -21,6 +22,7 @@ def get_polygon_private_key() -> str:
         "No Polygon private key found. Set POLYGON_WALLET_PRIVATE_KEY or "
         "POLYGON_WALLET_KEY_FILE in .env"
     )
+
 
 # Existing keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -59,7 +61,10 @@ DEFAULT_TEMPERATURE_CREATIVE = 0.3  # For research/generation
 DEFAULT_TEMPERATURE_STRUCTURED = 0.0  # For structured outputs
 
 # Model configurations for different use cases
-STRUCTURED_OUTPUT_MODELS = ["gpt-4o-2024-08-06", "gpt-4o-mini"]  # Models that support structured output well
+STRUCTURED_OUTPUT_MODELS = [
+    "gpt-4o-2024-08-06",
+    "gpt-4o-mini",
+]  # Models that support structured output well
 HIGH_REASONING_MODELS = ["gpt-4o-2024-08-06", "gpt-4o"]  # For complex analysis
 
 # =============================================================================
@@ -78,6 +83,7 @@ DEBUG_MODE: bool = os.getenv("DEBUG_MODE", "false").lower() == "true"
 # VALIDATION
 # =============================================================================
 
+
 def validate_config():
     """Validate critical configuration settings."""
     missing = []
@@ -85,11 +91,24 @@ def validate_config():
     if not OPENAI_API_KEY:
         missing.append("OPENAI_API_KEY")
 
-    if MARKET_FOCUS and MARKET_FOCUS not in ["sports", "politics", "crypto", "tech", "geopolitics", "culture", "finance", "economy", "science"]:
-        print(f"WARNING: MARKET_FOCUS='{MARKET_FOCUS}' is not a standard category. This may filter out all markets.")
+    if MARKET_FOCUS and MARKET_FOCUS not in [
+        "sports",
+        "politics",
+        "crypto",
+        "tech",
+        "geopolitics",
+        "culture",
+        "finance",
+        "economy",
+        "science",
+    ]:
+        print(
+            f"WARNING: MARKET_FOCUS='{MARKET_FOCUS}' is not a standard category. This may filter out all markets."
+        )
 
     if missing:
         print(f"WARNING: Missing required environment variables: {', '.join(missing)}")
+
 
 # Run validation on import
 validate_config()

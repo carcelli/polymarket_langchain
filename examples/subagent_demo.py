@@ -54,32 +54,32 @@ def simulate_subagent_workflow():
             "step": "Initial Query",
             "agent": "Main Agent",
             "action": "User asks: 'Should I trade the Russia-Ukraine ceasefire market?'",
-            "context_size": "~100 tokens"
+            "context_size": "~100 tokens",
         },
         {
             "step": "Market Research",
             "agent": "market-research subagent",
             "action": "task(name='market-research', task='Research Russia-Ukraine ceasefire market trends')",
-            "context_size": "~500 tokens (isolated)"
+            "context_size": "~500 tokens (isolated)",
         },
         {
             "step": "Risk Assessment",
             "agent": "risk-analysis subagent",
             "action": "task(name='risk-analysis', task='Assess position sizing for 2% edge trade')",
-            "context_size": "~300 tokens (isolated)"
+            "context_size": "~300 tokens (isolated)",
         },
         {
             "step": "Strategy Check",
             "agent": "strategy-dev subagent",
             "action": "task(name='strategy-dev', task='Validate against current strategy rules')",
-            "context_size": "~200 tokens (isolated)"
+            "context_size": "~200 tokens (isolated)",
         },
         {
             "step": "Final Decision",
             "agent": "Main Agent",
             "action": "Synthesizes subagent results into final recommendation",
-            "context_size": "~150 tokens (clean context)"
-        }
+            "context_size": "~150 tokens (clean context)",
+        },
     ]
 
     for step in workflow_steps:
@@ -115,13 +115,11 @@ You have access to specialized subagents for complex tasks:
 
 Use these subagents to keep your context clean while handling complex tasks.
 Always delegate specialized work to the appropriate subagent.""",
-
         "subagents": get_all_subagents(),
-
         # Main agent tools (simple, high-level)
         "tools": [
             # Simple tools that don't bloat context
-        ]
+        ],
     }
 
     print("🏗️ Main Agent Configuration:")
@@ -158,31 +156,30 @@ def show_subagent_benefits():
                 "Context fills with intermediate results",
                 "Main agent loses focus on high-level tasks",
                 "Hard to maintain complex workflows",
-                "Error-prone for multi-step analysis"
-            ]
+                "Error-prone for multi-step analysis",
+            ],
         },
-
         "With Subagents": {
             "pros": [
                 "Clean main agent context",
                 "Specialized agents for specific tasks",
                 "Scalable for complex workflows",
                 "Better error isolation",
-                "Easier testing and maintenance"
+                "Easier testing and maintenance",
             ],
-            "cons": ["Slightly more complex setup"]
-        }
+            "cons": ["Slightly more complex setup"],
+        },
     }
 
     for approach, details in comparison.items():
         print(f"📊 {approach}:")
-        if details.get('pros'):
+        if details.get("pros"):
             print("   ✅ Pros:")
-            for pro in details['pros']:
+            for pro in details["pros"]:
                 print(f"      • {pro}")
-        if details.get('cons'):
+        if details.get("cons"):
             print("   ❌ Cons:")
-            for con in details['cons']:
+            for con in details["cons"]:
                 print(f"      • {con}")
         print()
 

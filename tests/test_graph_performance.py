@@ -1,7 +1,7 @@
 import unittest
 import time
-from agents.graph.memory_agent import create_memory_agent
-from agents.graph.planning_agent import create_planning_agent
+from polymarket_agents.graph.memory_agent import create_memory_agent
+from polymarket_agents.graph.planning_agent import create_planning_agent
 
 
 class TestGraphPerformance(unittest.TestCase):

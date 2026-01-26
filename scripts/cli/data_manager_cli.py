@@ -36,25 +36,30 @@ def show_inventory(args):
         print(f"   Generated: {inventory['timestamp'][:19]}")
 
         print("\\n🗄️ DATABASES:")
-        for db_name, db_info in inventory['databases'].items():
+        for db_name, db_info in inventory["databases"].items():
             print(f"   📁 {db_name} ({db_info['size_mb']:.1f} MB)")
-            print(f"      Tables: {len(db_info['tables'])} ({', '.join(db_info['tables'])})")
-            total_records = sum(db_info['record_counts'].values())
+            print(
+                f"      Tables: {len(db_info['tables'])} ({', '.join(db_info['tables'])})"
+            )
+            total_records = sum(db_info["record_counts"].values())
             print(f"      Records: {total_records:,}")
-            if 'error' in db_info:
+            if "error" in db_info:
                 print(f"      ⚠️ Error: {db_info['error']}")
 
-        print("\\n📋 DATA BREAKDOWN:")        breakdown = inventory['data_breakdown']
+        print("\\n📋 DATA BREAKDOWN:")
+        breakdown = inventory["data_breakdown"]
         for data_type, info in breakdown.items():
-            if info['count'] > 0:
-                name = data_type.replace('_', ' ').title()
+            if info["count"] > 0:
+                name = data_type.replace("_", " ").title()
                 print(f"   • {name}: {info['count']:,} {info['description']}")
 
-        if inventory['vector_stores']:
-            print("\\n🔍 VECTOR STORES:")            for store_name, size_mb in inventory['vector_stores'].items():
+        if inventory["vector_stores"]:
+            print("\\n🔍 VECTOR STORES:")
+            for store_name, size_mb in inventory["vector_stores"].items():
                 print(f"   📚 {store_name}: {size_mb:.1f} MB")
 
-        print("\\n💾 RAW FILES:")        for json_name, json_info in inventory['json_files'].items():
+        print("\\n💾 RAW FILES:")
+        for json_name, json_info in inventory["json_files"].items():
             print(f"   📄 {json_name}: {json_info['size_kb']:.1f} KB")
 
     except Exception as e:
@@ -77,7 +82,7 @@ def create_vector_stores(args):
     print("🔍 Creating Vector Stores for LangChain")
     print("=" * 40)
 
-    if not os.getenv('OPENAI_API_KEY'):
+    if not os.getenv("OPENAI_API_KEY"):
         print("❌ OPENAI_API_KEY environment variable not set")
         print("   Please set it with: export OPENAI_API_KEY='your-key-here'")
         print("   Or get one from: https://platform.openai.com/api-keys")
@@ -90,7 +95,8 @@ def create_vector_stores(args):
 
         stores_created = organizer.create_vector_stores()
 
-        print("\\n✅ VECTOR STORES CREATED:")        for store_name, store_info in stores_created.items():
+        print("\\n✅ VECTOR STORES CREATED:")
+        for store_name, store_info in stores_created.items():
             print(f"   📚 {store_name}: {store_info['documents']:,} documents")
             print(f"      Path: {store_info['path']}")
 
@@ -99,7 +105,8 @@ def create_vector_stores(args):
         print(f"   • {len(tools)} tools created for agent integration")
 
         # Show usage example
-        print("\\n💡 USAGE EXAMPLE:")        print("   from data_organization_langchain import PolymarketDataOrganizer")
+        print("\\n💡 USAGE EXAMPLE:")
+        print("   from data_organization_langchain import PolymarketDataOrganizer")
         print("   organizer = PolymarketDataOrganizer()")
         print("   tools = organizer.create_langchain_tools()")
         print("   # Use tools['search_markets'] in your LangChain agent")
@@ -119,25 +126,31 @@ def analyze_growth(args):
     organizer = PolymarketDataOrganizer()
     inventory = organizer.get_data_inventory()
 
-    print("\\n📊 CURRENT DATA SCALE:")    print(f"   Markets: {inventory['data_breakdown']['markets_data']['count']:,}")
-    print(f"   ML Experiments: {inventory['data_breakdown']['ml_experiments']['count']}")
+    print("\\n📊 CURRENT DATA SCALE:")
+    print(f"   Markets: {inventory['data_breakdown']['markets_data']['count']:,}")
+    print(
+        f"   ML Experiments: {inventory['data_breakdown']['ml_experiments']['count']}"
+    )
     print(f"   ML Models: {inventory['data_breakdown']['ml_models']['count']}")
     print(f"   Workflows: {inventory['data_breakdown']['workflows']['count']}")
     print(f"   Total Size: {inventory['total_size_mb']:.1f} MB")
 
-    print("\\n📈 GROWTH PROJECTIONS:")    print("   Assuming weekly ML workflows + daily market updates:"
+    print("\\n📈 GROWTH PROJECTIONS:")
+    print("   Assuming weekly ML workflows + daily market updates:")
     print("   ")
     print("   Week 1: +5 workflows, +1000 markets = ~32 MB")
     print("   Month 1: +20 workflows, +4000 markets = ~45 MB")
     print("   Quarter 1: +80 workflows, +16000 markets = ~120 MB")
     print("   Year 1: +400 workflows, +80000 markets = ~600 MB")
 
-    print("\\n🗂️ ORGANIZATION RECOMMENDATIONS:")    print("   • Vector stores: Rebuild monthly for optimal performance")
+    print("\\n🗂️ ORGANIZATION RECOMMENDATIONS:")
+    print("   • Vector stores: Rebuild monthly for optimal performance")
     print("   • Database partitioning: Consider by time period after 6 months")
     print("   • Archival: Move old experiments to cold storage after 1 year")
     print("   • Backup: Daily database backups, weekly full system backups")
 
-    print("\\n💡 SCALING STRATEGIES:")    print("   • Distributed vector stores (Pinecone/Weaviate) for >1GB data")
+    print("\\n💡 SCALING STRATEGIES:")
+    print("   • Distributed vector stores (Pinecone/Weaviate) for >1GB data")
     print("   • Database sharding by category/time for >1M markets")
     print("   • Caching layer for frequent queries")
     print("   • Async processing for vector store updates")
@@ -150,12 +163,14 @@ def optimize_storage(args):
 
     organizer = PolymarketDataOrganizer()
 
-    print("\\n🧹 CLEANUP OPTIONS:")    print("   • Remove old workflow reports (>30 days): Saves ~1MB/month")
+    print("\\n🧹 CLEANUP OPTIONS:")
+    print("   • Remove old workflow reports (>30 days): Saves ~1MB/month")
     print("   • Archive completed experiments: Saves ~5MB/month")
     print("   • Compress vector stores: Saves ~20-30% space")
     print("   • Vacuum SQLite databases: Reclaims unused space")
 
-    print("\\n📁 RECOMMENDED STRUCTURE:")    print("   data/")
+    print("\\n📁 RECOMMENDED STRUCTURE:")
+    print("   data/")
     print("   ├── markets.db              # Main market data")
     print("   ├── standalone_ml.db         # ML experiments/models")
     print("   ├── memory.db               # Agent conversations")
@@ -169,13 +184,15 @@ def optimize_storage(args):
     print("   archives/")
     print("   └── YYYY-MM/               # Monthly archives")
 
-    print("\\n🗜️ COMPRESSION SAVINGS:")    print("   • SQLite VACUUM: Reclaims 10-50% unused space")
+    print("\\n🗜️ COMPRESSION SAVINGS:")
+    print("   • SQLite VACUUM: Reclaims 10-50% unused space")
     print("   • Vector store compression: 20-30% reduction")
     print("   • JSON gzip compression: 70-80% for archives")
     print("   • Total potential: 40-60% space reduction")
 
     # Show actual optimization commands
-    print("\\n🛠️ OPTIMIZATION COMMANDS:")    print("   # Vacuum SQLite databases")
+    print("\\n🛠️ OPTIMIZATION COMMANDS:")
+    print("   # Vacuum SQLite databases")
     print("   sqlite3 data/markets.db 'VACUUM;'")
     print("   sqlite3 data/standalone_ml.db 'VACUUM;'")
     print("   ")
@@ -200,9 +217,9 @@ def show_langchain_tools(args):
         print()
 
         tool_categories = {
-            'search': 'Vector Search Tools',
-            'query': 'Database Query Tools',
-            'get': 'Utility Tools'
+            "search": "Vector Search Tools",
+            "query": "Database Query Tools",
+            "get": "Utility Tools",
         }
 
         for category, title in tool_categories.items():
@@ -255,31 +272,34 @@ Examples:
 
   # Show available LangChain tools
   python data_manager_cli.py tools
-        """
+        """,
     )
 
-    parser.add_argument('--verbose', '-v', action='store_true',
-                       help='Enable verbose output')
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose output"
+    )
 
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Inventory command
-    subparsers.add_parser('inventory', help='Show comprehensive data inventory')
+    subparsers.add_parser("inventory", help="Show comprehensive data inventory")
 
     # LangChain guide
-    subparsers.add_parser('langchain-guide', help='Show LangChain integration guide')
+    subparsers.add_parser("langchain-guide", help="Show LangChain integration guide")
 
     # Create vector stores
-    subparsers.add_parser('create-vectors', help='Create vector stores for semantic search')
+    subparsers.add_parser(
+        "create-vectors", help="Create vector stores for semantic search"
+    )
 
     # Analyze growth
-    subparsers.add_parser('analyze-growth', help='Analyze data growth patterns')
+    subparsers.add_parser("analyze-growth", help="Analyze data growth patterns")
 
     # Optimize storage
-    subparsers.add_parser('optimize', help='Show storage optimization options')
+    subparsers.add_parser("optimize", help="Show storage optimization options")
 
     # Show tools
-    subparsers.add_parser('tools', help='Show available LangChain tools')
+    subparsers.add_parser("tools", help="Show available LangChain tools")
 
     args = parser.parse_args()
 
@@ -288,17 +308,17 @@ Examples:
         return
 
     try:
-        if args.command == 'inventory':
+        if args.command == "inventory":
             show_inventory(args)
-        elif args.command == 'langchain-guide':
+        elif args.command == "langchain-guide":
             show_langchain_guide(args)
-        elif args.command == 'create-vectors':
+        elif args.command == "create-vectors":
             create_vector_stores(args)
-        elif args.command == 'analyze-growth':
+        elif args.command == "analyze-growth":
             analyze_growth(args)
-        elif args.command == 'optimize':
+        elif args.command == "optimize":
             optimize_storage(args)
-        elif args.command == 'tools':
+        elif args.command == "tools":
             show_langchain_tools(args)
 
     except KeyboardInterrupt:
@@ -308,6 +328,7 @@ Examples:
         print(f"\\n❌ Error: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

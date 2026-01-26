@@ -55,7 +55,7 @@ class Trader:
             best_trade = self.agent.source_best_trade(market)
             print(f"5. CALCULATED TRADE {best_trade}")
 
-            amount = self.agent.format_trade_prompt_for_execution(best_trade)
+            self.agent.format_trade_prompt_for_execution(best_trade)
             # Please refer to TOS before uncommenting: polymarket.com/tos
             # trade = self.polymarket.execute_market_order(market, amount)
             # print(f"6. TRADED {trade}")

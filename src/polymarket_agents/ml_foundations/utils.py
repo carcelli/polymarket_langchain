@@ -9,15 +9,12 @@ Core utility functions for neural network implementation:
 """
 
 import numpy as np
-from scipy.stats import truncnorm
-from typing import Tuple, Union, Optional
+from scipy.stats import truncnorm  # type: ignore[import]
+from typing import Tuple, Optional
 
 
 def truncated_normal(
-    mean: float = 0,
-    sd: float = 1,
-    low: float = -0.5,
-    upp: float = 0.5
+    mean: float = 0, sd: float = 1, low: float = -0.5, upp: float = 0.5
 ) -> truncnorm:
     """
     Create a truncated normal distribution for weight initialization.
@@ -80,9 +77,7 @@ def one_hot(labels: np.ndarray, n_classes: int) -> np.ndarray:
 
 
 def confusion_matrix(
-    preds: np.ndarray,
-    targets: np.ndarray,
-    n_classes: Optional[int] = None
+    preds: np.ndarray, targets: np.ndarray, n_classes: Optional[int] = None
 ) -> np.ndarray:
     """
     Compute confusion matrix for multi-class classification.

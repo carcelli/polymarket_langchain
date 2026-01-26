@@ -7,7 +7,9 @@ Run this script after updating your .env file with the real GitHub App private k
 
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
+
 
 def test_github_setup():
     """Test if GitHub App setup is working."""
@@ -15,14 +17,18 @@ def test_github_setup():
     print("=" * 40)
 
     # Check environment variables
-    app_id = os.getenv('GITHUB_APP_ID')
-    private_key = os.getenv('GITHUB_APP_PRIVATE_KEY')
-    repository = os.getenv('GITHUB_REPOSITORY')
+    app_id = os.getenv("GITHUB_APP_ID")
+    private_key = os.getenv("GITHUB_APP_PRIVATE_KEY")
+    repository = os.getenv("GITHUB_REPOSITORY")
 
     print("📋 Configuration Check:")
     checks = [
         ("GITHUB_APP_ID", app_id, app_id is not None),
-        ("GITHUB_APP_PRIVATE_KEY", "Set" if private_key else None, private_key is not None),
+        (
+            "GITHUB_APP_PRIVATE_KEY",
+            "Set" if private_key else None,
+            private_key is not None,
+        ),
         ("GITHUB_REPOSITORY", repository, repository is not None),
     ]
 
@@ -42,19 +48,19 @@ def test_github_setup():
     actual_key_path = private_key
 
     # Handle the case where path starts with /polymarket_langchain/
-    if private_key.startswith('/polymarket_langchain/'):
-        actual_key_path = private_key.replace('/polymarket_langchain/', './')
+    if private_key.startswith("/polymarket_langchain/"):
+        actual_key_path = private_key.replace("/polymarket_langchain/", "./")
 
-    if private_key.startswith('-----BEGIN'):
+    if private_key.startswith("-----BEGIN"):
         print("\n✅ Configuration looks good")
         print("🔐 Private key is in PEM format (direct content)")
     elif os.path.exists(actual_key_path):
         print("\n✅ Configuration looks good")
         print(f"🔑 Private key file exists: {actual_key_path}")
         # Read file content for testing
-        with open(actual_key_path, 'r') as f:
+        with open(actual_key_path, "r") as f:
             file_content = f.read()
-        if file_content.startswith('-----BEGIN'):
+        if file_content.startswith("-----BEGIN"):
             print("   ✅ File contains valid PEM content")
         else:
             print("   ❌ File does not contain valid PEM content")
@@ -91,14 +97,14 @@ def test_github_setup():
             print("📝 Sample issues:")
             for i, issue in enumerate(issues[:3]):
                 if isinstance(issue, dict):
-                    title = issue.get('title', 'No title')[:50]
-                    number = issue.get('number', '?')
-                    state = issue.get('state', 'unknown')
+                    title = issue.get("title", "No title")[:50]
+                    number = issue.get("number", "?")
+                    state = issue.get("state", "unknown")
                 else:
                     # Handle string format
                     title = str(issue)[:50]
-                    number = '?'
-                    state = 'unknown'
+                    number = "?"
+                    state = "unknown"
                 print(f"   {i+1}. #{number} - {title}... ({state})")
 
         print("\n🎉 GitHub integration is ready!")
@@ -113,6 +119,7 @@ def test_github_setup():
         print("   • App permissions insufficient")
         print("   • Repository path incorrect")
         return False
+
 
 if __name__ == "__main__":
     success = test_github_setup()

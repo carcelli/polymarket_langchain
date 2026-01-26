@@ -135,7 +135,10 @@ def run_integration_tests():
     print("🔗 Running Integration Tests...")
 
     try:
-        from polymarket_agents.graph.memory_agent import create_memory_agent, run_memory_agent
+        from polymarket_agents.graph.memory_agent import (
+            create_memory_agent,
+            run_memory_agent,
+        )
         from unittest.mock import patch, MagicMock
 
         # Test full workflow

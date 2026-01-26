@@ -28,10 +28,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install black pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install package
+      run: |
+        pip install -e .
     - name: Lint with black
       run: |
         black .
     - name: Test with unittest
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
         python -m unittest discover
 

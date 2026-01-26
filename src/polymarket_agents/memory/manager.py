@@ -104,7 +104,9 @@ class MemoryManager:
 
         # Create indexes for efficient querying (only if columns exist)
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON markets(category)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_category ON markets(category)"
+            )
         except sqlite3.OperationalError:
             pass
 
@@ -119,12 +121,16 @@ class MemoryManager:
             pass
 
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_end_date ON markets(end_date)"
+            )
         except sqlite3.OperationalError:
             pass
 
         try:
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category_volume ON markets(category, volume DESC)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_category_volume ON markets(category, volume DESC)"
+            )
         except sqlite3.OperationalError:
             pass
 
@@ -314,7 +320,7 @@ class MemoryManager:
         conn.close()
 
     def add_market(
-        self, market_data: Dict[str, Any], news_data: List[Dict[str, Any]] = None
+        self, market_data: Dict[str, Any], news_data: Optional[List[Dict[str, Any]]] = None
     ):
         """Add or update a market and its associated news."""
         conn = sqlite3.connect(self.db_path)
@@ -367,8 +373,8 @@ class MemoryManager:
         # Upsert Market
         cursor.execute(
             """
-            INSERT OR REPLACE INTO markets 
-            (id, question, description, category, outcomes, outcome_prices, volume, liquidity, 
+            INSERT OR REPLACE INTO markets
+            (id, question, description, category, outcomes, outcome_prices, volume, liquidity,
              active, end_date, slug, clob_token_ids, event_id, tags, last_updated)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -516,7 +522,7 @@ class MemoryManager:
         return [self._parse_market_row(r) for r in rows]
 
     def list_top_volume_markets(
-        self, limit: int = 20, category: str = None
+        self, limit: int = 20, category: Optional[str] = None
     ) -> List[Dict]:
         """List markets with highest volume."""
         conn = sqlite3.connect(self.db_path)
@@ -539,7 +545,9 @@ class MemoryManager:
 
         return [self._parse_market_row(r) for r in rows]
 
-    def search_markets(self, query: str, limit: int = 20, category: str = None) -> List[Dict]:
+    def search_markets(
+        self, query: str, limit: int = 20, category: Optional[str] = None
+    ) -> List[Dict]:
         """Search markets by question text, optionally filtered by category."""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -569,7 +577,7 @@ class MemoryManager:
         cursor.execute(
             """
             SELECT category, COUNT(*) as count, SUM(volume) as total_volume
-            FROM markets 
+            FROM markets
             WHERE active = 1
             GROUP BY category
             ORDER BY count DESC
@@ -628,8 +636,8 @@ class MemoryManager:
         cursor.execute(
             """
             SELECT COUNT(*), SUM(volume)
-            FROM markets 
-            WHERE end_date IS NOT NULL 
+            FROM markets
+            WHERE end_date IS NOT NULL
             AND end_date != ''
             AND datetime(end_date) < datetime('now', ?)
         """,
@@ -637,15 +645,15 @@ class MemoryManager:
         )
 
         result = cursor.fetchone()
-        expired_count = result[0] or 0
+        result[0] or 0
         expired_volume = result[1] or 0
 
         # Get category breakdown of expired markets
         cursor.execute(
             """
-            SELECT category, COUNT(*) 
-            FROM markets 
-            WHERE end_date IS NOT NULL 
+            SELECT category, COUNT(*)
+            FROM markets
+            WHERE end_date IS NOT NULL
             AND end_date != ''
             AND datetime(end_date) < datetime('now', ?)
             GROUP BY category
@@ -658,8 +666,8 @@ class MemoryManager:
         # Delete expired markets
         cursor.execute(
             """
-            DELETE FROM markets 
-            WHERE end_date IS NOT NULL 
+            DELETE FROM markets
+            WHERE end_date IS NOT NULL
             AND end_date != ''
             AND datetime(end_date) < datetime('now', ?)
         """,
@@ -671,7 +679,7 @@ class MemoryManager:
         # Also delete associated news for expired markets
         cursor.execute(
             """
-            DELETE FROM news 
+            DELETE FROM news
             WHERE market_id NOT IN (SELECT id FROM markets)
         """
         )
@@ -714,9 +722,9 @@ class MemoryManager:
 
         cursor.execute(
             """
-            SELECT * FROM markets 
-            WHERE active = 1 
-            AND end_date IS NOT NULL 
+            SELECT * FROM markets
+            WHERE active = 1
+            AND end_date IS NOT NULL
             AND end_date != ''
             AND datetime(end_date) > datetime('now')
             AND datetime(end_date) < datetime('now', ?)
@@ -739,9 +747,9 @@ class MemoryManager:
         self,
         market_id: str,
         yes_price: float,
-        no_price: float = None,
-        volume: float = None,
-        liquidity: float = None,
+        no_price: Optional[float] = None,
+        volume: Optional[float] = None,
+        liquidity: Optional[float] = None,
     ):
         """Record a price snapshot for a market."""
         conn = sqlite3.connect(self.db_path)
@@ -776,8 +784,8 @@ class MemoryManager:
 
         cursor.execute(
             """
-            SELECT * FROM price_history 
-            WHERE market_id = ? 
+            SELECT * FROM price_history
+            WHERE market_id = ?
             AND datetime(timestamp) > datetime('now', ?)
             ORDER BY timestamp ASC
         """,
@@ -822,9 +830,9 @@ class MemoryManager:
         side: str,
         entry_price: float,
         shares: float,
-        strategy: str = None,
-        confidence: float = None,
-        notes: str = None,
+        strategy: Optional[str] = None,
+        confidence: Optional[float] = None,
+        notes: Optional[str] = None,
     ) -> int:
         """Record a new bet/position."""
         conn = sqlite3.connect(self.db_path)
@@ -838,7 +846,7 @@ class MemoryManager:
 
         cursor.execute(
             """
-            INSERT INTO bets (market_id, market_question, side, entry_price, current_price, 
+            INSERT INTO bets (market_id, market_question, side, entry_price, current_price,
                             shares, cost_basis, current_value, unrealized_pnl, status,
                             entry_date, strategy, confidence, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?)
@@ -864,6 +872,7 @@ class MemoryManager:
         conn.commit()
         conn.close()
 
+        assert bet_id is not None, "Failed to get bet_id after INSERT"
         return bet_id
 
     def update_bet_prices(self):
@@ -918,8 +927,8 @@ class MemoryManager:
 
             cursor.execute(
                 """
-                UPDATE bets SET exit_price = ?, exit_date = ?, status = ?, 
-                              realized_pnl = ?, current_price = ?, 
+                UPDATE bets SET exit_price = ?, exit_date = ?, status = ?,
+                              realized_pnl = ?, current_price = ?,
                               current_value = ?, unrealized_pnl = 0
                 WHERE id = ?
             """,
@@ -1006,9 +1015,9 @@ class MemoryManager:
         market_id: str,
         research_type: str,
         content: str,
-        source: str = None,
-        sentiment_score: float = None,
-        confidence: float = None,
+        source: Optional[str] = None,
+        sentiment_score: Optional[float] = None,
+        confidence: Optional[float] = None,
         expires_hours: int = 24,
     ) -> int:
         """Add research/intelligence for a market."""
@@ -1023,7 +1032,7 @@ class MemoryManager:
 
         cursor.execute(
             """
-            INSERT INTO research (market_id, research_type, source, content, 
+            INSERT INTO research (market_id, research_type, source, content,
                                 sentiment_score, confidence, created_at, expires_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -1043,6 +1052,7 @@ class MemoryManager:
         conn.commit()
         conn.close()
 
+        assert research_id is not None, "Failed to get research_id after INSERT"
         return research_id
 
     def get_market_research(
@@ -1063,7 +1073,7 @@ class MemoryManager:
         else:
             cursor.execute(
                 """
-                SELECT * FROM research WHERE market_id = ? 
+                SELECT * FROM research WHERE market_id = ?
                 AND (expires_at IS NULL OR datetime(expires_at) > datetime('now'))
                 ORDER BY created_at DESC
             """,
@@ -1080,7 +1090,7 @@ class MemoryManager:
     # =========================================================================
 
     def update_market_analytics(
-        self, market_id: str, estimated_prob: float = None, analyst_notes: str = None
+        self, market_id: str, estimated_prob: Optional[float] = None, analyst_notes: Optional[str] = None
     ) -> Dict:
         """
         Update analytics for a market (calculates edge, EV, Kelly).
@@ -1148,7 +1158,7 @@ class MemoryManager:
 
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO market_analytics 
+                INSERT OR REPLACE INTO market_analytics
                 (market_id, implied_prob_yes, estimated_prob_yes, edge, expected_value,
                  kelly_fraction, volatility, price_momentum, last_analysis, analyst_notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -1389,7 +1399,7 @@ class MemoryManager:
     # =========================================================================
 
     def start_agent_execution(
-        self, agent_type: str, agent_name: str, query: str = None
+        self, agent_type: str, agent_name: str, query: Optional[str] = None
     ) -> int:
         """
         Start tracking a new agent execution.
@@ -1417,14 +1427,15 @@ class MemoryManager:
         conn.commit()
         conn.close()
 
+        assert execution_id is not None, "Failed to get execution_id after INSERT"
         return execution_id
 
     def complete_agent_execution(
         self,
         execution_id: int,
-        result: str = None,
-        tokens_used: int = None,
-        langsmith_run_id: str = None,
+        result: Optional[str] = None,
+        tokens_used: Optional[int] = None,
+        langsmith_run_id: Optional[str] = None,
     ):
         """Complete an agent execution with results."""
         conn = sqlite3.connect(self.db_path)
@@ -1525,11 +1536,11 @@ class MemoryManager:
         self,
         agent_execution_id: int,
         node_name: str,
-        node_type: str = None,
-        input_data: str = None,
-        output_data: str = None,
-        error: str = None,
-        duration_ms: int = None,
+        node_type: Optional[str] = None,
+        input_data: Optional[str] = None,
+        output_data: Optional[str] = None,
+        error: Optional[str] = None,
+        duration_ms: Optional[int] = None,
         status: str = "completed",
     ) -> int:
         """
@@ -1579,6 +1590,7 @@ class MemoryManager:
         conn.commit()
         conn.close()
 
+        assert node_execution_id is not None, "Failed to get node_execution_id after INSERT"
         return node_execution_id
 
     def get_recent_executions(self, limit: int = 50) -> List[Dict]:

@@ -1,15 +1,15 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from agents.graph.memory_agent import create_memory_agent
-from agents.graph.planning_agent import create_planning_agent
+from polymarket_agents.graph.memory_agent import create_memory_agent
+from polymarket_agents.graph.planning_agent import create_planning_agent
 from langchain_core.messages import HumanMessage
 
 
 class TestGraphIntegration(unittest.TestCase):
     """Test complete graph execution flows."""
 
-    @patch("agents.memory.manager.MemoryManager")
-    @patch("agents.polymarket.gamma.GammaMarketClient")
+    @patch("polymarket_agents.memory.manager.MemoryManager")
+    @patch("polymarket_agents.connectors.gamma.GammaMarketClient")
     @patch("langchain_openai.ChatOpenAI")
     def test_memory_agent_full_flow(
         self, mock_llm_class, mock_gamma_class, mock_mm_class
