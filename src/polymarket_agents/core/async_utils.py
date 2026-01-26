@@ -87,7 +87,7 @@ class TaskSupervisor:
     and graceful shutdown handling.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tasks: dict[str, asyncio.Task] = {}
         self.metrics: dict[str, TaskMetrics] = {}
         self._shutdown_event = asyncio.Event()
