@@ -176,7 +176,10 @@ class MLDatabase:
             )
 
     def create_experiment(
-        self, name: str, description: str = "", pipeline_config: Optional[Dict[str, Any]] = None
+        self,
+        name: str,
+        description: str = "",
+        pipeline_config: Optional[Dict[str, Any]] = None,
     ) -> str:
         """
         Create a new ML experiment.

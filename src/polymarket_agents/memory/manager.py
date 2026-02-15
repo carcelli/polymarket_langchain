@@ -320,7 +320,9 @@ class MemoryManager:
         conn.close()
 
     def add_market(
-        self, market_data: Dict[str, Any], news_data: Optional[List[Dict[str, Any]]] = None
+        self,
+        market_data: Dict[str, Any],
+        news_data: Optional[List[Dict[str, Any]]] = None,
     ):
         """Add or update a market and its associated news."""
         conn = sqlite3.connect(self.db_path)
@@ -1090,7 +1092,10 @@ class MemoryManager:
     # =========================================================================
 
     def update_market_analytics(
-        self, market_id: str, estimated_prob: Optional[float] = None, analyst_notes: Optional[str] = None
+        self,
+        market_id: str,
+        estimated_prob: Optional[float] = None,
+        analyst_notes: Optional[str] = None,
     ) -> Dict:
         """
         Update analytics for a market (calculates edge, EV, Kelly).
@@ -1590,7 +1595,9 @@ class MemoryManager:
         conn.commit()
         conn.close()
 
-        assert node_execution_id is not None, "Failed to get node_execution_id after INSERT"
+        assert (
+            node_execution_id is not None
+        ), "Failed to get node_execution_id after INSERT"
         return node_execution_id
 
     def get_recent_executions(self, limit: int = 50) -> List[Dict]:

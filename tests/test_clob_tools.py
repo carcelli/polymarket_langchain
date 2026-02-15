@@ -242,7 +242,10 @@ class TestCLOBCombinedTools(unittest.TestCase):
 
     def test_get_combined_readonly_tools(self):
         """Test get_combined_readonly_tools returns readonly tools from both."""
-        from polymarket_agents.langchain import get_combined_readonly_tools, get_read_only_tools
+        from polymarket_agents.langchain import (
+            get_combined_readonly_tools,
+            get_read_only_tools,
+        )
         from polymarket_agents.langchain.clob_tools import get_clob_readonly_tools
 
         combined = get_combined_readonly_tools()

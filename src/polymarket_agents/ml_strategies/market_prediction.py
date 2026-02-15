@@ -54,7 +54,9 @@ class MarketPredictor(MLBettingStrategy):
         y_classification = []  # For predicting binary outcome
 
         for _, row in training_data.iterrows():
-            features = self.prepare_features({str(k): v for k, v in row.to_dict().items()})
+            features = self.prepare_features(
+                {str(k): v for k, v in row.to_dict().items()}
+            )
             X.append(features.flatten())
 
             # For regression: predict the "true" probability (we'll simulate this)
@@ -73,13 +75,13 @@ class MarketPredictor(MLBettingStrategy):
             y_classification.append(1 if true_prob > 0.5 else 0)
 
         X_arr = np.vstack(X)
-        y_regression = np.array(y_regression)
-        y_classification = np.array(y_classification)
+        y_reg_arr = np.array(y_regression)
+        y_clf_arr = np.array(y_classification)
 
         # Split data
         X_train, X_test, y_reg_train, y_reg_test, y_clf_train, y_clf_test = (
             train_test_split(
-                X_arr, y_regression, y_classification, test_size=0.2, random_state=42
+                X_arr, y_reg_arr, y_clf_arr, test_size=0.2, random_state=42
             )
         )
 
@@ -209,7 +211,9 @@ class EnsemblePredictor(MarketPredictor):
         y = []
 
         for _, row in training_data.iterrows():
-            features = self.prepare_features({str(k): v for k, v in row.to_dict().items()})
+            features = self.prepare_features(
+                {str(k): v for k, v in row.to_dict().items()}
+            )
             X.append(features.flatten())
 
             market_prob = (

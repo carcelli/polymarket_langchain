@@ -73,5 +73,3 @@ def get_market_history(market_id: str, days_back: int = 30) -> str:
     }
 
     return json.dumps(response, indent=2)
-
-

@@ -41,7 +41,9 @@ class Test{model_name}:
 '''
 
 
-def commit_ml_tests_to_github(test_files: Dict[str, str], message: str) -> Dict[str, Any]:
+def commit_ml_tests_to_github(
+    test_files: Dict[str, str], message: str
+) -> Dict[str, Any]:
     """Stub: GitHub integration has been deprecated."""
     logger.warning("GitHub integration has been deprecated. Tests saved locally only.")
     return {"status": "skipped", "message": "GitHub integration deprecated"}

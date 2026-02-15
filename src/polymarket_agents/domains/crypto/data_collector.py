@@ -30,7 +30,8 @@ def init_database(db_path: Path = DB_PATH) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
 
-    conn.executescript("""
+    conn.executescript(
+        """
         CREATE TABLE IF NOT EXISTS market_snapshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT NOT NULL,
@@ -65,7 +66,8 @@ def init_database(db_path: Path = DB_PATH) -> sqlite3.Connection:
         CREATE INDEX IF NOT EXISTS idx_asset ON market_snapshots(asset);
         CREATE INDEX IF NOT EXISTS idx_resolved ON market_snapshots(resolved);
         CREATE INDEX IF NOT EXISTS idx_timestamp ON market_snapshots(timestamp);
-    """)
+    """
+    )
 
     conn.commit()
     return conn
@@ -102,31 +104,34 @@ class CryptoDataCollector:
                     continue
 
                 # Insert into database
-                self.conn.execute("""
+                self.conn.execute(
+                    """
                     INSERT OR IGNORE INTO market_snapshots (
                         timestamp, market_id, asset, question,
                         yes_price, no_price, volume, expiry_minutes, end_date,
                         current_price, momentum_5m, momentum_30m,
                         volatility, volume_spike, rsi, deviation
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    timestamp,
-                    market["id"],
-                    market["asset"],
-                    market["question"],
-                    market["yes_price"],
-                    market["no_price"],
-                    market["volume"],
-                    market["expiry_min"],
-                    market["end_date"],
-                    data["current_price"],
-                    data["momentum_5m"],
-                    data["momentum_30m"],
-                    data["volatility"],
-                    data["volume_spike"],
-                    data["rsi"],
-                    data["deviation"],
-                ))
+                """,
+                    (
+                        timestamp,
+                        market["id"],
+                        market["asset"],
+                        market["question"],
+                        market["yes_price"],
+                        market["no_price"],
+                        market["volume"],
+                        market["expiry_min"],
+                        market["end_date"],
+                        data["current_price"],
+                        data["momentum_5m"],
+                        data["momentum_30m"],
+                        data["volatility"],
+                        data["volume_spike"],
+                        data["rsi"],
+                        data["deviation"],
+                    ),
+                )
 
                 count += 1
 
@@ -204,16 +209,18 @@ class CryptoDataCollector:
                         asset = self._extract_asset(question)
 
                         if asset:
-                            markets.append({
-                                "id": market.get("id"),
-                                "asset": asset,
-                                "question": question,
-                                "yes_price": yes_price,
-                                "no_price": no_price,
-                                "volume": float(market.get("volume", 0)),
-                                "expiry_min": minutes_left,
-                                "end_date": end_str,
-                            })
+                            markets.append(
+                                {
+                                    "id": market.get("id"),
+                                    "asset": asset,
+                                    "question": question,
+                                    "yes_price": yes_price,
+                                    "no_price": no_price,
+                                    "volume": float(market.get("volume", 0)),
+                                    "expiry_min": minutes_left,
+                                    "end_date": end_str,
+                                }
+                            )
 
                 offset += limit
 
@@ -258,7 +265,9 @@ class CryptoDataCollector:
             current_price = closes[-1]
 
             # Calculate indicators
-            momentum_5m = (closes[-5:].mean() - closes[-10:-5].mean()) / closes[-10:-5].mean()
+            momentum_5m = (closes[-5:].mean() - closes[-10:-5].mean()) / closes[
+                -10:-5
+            ].mean()
             momentum_30m = (closes[-1] - closes[0]) / closes[0]
             volatility = closes.std() / closes.mean()
 
@@ -305,12 +314,14 @@ class CryptoDataCollector:
             Number of markets updated
         """
         # Get unresolved markets that should have expired
-        cursor = self.conn.execute("""
+        cursor = self.conn.execute(
+            """
             SELECT DISTINCT market_id, end_date
             FROM market_snapshots
             WHERE resolved = 0
             AND datetime(end_date) < datetime('now')
-        """)
+        """
+        )
 
         updated = 0
 
@@ -337,11 +348,14 @@ class CryptoDataCollector:
                         yes_final = float(prices[0])
                         outcome = "YES" if yes_final > 0.5 else "NO"
 
-                        self.conn.execute("""
+                        self.conn.execute(
+                            """
                             UPDATE market_snapshots
                             SET resolved = 1, outcome = ?
                             WHERE market_id = ?
-                        """, (outcome, market_id))
+                        """,
+                            (outcome, market_id),
+                        )
 
                         updated += 1
 
@@ -355,7 +369,8 @@ class CryptoDataCollector:
     def get_stats(self) -> Dict:
         """Get collection statistics."""
 
-        cursor = self.conn.execute("""
+        cursor = self.conn.execute(
+            """
             SELECT
                 COUNT(*) as total,
                 COUNT(DISTINCT market_id) as unique_markets,
@@ -363,7 +378,8 @@ class CryptoDataCollector:
                 MIN(timestamp) as first_snapshot,
                 MAX(timestamp) as last_snapshot
             FROM market_snapshots
-        """)
+        """
+        )
 
         row = cursor.fetchone()
 
@@ -380,7 +396,8 @@ class CryptoDataCollector:
 
         import pandas as pd
 
-        df = pd.read_sql_query("""
+        df = pd.read_sql_query(
+            """
             SELECT
                 asset,
                 yes_price,
@@ -398,7 +415,9 @@ class CryptoDataCollector:
             FROM market_snapshots
             WHERE resolved = 1
             AND outcome IS NOT NULL
-        """, self.conn)
+        """,
+            self.conn,
+        )
 
         # Create target variable
         df["target"] = (df["outcome"] == "YES").astype(int)
@@ -419,10 +438,20 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Collect crypto market data for ML")
-    parser.add_argument("--interval", type=int, default=60, help="Collection interval in seconds")
-    parser.add_argument("--duration", type=int, default=0, help="Total duration in minutes (0=infinite)")
-    parser.add_argument("--update-only", action="store_true", help="Only update resolutions, don't collect")
-    parser.add_argument("--export", action="store_true", help="Export training data and exit")
+    parser.add_argument(
+        "--interval", type=int, default=60, help="Collection interval in seconds"
+    )
+    parser.add_argument(
+        "--duration", type=int, default=0, help="Total duration in minutes (0=infinite)"
+    )
+    parser.add_argument(
+        "--update-only",
+        action="store_true",
+        help="Only update resolutions, don't collect",
+    )
+    parser.add_argument(
+        "--export", action="store_true", help="Export training data and exit"
+    )
     parser.add_argument("--stats", action="store_true", help="Show stats and exit")
     args = parser.parse_args()
 
@@ -473,9 +502,11 @@ def main():
 
             # Show progress
             stats = collector.get_stats()
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] "
-                  f"Collected: {count} | Total: {stats['total_snapshots']:,} | "
-                  f"Resolved: {stats['resolved_markets']:,} (+{resolved})")
+            print(
+                f"[{datetime.now().strftime('%H:%M:%S')}] "
+                f"Collected: {count} | Total: {stats['total_snapshots']:,} | "
+                f"Resolved: {stats['resolved_markets']:,} (+{resolved})"
+            )
 
             # Check duration limit
             if args.duration > 0:

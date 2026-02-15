@@ -58,11 +58,11 @@ def create_polymarket_agent(
         # Try modern LangGraph API first (better JSON parsing)
         from langgraph.prebuilt import create_react_agent
         from langchain_core.language_models import BaseChatModel
-        
+
         # Initialize LLM
         if llm is None:
             from langchain_openai import ChatOpenAI
-            
+
             llm = ChatOpenAI(
                 model=model,
                 temperature=temperature,
@@ -71,17 +71,18 @@ def create_polymarket_agent(
             )
         elif not isinstance(llm, BaseChatModel):
             raise ValueError("llm must be an instance of BaseChatModel")
-        
+
         # Get tools
         if tools is None:
             from polymarket_agents.langchain.tools import get_all_tools
+
             tools = get_all_tools()
-        
+
         # Get context block if manager provided
         context_block = ""
         if context_manager:
             context_block = context_manager.get_model_context()
-        
+
         # Create system prompt
         system_message = f"""You are an expert Polymarket trader and analyst.
 
@@ -99,12 +100,12 @@ IMPORTANT GUIDELINES:
 - Express predictions as probabilities, not certainties
 - Note any uncertainties or limitations in your analysis
 - For trades, consider risk/reward and position sizing"""
-        
+
         # LangGraph's create_react_agent handles JSON parsing correctly
         agent = create_react_agent(llm, tools, state_modifier=system_message)
-        
+
         return agent
-        
+
     except ImportError:
         # Fallback to legacy LangChain if LangGraph not available
         from langchain.agents import create_react_agent, AgentExecutor

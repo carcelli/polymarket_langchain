@@ -96,11 +96,7 @@ class CryptoMLScanner:
 
         return opportunities
 
-    def _fetch_markets(
-        self,
-        max_duration: int,
-        min_volume: float
-    ) -> List[Dict]:
+    def _fetch_markets(self, max_duration: int, min_volume: float) -> List[Dict]:
         """Fetch active crypto markets from Gamma API."""
 
         markets = []
@@ -170,15 +166,17 @@ class CryptoMLScanner:
                         asset = self._extract_asset(question)
 
                         if asset:
-                            markets.append({
-                                "id": market.get("id"),
-                                "asset": asset,
-                                "question": question,
-                                "yes_price": yes_price,
-                                "no_price": no_price,
-                                "volume": volume,
-                                "expiry_min": minutes_left,
-                            })
+                            markets.append(
+                                {
+                                    "id": market.get("id"),
+                                    "asset": asset,
+                                    "question": question,
+                                    "yes_price": yes_price,
+                                    "no_price": no_price,
+                                    "volume": volume,
+                                    "expiry_min": minutes_left,
+                                }
+                            )
 
                 offset += limit
 
@@ -222,15 +220,15 @@ class CryptoMLScanner:
 
         # Look for dollar amount pattern
         patterns = [
-            r'\$([0-9,]+(?:\.[0-9]+)?)',  # $87,000 or $87,000.50
-            r'above ([0-9,]+)',  # above 87000
-            r'below ([0-9,]+)',  # below 87000
+            r"\$([0-9,]+(?:\.[0-9]+)?)",  # $87,000 or $87,000.50
+            r"above ([0-9,]+)",  # above 87000
+            r"below ([0-9,]+)",  # below 87000
         ]
 
         for pattern in patterns:
             match = re.search(pattern, question, re.IGNORECASE)
             if match:
-                price_str = match.group(1).replace(',', '')
+                price_str = match.group(1).replace(",", "")
                 try:
                     return float(price_str)
                 except ValueError:
@@ -278,11 +276,7 @@ class CryptoMLScanner:
 
         return prob_above if is_above else (1 - prob_above)
 
-    def _analyze_market(
-        self,
-        market: Dict,
-        min_edge: float
-    ) -> Optional[Opportunity]:
+    def _analyze_market(self, market: Dict, min_edge: float) -> Optional[Opportunity]:
         """Analyze market with ML prediction."""
 
         asset = market["asset"]
@@ -430,7 +424,9 @@ class CryptoMLScanner:
         """Calculate technical indicators."""
 
         # Momentum
-        momentum_5m = (closes[-5:].mean() - closes[-10:-5].mean()) / closes[-10:-5].mean()
+        momentum_5m = (closes[-5:].mean() - closes[-10:-5].mean()) / closes[
+            -10:-5
+        ].mean()
         momentum_30m = (closes[-1] - closes[0]) / closes[0]
 
         # Volatility
@@ -519,9 +515,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="ML-enhanced crypto scanner")
-    parser.add_argument("--min-edge", type=float, default=0.04, help="Minimum edge (default: 4%%)")
-    parser.add_argument("--min-volume", type=float, default=100, help="Minimum volume (default: $100)")
-    parser.add_argument("--max-duration", type=int, default=25, help="Max minutes to expiry")
+    parser.add_argument(
+        "--min-edge", type=float, default=0.04, help="Minimum edge (default: 4%%)"
+    )
+    parser.add_argument(
+        "--min-volume", type=float, default=100, help="Minimum volume (default: $100)"
+    )
+    parser.add_argument(
+        "--max-duration", type=int, default=25, help="Max minutes to expiry"
+    )
     args = parser.parse_args()
 
     scanner = CryptoMLScanner()
@@ -544,11 +546,15 @@ def main():
     for i, opp in enumerate(opportunities, 1):
         print(f"[{i}] {opp.asset} - {opp.direction}")
         print(f"    Question: {opp.question[:60]}...")
-        print(f"    Edge: {opp.edge:+.1%} (model={opp.model_prob:.1%}, market={opp.market_prob:.1%})")
+        print(
+            f"    Edge: {opp.edge:+.1%} (model={opp.model_prob:.1%}, market={opp.market_prob:.1%})"
+        )
         print(f"    Confidence: {opp.confidence:.1%}")
         print(f"    Expiry: {opp.expiry_minutes:.1f} min | Volume: ${opp.volume:,.0f}")
         print(f"    Price: ${opp.current_price:,.2f}")
-        print(f"    Indicators: RSI={opp.indicators['rsi']:.1f}, Mom={opp.indicators['momentum_5m']:+.2%}")
+        print(
+            f"    Indicators: RSI={opp.indicators['rsi']:.1f}, Mom={opp.indicators['momentum_5m']:+.2%}"
+        )
         print()
 
 

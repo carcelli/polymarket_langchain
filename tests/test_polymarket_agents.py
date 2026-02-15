@@ -30,7 +30,13 @@ class TestProjectStructure(unittest.TestCase):
 
     def test_agents_application_modules_exist(self):
         """Verify all application modules exist."""
-        from polymarket_agents.application import cron, creator, trade, executor, prompts
+        from polymarket_agents.application import (
+            cron,
+            creator,
+            trade,
+            executor,
+            prompts,
+        )
 
         self.assertTrue(hasattr(cron, "TradingAgent"))
         self.assertTrue(hasattr(creator, "Creator"))
@@ -250,29 +256,27 @@ class TestNewsConnector(unittest.TestCase):
         """Test News client can be instantiated."""
         from polymarket_agents.connectors.news import News
 
-        # Mock the NewsApiClient to avoid needing real API key
-        with patch("polymarket_agents.connectors.news.NewsApiClient"):
-            client = News()
+        # News() doesn't use API in __init__, so no mock needed
+        client = News()
 
-            self.assertIn("language", client.configs)
-            self.assertIn("country", client.configs)
-            self.assertIn("business", client.categories)
-            self.assertIn("technology", client.categories)
+        self.assertIn("language", client.configs)
+        self.assertIn("country", client.configs)
+        self.assertIn("business", client.categories)
+        self.assertIn("technology", client.categories)
 
     def test_get_category_mapping(self):
         """Test category mapping function."""
         from polymarket_agents.connectors.news import News
 
-        with patch("polymarket_agents.connectors.news.NewsApiClient"):
-            client = News()
+        client = News()
 
-            # Test matching category
-            market_with_tech = {"category": "technology"}
-            self.assertEqual(client.get_category(market_with_tech), "technology")
+        # Test matching category
+        market_with_tech = {"category": "technology"}
+        self.assertEqual(client.get_category(market_with_tech), "technology")
 
-            # Test non-matching category defaults to general
-            market_unknown = {"category": "unknown"}
-            self.assertEqual(client.get_category(market_unknown), "general")
+        # Test non-matching category defaults to general
+        market_unknown = {"category": "unknown"}
+        self.assertEqual(client.get_category(market_unknown), "general")
 
 
 class TestPrompter(unittest.TestCase):

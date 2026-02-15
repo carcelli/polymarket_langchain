@@ -58,16 +58,16 @@ class TestStrategyRegistry:
         # Backup existing strategies
         original_strategies = STRATEGIES.copy()
         STRATEGIES.clear()
-        
+
         # Register test strategies
         # Note: We re-register them because we cleared the global registry
         # The decorators ran at import time, but we just wiped their work
         STRATEGIES["test_high_edge"] = high_edge_strategy
         STRATEGIES["test_low_edge"] = low_edge_strategy
         STRATEGIES["test_negative_edge"] = negative_edge_strategy
-        
+
         yield
-        
+
         # Restore original strategies
         STRATEGIES.clear()
         STRATEGIES.update(original_strategies)

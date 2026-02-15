@@ -26,7 +26,8 @@ def load_training_data(db_path: Path = DB_PATH) -> pd.DataFrame:
 
     conn = sqlite3.connect(str(db_path))
 
-    df = pd.read_sql_query("""
+    df = pd.read_sql_query(
+        """
         SELECT
             asset,
             yes_price,
@@ -44,7 +45,9 @@ def load_training_data(db_path: Path = DB_PATH) -> pd.DataFrame:
         FROM market_snapshots
         WHERE resolved = 1
         AND outcome IS NOT NULL
-    """, conn)
+    """,
+        conn,
+    )
 
     conn.close()
 
@@ -90,7 +93,11 @@ def train_model(X, y, model_type: str = "rf"):
 
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y if len(y.unique()) > 1 else None
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y if len(y.unique()) > 1 else None,
     )
 
     # Scale features
@@ -157,17 +164,18 @@ def main():
 
     # Train Random Forest
     print("\n🌲 Training Random Forest...")
-    rf_model, rf_scaler, rf_acc, rf_auc, X_test, y_test, y_pred = train_model(X, y, "rf")
+    rf_model, rf_scaler, rf_acc, rf_auc, X_test, y_test, y_pred = train_model(
+        X, y, "rf"
+    )
 
     print(f"   Accuracy: {rf_acc:.1%}")
     print(f"   AUC: {rf_auc:.3f}")
 
     # Feature importance
     print("\n📈 Top Features:")
-    importance = pd.DataFrame({
-        "feature": feature_names,
-        "importance": rf_model.feature_importances_
-    }).sort_values("importance", ascending=False)
+    importance = pd.DataFrame(
+        {"feature": feature_names, "importance": rf_model.feature_importances_}
+    ).sort_values("importance", ascending=False)
 
     for _, row in importance.head(5).iterrows():
         print(f"   {row['feature']}: {row['importance']:.3f}")

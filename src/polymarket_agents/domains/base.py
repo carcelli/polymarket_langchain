@@ -8,10 +8,17 @@ Each domain defines its own Market subclass with domain-specific fields.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, Protocol, TypeVar
 
 
-T = TypeVar("T")
+class HasVolumeAndLiquidity(Protocol):
+    """Protocol for types with volume and liquidity attributes."""
+
+    volume: float
+    liquidity: float
+
+
+T = TypeVar("T", bound=HasVolumeAndLiquidity)
 
 
 @dataclass

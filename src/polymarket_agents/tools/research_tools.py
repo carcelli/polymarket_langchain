@@ -16,7 +16,12 @@ import requests
 from markdownify import markdownify
 
 # Initialize clients
-tavily_client = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
+_tavily_api_key = os.environ.get("TAVILY_API_KEY")
+if _tavily_api_key:
+    tavily_client = TavilyClient(api_key=_tavily_api_key)
+else:
+    # Create a mock client for testing or when API key is not available
+    tavily_client = None
 gamma_client = GammaMarketClient()
 
 ALLOWED_DOMAINS = ["https://langchain-ai.github.io/"]
@@ -66,6 +71,12 @@ def _web_search_impl(
     Returns:
         Search results with titles, URLs, snippets, and optionally full content
     """
+    if tavily_client is None:
+        return {
+            "error": "TAVILY_API_KEY not set. Web search is unavailable.",
+            "results": [],
+        }
+
     try:
         results = tavily_client.search(
             query=query,
@@ -121,6 +132,10 @@ def _market_news_search_impl(market_question: str, days_back: int = 7) -> List[D
         # If no specific terms found, use the whole question
         if not search_terms:
             search_terms = [market_question]
+
+        # Check if tavily_client is available
+        if tavily_client is None:
+            return [{"error": "TAVILY_API_KEY not set. News search is unavailable."}]
 
         # Search for news
         all_results = []

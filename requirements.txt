@@ -174,3 +174,8 @@ ccxt
 scipy
 structlog
 pandas
+markdownify
+scikit-learn
+psutil
+beautifulsoup4
+xgboost
