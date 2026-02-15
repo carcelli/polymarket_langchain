@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Store Backend for Polymarket Agents
 

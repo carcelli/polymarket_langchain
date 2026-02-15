@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 ML Strategy Registry - Fluent Python Chapters 6-7 Style
 
