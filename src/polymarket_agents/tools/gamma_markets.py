@@ -11,7 +11,7 @@ import json
 import httpx
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Type
 
 
 class GammaMarketsInput(BaseModel):
@@ -35,7 +35,7 @@ class GammaMarketsTool(BaseTool):
         "Returns structured snapshots with implied YES probability, volume, and metadata. "
         "Read-only and rate-limit safe for market discovery and analysis."
     )
-    args_schema = GammaMarketsInput
+    args_schema: Type[GammaMarketsInput] = GammaMarketsInput
 
     def _run(
         self,

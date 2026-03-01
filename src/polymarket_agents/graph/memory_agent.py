@@ -367,8 +367,6 @@ Your role is to:
 3. Provide probability estimates where relevant
 4. Give actionable recommendations
 
-IMPORTANT: Focus exclusively on sports category markets. Do not reference or analyze markets from other categories (politics, crypto, etc.).
-
 Be specific, data-driven, and express uncertainty appropriately."""
 
         user_prompt = f"""Query: {query}

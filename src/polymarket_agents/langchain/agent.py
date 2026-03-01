@@ -17,7 +17,9 @@ from typing import Optional, List, Dict, Any, Union
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from langchain_core.pydantic_v1 import BaseModel as BaseModelV1, Field as FieldV1
+
+BaseModelV1 = BaseModel
+FieldV1 = Field
 
 from polymarket_agents.utils.context import ContextManager
 from polymarket_agents.config import DEFAULT_MODEL

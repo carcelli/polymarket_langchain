@@ -6,8 +6,8 @@ Build research, forecasting, and trading workflows on Polymarket using LangChain
 ```bash
 conda env create -f environment.yml
 conda activate polymarket-agent
+pip install -e ".[dev]"
 cp .env.example .env
-export PYTHONPATH=$PYTHONPATH:$(pwd)/src
 python scripts/python/refresh_markets.py --max-events 200
 python scripts/python/cli.py run-memory-agent "Find interesting markets"
 ```
@@ -34,7 +34,7 @@ CLOB API ◀──────────────────────�
   - 🔌 `src/polymarket_agents/connectors/` API clients & Integrations (`polymarket.py`, `gamma.py`, `news.py`, `chroma.py`)
   - 🧰 `src/polymarket_agents/langchain/` LangChain tools + helpers (`tools.py`, `clob_tools.py`)
   - 🧭 `src/polymarket_agents/graph/` LangGraph agents + state (`memory_agent.py`, `planning_agent.py`, `state.py`)
-  - 🧪 `src/polymarket_agents/application/` workflows (`executor.py`, `creator.py`, `cron.py`)
+  - 🧪 `src/polymarket_agents/application/` workflows (`executor.py`, `creator.py`)
   - 🧩 `src/polymarket_agents/tools/` tool wrappers (`market_tools.py`, `trade_tools.py`, `research_tools.py`)
   - 🗃️ `src/polymarket_agents/memory/` Memory management (`manager.py`)
   - 🤖 `src/polymarket_agents/automl/` AutoML & Data Quality pipeline
@@ -52,27 +52,12 @@ CLOB API ◀──────────────────────�
 - 🙌 `CONTRIBUTING.md`, `LICENSE.md`, `CHANGELOG.md`
 
 ## 🚀 Quick start
-1) Conda (recommended):
-```bash
-conda env create -f environment.yml
-conda activate polymarket-agent
-```
 
-2) Or pip:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
+See [QUICKSTART.md](QUICKSTART.md) for the full guide. In short:
 
-Optional helper:
 ```bash
-./scripts/bash/install.sh
-```
-
-3) Configure env:
-```bash
-cp .env.example .env
+pip install -e ".[dev]"
+cp .env.example .env    # add OPENAI_API_KEY
 ```
 
 4) Seed the local DB (recommended):
@@ -134,9 +119,8 @@ LangGraph config lives in `langgraph.json` and wires:
 - `memory_agent` to `polymarket_agents/graph/memory_agent.py:create_memory_agent`
 - `planning_agent` to `polymarket_agents/graph/planning_agent.py:create_planning_agent`
 
-Direct runs (ensure `src` is in PYTHONPATH):
+Direct runs:
 ```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)/src
 python -m polymarket_agents.graph.memory_agent "What are the top crypto markets?"
 python -m polymarket_agents.graph.planning_agent "Will the Fed cut rates in Q1 2025?"
 python -m polymarket_agents.graph.planning_agent --scan politics
@@ -159,7 +143,6 @@ print(result.get("recommendation"))
 - `scripts/python/category_workflow.py` categorizes markets across domains.
 - `scripts/python/politics_workflow.py` ingests politics-tagged markets into `data/memory.db`.
 - `scripts/python/data_pipeline.py` runs refresh + info management + monitoring.
-- `scripts/python/run_ingestion_team.py` runs a market/news ingestion team into `data/memory.db`.
 - `scripts/python/sports_explorer.py` explores leagues, teams, and market types.
 
 Examples:
@@ -215,7 +198,6 @@ python examples/fetch_active_bets.py
 - `scripts/python/category_workflow.py` multi-category ingestion
 - `scripts/python/politics_workflow.py` politics-only workflow
 - `scripts/python/data_pipeline.py` full pipeline + monitoring
-- `scripts/python/run_ingestion_team.py` ingestion team runner
 - `scripts/python/sports_explorer.py` sports metadata explorer
 - `scripts/python/server.py` FastAPI server
 - `scripts/python/setup.py` loads `.env` for dev helpers

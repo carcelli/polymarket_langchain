@@ -5,25 +5,24 @@ Polymarket prediction market agents using LangChain/LangGraph.
 ## Setup
 
 ```bash
-pip install -e .
-cp .env.example .env  # Add OPENAI_API_KEY
-export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+pip install -e ".[dev]"   # installs package + pytest/black
+cp .env.example .env      # add OPENAI_API_KEY
 python scripts/python/refresh_markets.py --max-events 200
 ```
 
 ## Run
 
 ```bash
-# Domain agents (new architecture)
+# Domain agents
 python -m polymarket_agents.domains.crypto.agent
 python -m polymarket_agents.domains.nba.agent --mode games
 
-# Legacy agents
+# Graph agents
 python -m polymarket_agents.graph.memory_agent "Find crypto markets"
 python -m polymarket_agents.graph.planning_agent "Will BTC hit 100k?"
 
 # Tests
-python -m pytest
+python -m pytest tests/ -x -q
 ```
 
 ## Architecture

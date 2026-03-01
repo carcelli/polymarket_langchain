@@ -22,7 +22,10 @@ from .evaluation import (
 
 from .neural_net_strategy import NeuralNetStrategy
 
-from .lstm_probability import lstm_probability_strategy
+try:
+    from .lstm_probability import lstm_probability_strategy
+except ImportError:
+    lstm_probability_strategy = None  # type: ignore[assignment]
 
 
 __all__ = [
