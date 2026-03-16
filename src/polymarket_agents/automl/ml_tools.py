@@ -95,7 +95,7 @@ class DataIngestionTool(BaseTool):
     description: str = (
         "Ingest historical market data from Polymarket and prepare it for ML training"
     )
-    args_schema: Type[BaseModel] = DataIngestionInput
+    args_schema: Type[DataIngestionInput] = DataIngestionInput
 
     def _run(
         self,
@@ -160,7 +160,7 @@ class DataQualityTool(BaseTool):
 
     name: str = "data_quality_check"
     description: str = "Validate data quality and readiness for ML training"
-    args_schema: Type[BaseModel] = DataQualityCheckInput
+    args_schema: Type[DataQualityCheckInput] = DataQualityCheckInput
 
     def _run(
         self, dataset_info: str, run_manager: Optional[CallbackManagerForToolRun] = None
@@ -213,7 +213,7 @@ class AutoMLPipelineTool(BaseTool):
 
     name: str = "run_automl_pipeline"
     description: str = "Run complete automated ML pipeline from data to deployed model"
-    args_schema: Type[BaseModel] = RunAutoMLPipelineInput
+    args_schema: Type[RunAutoMLPipelineInput] = RunAutoMLPipelineInput
 
     def _run(
         self,
@@ -276,7 +276,7 @@ class ModelTrainingTool(BaseTool):
 
     name: str = "train_ml_model"
     description: str = "Train a specific ML model for market prediction"
-    args_schema: Type[BaseModel] = TrainMLModelInput
+    args_schema: Type[TrainMLModelInput] = TrainMLModelInput
 
     def _run(
         self,
@@ -449,7 +449,7 @@ class ModelEvaluationTool(BaseTool):
 
     name: str = "evaluate_ml_model"
     description: str = "Evaluate a trained ML model's performance"
-    args_schema: Type[BaseModel] = EvaluateModelInput
+    args_schema: Type[EvaluateModelInput] = EvaluateModelInput
 
     def _run(
         self,
@@ -614,7 +614,7 @@ class PredictionTool(BaseTool):
 
     name: str = "make_ml_prediction"
     description: str = "Make predictions on market data using a trained ML model"
-    args_schema: Type[BaseModel] = MakePredictionInput
+    args_schema: Type[MakePredictionInput] = MakePredictionInput
 
     def _run(
         self,
@@ -690,7 +690,7 @@ class ExperimentResultsTool(BaseTool):
 
     name: str = "get_experiment_results"
     description: str = "Retrieve results and performance metrics for ML experiments"
-    args_schema: Type[BaseModel] = GetExperimentResultsInput
+    args_schema: Type[GetExperimentResultsInput] = GetExperimentResultsInput
 
     def _run(
         self,

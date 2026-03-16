@@ -1,7 +1,14 @@
-FROM python:3.9
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY pyproject.toml ./
+RUN pip install --upgrade pip && pip install build
+COPY . .
+RUN pip install -e ".[dev]"
 
-COPY . /home
-WORKDIR /home
-
-RUN pip3 install --default-timeout=300 --retries 3 -r requirements.txt
-
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=builder /app /app
+ENV PYTHONPATH=/app/src
+CMD ["python", "-m", "polymarket_agents.domains.crypto.agent"]

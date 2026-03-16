@@ -23,7 +23,7 @@ dependencies = [
     "xgboost",
     # Polymarket / trading
     "py-clob-client",
-    "web3>=6,<7",
+    "web3>=7",
     # Config / utilities
     "python-dotenv",
     "pydantic",
@@ -32,6 +32,10 @@ dependencies = [
     "markdownify",
     "psutil",
     "scheduler",
+    "typer",
+    "fastapi",
+    "uvicorn",
+    "devtools",
     # External data sources
     "tavily-python",
     "newsapi-python",

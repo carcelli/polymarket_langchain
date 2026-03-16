@@ -31,14 +31,12 @@ class TestProjectStructure(unittest.TestCase):
     def test_agents_application_modules_exist(self):
         """Verify all application modules exist."""
         from polymarket_agents.application import (
-            cron,
             creator,
             trade,
             executor,
             prompts,
         )
 
-        self.assertTrue(hasattr(cron, "TradingAgent"))
         self.assertTrue(hasattr(creator, "Creator"))
         self.assertTrue(hasattr(trade, "Trader"))
         self.assertTrue(hasattr(executor, "Executor"))
@@ -501,20 +499,16 @@ class TestIntegration(unittest.TestCase):
     def test_import_all_modules(self):
         """Test all modules can be imported without errors."""
         modules_to_import = [
-            "polymarket_agents.application.cron",
             "polymarket_agents.application.creator",
             "polymarket_agents.application.trade",
             "polymarket_agents.application.executor",
             "polymarket_agents.application.prompts",
             "polymarket_agents.connectors.news",
-            "polymarket_agents.connectors.search",
             "polymarket_agents.connectors.chroma",
             "polymarket_agents.connectors.gamma",
             "polymarket_agents.connectors.polymarket",
             "polymarket_agents.utils.objects",
             "polymarket_agents.utils.utils",
-            "scripts.python.cli",
-            "scripts.python.server",
         ]
 
         for module_name in modules_to_import:

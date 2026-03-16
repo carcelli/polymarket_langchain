@@ -148,57 +148,48 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         """
         Prepare features for prediction (without target variable).
 
+        If self.feature_names is populated (e.g. after loading a model), the
+        output columns are aligned to that exact order so XGBoost doesn't
+        complain about feature-name mismatches.
+
         Args:
             market_data: Dictionary containing market information
 
         Returns:
             Tuple of (X, feature_names)
         """
-        # Convert to DataFrame for processing
+        # If the model was loaded from disk its feature names are stored;
+        # build a row with exactly those columns (fill missing with 0).
+        if self.feature_names:
+            row = {k: market_data.get(k, 0) for k in self.feature_names}
+            X = pd.DataFrame([row])[self.feature_names].fillna(0)
+            return X.values, self.feature_names
+
+        # Fallback: infer feature columns from the dict (training-time path)
         df = pd.DataFrame([market_data])
 
-        # Define feature columns (same as training, exclude target and metadata)
-        exclude_cols = [
-            "market_id",
-            "question",
-            "description",
-            "outcomes",
-            "created_at",
-            "end_date",
-            "resolved_at",
-            "actual_outcome",
-            "will_resolve_yes",
-            "resolved",
-            "active",
-            "category",  # Keep category for one-hot encoding
-        ]
+        exclude_cols = {
+            "market_id", "question", "description", "outcomes",
+            "created_at", "end_date", "resolved_at", "actual_outcome",
+            "will_resolve_yes", "resolved", "active", "category",
+        }
 
-        # Get numeric and boolean columns
         feature_cols = []
         for col in df.columns:
             if col not in exclude_cols:
                 if df[col].dtype in ["int64", "float64", "bool"]:
                     feature_cols.append(col)
                 elif df[col].dtype == "object" and col == "volume_category":
-                    # Handle categorical volume
                     feature_cols.append(col)
 
-        # Prepare X
         X = df[feature_cols].copy()
 
-        # Handle categorical variables
         if "volume_category" in X.columns:
-            # One-hot encode volume categories
             volume_dummies = pd.get_dummies(X["volume_category"], prefix="volume_cat")
             X = pd.concat([X.drop("volume_category", axis=1), volume_dummies], axis=1)
 
-        # Handle any remaining NaN values
         X = X.fillna(0)
-
-        # Get final feature names
-        feature_names = list(X.columns)
-
-        return X.values, feature_names
+        return X.values, list(X.columns)
 
     def _get_feature_importance(self) -> Dict[str, float]:
         """Get feature importance from trained model."""
@@ -260,12 +251,28 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
             # Use XGBoost
             dtrain = xgb.DMatrix(X_train, label=y_train, feature_names=feature_names)
 
+            # early_stopping_rounds requires a watchlist with a validation set;
+            # split off 10 % as an internal eval set when the caller hasn't supplied one.
+            early_stopping = default_params.pop("early_stopping_rounds", None)
+            num_boost_round = default_params.pop("n_estimators", 100)
+            default_params.pop("random_state", None)  # not a native xgb param
+
+            evals = []
+            if early_stopping:
+                n_val = max(1, int(len(X_train) * 0.1))
+                X_val, y_val = X_train[-n_val:], y_train[-n_val:]
+                X_tr, y_tr = X_train[:-n_val], y_train[:-n_val]
+                dtrain = xgb.DMatrix(X_tr, label=y_tr, feature_names=feature_names)
+                dval = xgb.DMatrix(X_val, label=y_val, feature_names=feature_names)
+                evals = [(dval, "validation")]
+
             # Train model
             self.model = xgb.train(
                 default_params,
                 dtrain,
-                num_boost_round=default_params["n_estimators"],
-                early_stopping_rounds=default_params.get("early_stopping_rounds"),
+                num_boost_round=num_boost_round,
+                early_stopping_rounds=early_stopping,
+                evals=evals if evals else None,
                 verbose_eval=False,
             )
 
@@ -396,10 +403,14 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         if self.use_xgboost:
             self.model = xgb.Booster()
             self.model.load_model(filepath)
+            # Restore feature names stored inside the XGBoost model file
+            self.feature_names = self.model.feature_names
         else:
             import joblib
 
             self.model = joblib.load(filepath)
+            # sklearn doesn't embed feature names; leave as None and rely on
+            # _prepare_features_for_prediction ordering.
         self.trained = True
         logger.info(f"Model loaded from {filepath}")
 
@@ -444,11 +455,11 @@ class XGBoostProbabilityStrategy(MLBettingStrategy):
         logger.info(f"Evaluating model on {len(test_data)} test samples...")
 
         # Prepare test features
-        X_test, y_test, _ = self._prepare_features_for_training(test_data)
+        X_test, y_test, feature_names = self._prepare_features_for_training(test_data)
 
         # Get predictions
         if self.use_xgboost:
-            dtest = xgb.DMatrix(X_test, label=y_test)
+            dtest = xgb.DMatrix(X_test, label=y_test, feature_names=feature_names)
             y_pred_prob = self.model.predict(dtest)
         else:
             # sklearn prediction

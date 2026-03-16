@@ -42,7 +42,9 @@ Usage Patterns:
 """
 
 import asyncio
+import inspect
 import logging
+from types import FrameType
 from typing import Awaitable, Optional, Callable, Any
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -50,6 +52,126 @@ from datetime import datetime, timedelta
 
 
 logger = logging.getLogger(__name__)
+
+
+class _CoroutineReuseError(RuntimeError):
+    """Raised when retry logic cannot recreate a one-shot coroutine."""
+
+
+def _extract_call_args(
+    func: Callable[..., Awaitable[Any]], frame_locals: dict[str, Any]
+) -> tuple[list[Any], dict[str, Any]]:
+    """Extract positional/keyword args for a function call from coroutine frame locals."""
+    signature = inspect.signature(func)
+    positional: list[Any] = []
+    keywords: dict[str, Any] = {}
+
+    for param in signature.parameters.values():
+        name = param.name
+
+        if param.kind is inspect.Parameter.POSITIONAL_ONLY:
+            if name in frame_locals:
+                positional.append(frame_locals[name])
+            elif param.default is inspect.Signature.empty:
+                raise ValueError(f"Missing positional-only argument: {name}")
+
+        elif param.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            if name in frame_locals:
+                positional.append(frame_locals[name])
+            elif param.default is inspect.Signature.empty:
+                raise ValueError(f"Missing positional argument: {name}")
+
+        elif param.kind is inspect.Parameter.VAR_POSITIONAL:
+            if name in frame_locals:
+                positional.extend(frame_locals[name])
+
+        elif param.kind is inspect.Parameter.KEYWORD_ONLY:
+            if name in frame_locals:
+                keywords[name] = frame_locals[name]
+            elif param.default is inspect.Signature.empty:
+                raise ValueError(f"Missing keyword-only argument: {name}")
+
+        elif param.kind is inspect.Parameter.VAR_KEYWORD:
+            if name in frame_locals:
+                keywords.update(frame_locals[name])
+
+    return positional, keywords
+
+
+def _build_retry_factory(
+    task: Awaitable[Any], caller_frame: Optional[FrameType]
+) -> Optional[Callable[[], Awaitable[Any]]]:
+    """Build a coroutine factory for retries using caller-scope function resolution."""
+    if caller_frame is None or not inspect.iscoroutine(task):
+        return None
+
+    code = task.cr_code
+    frame_locals = dict(task.cr_frame.f_locals) if task.cr_frame is not None else {}
+
+    for scope in (caller_frame.f_locals, caller_frame.f_globals):
+        for value in scope.values():
+            candidate = value.__func__ if inspect.ismethod(value) else value
+            if inspect.iscoroutinefunction(candidate) and getattr(
+                candidate, "__code__", None
+            ) is code:
+                try:
+                    args, kwargs = _extract_call_args(candidate, frame_locals)
+                except ValueError:
+                    continue
+                return lambda c=candidate, a=tuple(args), k=dict(kwargs): c(*a, **k)
+
+    return None
+
+
+def _resolve_coro_factory(
+    task: Awaitable[Any] | Callable[[], Awaitable[Any]],
+    caller_frame: Optional[FrameType],
+) -> Callable[[], Awaitable[Any]]:
+    """
+    Normalize input into a coroutine factory for safe retries.
+
+    If a coroutine object is passed, try to recover its originating coroutine
+    function from the caller scope. If that is not possible, allow one run and
+    raise a clear error on retry.
+    """
+    if callable(task) and not inspect.iscoroutine(task):
+        return task
+
+    if inspect.iscoroutine(task):
+        retry_factory = _build_retry_factory(task, caller_frame)
+        used_initial = False
+
+        def coro_factory() -> Awaitable[Any]:
+            nonlocal used_initial
+            if not used_initial:
+                used_initial = True
+                return task
+            if retry_factory is not None:
+                return retry_factory()
+            raise _CoroutineReuseError(
+                "Cannot retry a one-shot coroutine object. Pass a coroutine "
+                "factory (callable returning a new coroutine) to enable retries."
+            )
+
+        def close_pending() -> None:
+            nonlocal used_initial
+            if not used_initial:
+                task.close()
+                used_initial = True
+
+        setattr(coro_factory, "close_pending", close_pending)
+        return coro_factory
+
+    raise TypeError(
+        "task must be an awaitable or a callable returning an awaitable"
+    )
+
+
+def _cleanup_pending_coroutine(coro_factory: Callable[[], Awaitable[Any]]) -> None:
+    """Close an unstarted coroutine to avoid RuntimeWarning on cancellation."""
+    closer = getattr(coro_factory, "close_pending", None)
+    if callable(closer):
+        closer()
 
 
 @dataclass
@@ -89,19 +211,30 @@ class TaskSupervisor:
 
     def __init__(self) -> None:
         self.tasks: dict[str, asyncio.Task] = {}
+        self._task_factories: dict[str, Callable[[], Awaitable[Any]]] = {}
         self.metrics: dict[str, TaskMetrics] = {}
         self._shutdown_event = asyncio.Event()
 
     async def start_task(
-        self, name: str, coro: Awaitable, restart_on_failure: bool = True
+        self,
+        name: str,
+        coro: Awaitable[Any] | Callable[[], Awaitable[Any]],
+        restart_on_failure: bool = True,
     ) -> None:
         """Start a supervised task."""
         if name in self.tasks:
             logger.warning(f"Task {name} already exists, replacing...")
 
+        caller_frame = inspect.currentframe().f_back
+        try:
+            coro_factory = _resolve_coro_factory(coro, caller_frame)
+        finally:
+            del caller_frame
+
         self.metrics[name] = TaskMetrics(name)
+        self._task_factories[name] = coro_factory
         task = asyncio.create_task(
-            self._run_supervised_task(name, coro, restart_on_failure)
+            self._run_supervised_task(name, coro_factory, restart_on_failure)
         )
         self.tasks[name] = task
 
@@ -118,8 +251,14 @@ class TaskSupervisor:
             task.cancel()
             try:
                 await asyncio.wait_for(task, timeout=5.0)
+            except asyncio.CancelledError:
+                pass
             except asyncio.TimeoutError:
                 logger.warning(f"Task {name} did not stop gracefully")
+
+        coro_factory = self._task_factories.pop(name, None)
+        if coro_factory is not None:
+            _cleanup_pending_coroutine(coro_factory)
 
         del self.tasks[name]
         logger.info(f"Stopped task: {name}")
@@ -162,19 +301,23 @@ class TaskSupervisor:
         }
 
     async def _run_supervised_task(
-        self, name: str, coro: Awaitable, restart_on_failure: bool
+        self,
+        name: str,
+        coro_factory: Callable[[], Awaitable[Any]],
+        restart_on_failure: bool,
     ) -> None:
         """Internal method to run a supervised task with error handling."""
         while not self._shutdown_event.is_set():
             try:
                 logger.info(f"Starting supervised task iteration: {name}")
-                await coro
+                await coro_factory()
 
                 # Normal completion - don't restart
                 logger.info(f"Task completed normally: {name}")
                 break
 
             except asyncio.CancelledError:
+                _cleanup_pending_coroutine(coro_factory)
                 logger.info(f"Task cancelled: {name}")
                 raise  # Allow cancellation to propagate
 
@@ -182,7 +325,7 @@ class TaskSupervisor:
                 self.metrics[name].record_error(exc)
                 logger.error(f"Task failed: {name} | {exc!r}", exc_info=True)
 
-                if not restart_on_failure:
+                if not restart_on_failure or isinstance(exc, _CoroutineReuseError):
                     logger.error(f"Fatal error in task {name}, not restarting")
                     break
 
@@ -206,11 +349,14 @@ class TaskSupervisor:
         # Update final runtime
         if name in self.metrics:
             self.metrics[name].update_runtime()
+        coro_factory_ref = self._task_factories.pop(name, None)
+        if coro_factory_ref is not None:
+            _cleanup_pending_coroutine(coro_factory_ref)
 
 
 async def robust_task(
     name: str,
-    coro: Awaitable,
+    coro: Awaitable[Any] | Callable[[], Awaitable[Any]],
     restart_on_failure: bool = True,
     backoff_seconds: float = 5.0,
 ) -> None:
@@ -229,13 +375,18 @@ async def robust_task(
         restart_on_failure: Whether to restart on recoverable exceptions
         backoff_seconds: Base delay between retries
     """
-    iteration = 0
+    caller_frame = inspect.currentframe().f_back
+    try:
+        coro_factory = _resolve_coro_factory(coro, caller_frame)
+    finally:
+        del caller_frame
 
+    iteration = 0
     while True:
         iteration += 1
         try:
             logger.info(f"Starting task: {name} (iteration {iteration})")
-            await coro
+            await coro_factory()
             logger.info(f"Task completed successfully: {name}")
             break  # Normal completion
 
@@ -246,13 +397,16 @@ async def robust_task(
         except Exception as exc:
             logger.error(f"Task failed: {name} | {exc!r}", exc_info=True)
 
+            if isinstance(exc, _CoroutineReuseError):
+                raise RuntimeError(str(exc)) from exc
+
             if not restart_on_failure:
                 logger.error(f"Fatal error in task {name}, terminating")
-                break
+                raise
 
             # Exponential backoff with jitter
             delay = min(backoff_seconds * (2 ** (iteration - 1)), 300)  # Max 5 minutes
-            logger.info(".1f")
+            logger.info(f"Retrying task {name} in {delay:.1f}s")
 
             # Check for shutdown signal during backoff
             try:

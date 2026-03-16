@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.option(
     "--dataset",
-    default="data/sports_ml_dataset_synthetic.parquet",
+    default="data/ml_training_dataset.parquet",
     help="Path to training dataset",
 )
 @click.option(
     "--model-name",
-    default="xgboost_sports_probability",
+    default="xgboost_probability_model",
     help="Name for the trained model",
 )
 @click.option("--test-size", default=0.2, help="Fraction of data for testing")
@@ -52,7 +52,7 @@ def train(dataset, model_name, test_size, use_existing):
 
     # Initialize strategy
     strategy = XGBoostProbabilityStrategy(
-        name=model_name, model_path=f"data/models/{model_name}_model.pkl"
+        name=model_name, model_path=f"data/models/{model_name}.json"
     )
 
     try:
@@ -84,22 +84,22 @@ def train(dataset, model_name, test_size, use_existing):
         print("\n📊 Model Evaluation Results:")
         print("-" * 40)
         eval_metrics = results["evaluation_metrics"]
-        print(".3f")
-        print(".3f")
-        print(".3f")
-        print(".3f")
-        print(".1%")
-        print(".1%")
+        print(f"  Accuracy:    {eval_metrics.get('accuracy', 0):.3f}")
+        print(f"  Precision:   {eval_metrics.get('precision', 0):.3f}")
+        print(f"  Recall:      {eval_metrics.get('recall', 0):.3f}")
+        print(f"  F1 Score:    {eval_metrics.get('f1_score', 0):.3f}")
+        print(f"  ROC-AUC:     {eval_metrics.get('roc_auc', 0):.3f}")
+        print(f"  Brier Score: {eval_metrics.get('brier_score', 0):.3f}")
 
         print("\n💰 Backtest Results:")
         print("-" * 40)
         backtest = results["backtest_results"]
-        print(".1f")
-        print(".1f")
-        print(f"Number of trades: {backtest['num_trades']}")
-        print(".1%")
-        print(".2f")
-        print(".1%")
+        print(f"  Initial capital: ${backtest.get('initial_capital', 0):,.1f}")
+        print(f"  Final capital:   ${backtest.get('final_capital', 0):,.1f}")
+        print(f"  Number of trades: {backtest.get('num_trades', 0)}")
+        print(f"  Win rate:        {backtest.get('win_rate', 0):.1%}")
+        print(f"  Sharpe ratio:    {backtest.get('sharpe_ratio', 0):.2f}")
+        print(f"  Max drawdown:    {backtest.get('max_drawdown', 0):.1%}")
 
         print("\n🎯 Top 10 Most Important Features:")
         print("-" * 40)
@@ -108,7 +108,7 @@ def train(dataset, model_name, test_size, use_existing):
             feature_importance.items(), key=lambda x: x[1], reverse=True
         )[:10]
         for i, (feature, importance) in enumerate(sorted_features, 1):
-            print("2d")
+            print(f"  {i:2d}. {feature}: {importance:.4f}")
 
         # Save results to file
         results_file = Path("data/models/xgboost_training_results.json")
@@ -196,7 +196,7 @@ def quick_test():
 
         # Train model
         strategy = XGBoostProbabilityStrategy(
-            name="xgboost_test", model_path="data/models/xgboost_test_model.json"
+            name="xgboost_test", model_path="data/models/xgboost_test_model.json"  # .json for XGBoost native format
         )
 
         print("Training model on synthetic data...")
@@ -218,7 +218,7 @@ def quick_test():
 
         result = strategy.predict(test_market)
         print("\nSample prediction:")
-        print(".3f")
+        print(f"Predicted probability: {result.predicted_probability:.3f}")
         print(f"Confidence: {result.confidence:.3f}")
         print(f"Recommendation: {result.recommended_bet}")
         print(f"Position size: {result.position_size:.3f}")

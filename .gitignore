@@ -30,4 +30,5 @@ agent_data/
 # Build / dist
 dist/
 build/
-*.egg-info/
+*.egg-info/.pip_packages/
+data/models/*.json

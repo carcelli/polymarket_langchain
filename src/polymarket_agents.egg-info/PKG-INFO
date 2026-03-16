@@ -1,0 +1,33 @@
+Metadata-Version: 2.4
+Name: polymarket-agents
+Version: 0.2.0
+Requires-Python: >=3.9
+License-File: LICENSE.md
+Requires-Dist: langchain
+Requires-Dist: langchain-community
+Requires-Dist: langchain-openai
+Requires-Dist: langgraph
+Requires-Dist: httpx
+Requires-Dist: requests
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: scipy
+Requires-Dist: xgboost
+Requires-Dist: py-clob-client
+Requires-Dist: web3>=7
+Requires-Dist: python-dotenv
+Requires-Dist: pydantic
+Requires-Dist: structlog
+Requires-Dist: beautifulsoup4
+Requires-Dist: markdownify
+Requires-Dist: psutil
+Requires-Dist: scheduler
+Requires-Dist: tavily-python
+Requires-Dist: newsapi-python
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-asyncio; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Dynamic: license-file

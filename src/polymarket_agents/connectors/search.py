@@ -39,4 +39,11 @@ class Search:
         return self._get_client().get_search_context(query=query)
 
 
-search_client = Search()
+_search_client: "Search | None" = None
+
+
+def get_search_client() -> "Search":
+    global _search_client
+    if _search_client is None:
+        _search_client = Search()
+    return _search_client

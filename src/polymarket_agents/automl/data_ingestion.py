@@ -44,62 +44,100 @@ class PolymarketDataIngestion:
         self, days_back: int = 365, limit: int = 10000
     ) -> List[Dict]:
         """
-        Fetch historical markets from Polymarket API.
+        Fetch resolved markets from Polymarket API with pagination.
+
+        Resolved (closed) markets have known outcomes and are the only markets
+        usable as supervised-learning training labels.
 
         Args:
-            days_back: Number of days of historical data to fetch
-            limit: Maximum number of markets to fetch
+            days_back: Unused — kept for API compatibility. The Gamma API does
+                not support date-range filtering on the /markets endpoint.
+            limit: Maximum number of markets to fetch.
 
         Returns:
-            List of market data dictionaries
+            List of market data dictionaries.
         """
-        logger.info(f"Fetching {days_back} days of historical market data...")
+        logger.info(f"Fetching up to {limit} resolved markets from Polymarket API...")
 
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days_back)
+        import time
 
-        # Polymarket API for historical markets
-        # Note: This is a simplified version - real implementation would need
-        # to handle pagination and rate limiting
-        markets = []
+        markets: List[Dict] = []
+        page_size = 500
+        offset = 0
 
-        try:
-            # Get active markets first
-            active_url = f"{self.base_url}/markets"
-            params = {
-                "active": "true",
-                "limit": min(100, limit // 2),  # Split between active and closed
-            }
+        while len(markets) < limit:
+            try:
+                params = {
+                    "closed": "true",
+                    "limit": page_size,
+                    "offset": offset,
+                }
+                response = requests.get(
+                    f"{self.base_url}/markets",
+                    headers=self.headers,
+                    params=params,
+                    timeout=30,
+                )
+                response.raise_for_status()
 
-            response = requests.get(active_url, headers=self.headers, params=params)
-            response.raise_for_status()
+                batch = response.json()
+                if not batch:
+                    break
 
-            active_markets = response.json()
-            markets.extend(active_markets)
+                markets.extend(batch)
+                offset += len(batch)
+                logger.info(f"Fetched {len(markets)} markets so far...")
 
-            # Get closed markets (resolved)
-            closed_url = f"{self.base_url}/markets"
-            params_closed = {
-                "closed": "true",
-                "limit": min(100, limit // 2),
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat(),
-            }
+                if len(batch) < page_size:
+                    break  # No more pages available
 
-            response_closed = requests.get(
-                closed_url, headers=self.headers, params=params_closed
+                time.sleep(0.3)  # Rate limiting
+
+            except Exception as e:
+                logger.error(f"Failed to fetch markets at offset {offset}: {e}")
+                break
+
+        markets = markets[:limit]
+        logger.info(f"Fetched {len(markets)} total resolved markets")
+        return markets
+
+    def fetch_from_local_db(self) -> List[Dict]:
+        """
+        Load active markets from the local database populated by refresh_markets.py.
+
+        Use this for scoring/inference on live markets. These markets do not have
+        resolved outcomes, so they cannot be used as ML training labels.
+
+        Returns:
+            List of market dictionaries, or empty list if the DB is missing.
+        """
+        logger.info(f"Loading markets from local database: {self.db_path}")
+
+        if not Path(self.db_path).exists():
+            logger.warning(
+                f"Database not found at {self.db_path}. "
+                "Run scripts/python/refresh_markets.py first."
             )
-            response_closed.raise_for_status()
-
-            closed_markets = response_closed.json()
-            markets.extend(closed_markets)
-
-            logger.info(f"Successfully fetched {len(markets)} markets")
-            return markets
-
-        except Exception as e:
-            logger.error(f"Failed to fetch historical markets: {e}")
             return []
+
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT id, question, description, category, outcomes, "
+                "outcome_prices, volume, liquidity, active, end_date "
+                "FROM markets"
+            )
+            columns = [col[0] for col in cursor.description]
+            rows = cursor.fetchall()
+            markets = [dict(zip(columns, row)) for row in rows]
+            logger.info(f"Loaded {len(markets)} markets from local database")
+            return markets
+        except sqlite3.OperationalError as e:
+            logger.warning(f"Could not read from database: {e}")
+            return []
+        finally:
+            conn.close()
 
     def fetch_market_details(self, market_ids: List[str]) -> List[Dict]:
         """
@@ -163,8 +201,8 @@ class PolymarketDataIngestion:
                 if isinstance(outcomes, str):
                     outcomes = outcomes.strip("[]").replace("'", "").split(", ")
 
-                # Handle prices
-                outcome_prices = market.get("outcome_prices", [])
+                # Handle prices (API returns camelCase "outcomePrices"; local DB uses snake_case)
+                outcome_prices = market.get("outcome_prices", market.get("outcomePrices", []))
                 if isinstance(outcome_prices, str):
                     outcome_prices = [
                         float(p.strip())
